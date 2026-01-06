@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -35,13 +34,14 @@
             pointer-events: none; clip-path: polygon(4% 0, 96% 0, 100% 8%, 100% 92%, 96% 100%, 4% 100%, 0 92%, 0 8%);
         }
 
-        .resgate-selector { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 8px; }
-        .resgate-opt {
-            flex: 1; background: #010a13; border: 1px solid var(--gold-dark); color: var(--gold);
-            padding: 6px 2px; font-size: 0.65rem; font-weight: bold; cursor: pointer; text-align: center;
-            transition: 0.3s;
+        .video-container { margin-bottom: 8px; text-align: center; }
+        .limit-text { font-size: 0.65rem; color: var(--gold); margin-bottom: 4px; display: block; text-transform: uppercase; font-weight: bold; }
+
+        .video-btn { 
+            background: linear-gradient(to bottom, #c8a355, #785a28); border: 1px solid var(--gold-bright); 
+            color: #f0e6d2; padding: 10px; width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 0.7rem;
         }
-        .resgate-opt.active { background: var(--gold); color: #000; border-color: var(--gold-bright); box-shadow: 0 0 8px var(--gold); }
+        .video-btn:disabled { background: #1a1a1a !important; border-color: #444 !important; color: #666 !important; cursor: not-allowed; filter: grayscale(1); }
 
         .option-btn { 
             background: #1e2328; border: 1px solid var(--gold-dark); color: var(--gold-bright); padding: 10px; 
@@ -50,22 +50,20 @@
         .btn-correct { background-color: var(--correct) !important; border-color: #fff !important; color: white !important; }
         .btn-wrong { background-color: var(--wrong) !important; border-color: #fff !important; color: white !important; }
         
-        .video-btn { 
-            background: linear-gradient(to bottom, #c8a355, #785a28); border: 1px solid var(--gold-bright); 
-            color: #f0e6d2; padding: 12px; width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-bottom: 6px; font-size: 0.7rem;
+        .resgate-selector { display: flex; justify-content: space-between; gap: 4px; margin-top: 8px; }
+        .resgate-opt {
+            flex: 1; background: #010a13; border: 1px solid var(--gold-dark); color: var(--gold);
+            padding: 6px 2px; font-size: 0.65rem; font-weight: bold; cursor: pointer; text-align: center;
+            transition: 0.3s;
         }
-        .video-btn:disabled { background: #1a1a1a; border-color: #444; color: #666; cursor: not-allowed; filter: grayscale(1); }
-        
-        .ad-banner-footer {
-            height: var(--ad-space); width: 100%; background: #000; display: flex; align-items: center; 
-            justify-content: center; color: var(--gold); font-size: 0.8rem; font-weight: bold; border-top: 2px solid var(--gold); flex-shrink: 0;
-        }
+        .resgate-opt.active { background: var(--gold); color: #000; border-color: var(--gold-bright); box-shadow: 0 0 8px var(--gold); }
+
         .progress-bg { background: #000; height: 10px; border: 1px solid var(--gold-dark); margin-top: 4px; }
         .progress-fill { background: var(--gold); height: 100%; width: 0%; transition: 0.7s; }
         
-        input { width: 100%; padding: 8px; background: #010a13; color: white; border: 1px solid var(--gold-dark); margin-bottom: 6px; box-sizing: border-box; font-size: 0.8rem; }
-        #avisoStatusQuiz { text-align: center; font-size: 0.85rem; color: var(--gold); font-weight: bold; margin-top: 8px; text-transform: uppercase; }
-        .contador-verde { color: #28a745; font-size: 1.1rem; }
+        input { width: 100%; padding: 8px; background: #010a13; color: white; border: 1px solid var(--gold-dark); margin: 6px 0; box-sizing: border-box; font-size: 0.8rem; }
+        #avisoStatusQuiz { text-align: center; font-size: 0.8rem; color: var(--gold); font-weight: bold; margin-top: 8px; text-transform: uppercase; }
+        .contador-verde { color: #28a745; font-size: 1rem; }
         #adOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -76,19 +74,21 @@
             <div class="title-legends"><h1>QUIZ LEGENDS</h1></div>
             <div class="coin-badge">🟡 <span id="goldAmount">...</span> GOLD</div>
         </div>
+
+        <div class="video-container">
+            <span class="limit-text">Limite Diário: <span id="limitDiario">0/35</span> Vídeos</span>
+            <button id="btnVideo" class="video-btn">📺 ASSISTIR ANÚNCIO (300 GOLD)</button>
+        </div>
         
         <div class="hex-frame">
             <div id="quizContent">
-                <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin: 0 0 10px 0;">Sincronizando com Nexus...</p>
+                <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin: 0 0 10px 0;">Sincronizando Nexus...</p>
                 <div id="opcoes"></div>
                 <p id="avisoStatusQuiz"></p>
             </div>
-            <div id="avisoQuiz" style="text-align: center; display: none; font-weight: bold; font-size: 0.9rem;"></div>
         </div>
 
-        <div class="hex-frame">
-            <button id="btnVideo" class="video-btn">📺 ASSISTA ANÚNCIOS (300 GOLD)</button>
-            
+        <div class="hex-frame" style="flex: 0;">
             <div class="progress-bg"><div id="progressBar" class="progress-fill"></div></div>
             <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gold); margin: 4px 0;">
                 <span id="txtMeta">Meta: 15.8k Gold</span>
@@ -102,7 +102,7 @@
             </div>
 
             <input type="text" id="chavePix" placeholder="CHAVE PIX PARA RECEBER">
-            <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold);">SOLICITAR RESGATE PIX</button>
+            <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); width:100%;">SOLICITAR RESGATE PIX</button>
         </div>
     </div>
 
@@ -129,15 +129,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const REQUISITO_ACERTOS = 5;
+        const REQUISITO_ACERTOS = 10; // Mudou para 10
+        const REQUISITO_VIDEOS = 3;  // Precisa de 3 vídeos
+        const LIMITE_DIARIO = 35;
+
         let metaAtual = 15800;
         let usuarioLogado = localStorage.getItem("usuarioLogado");
-
         if (!usuarioLogado) window.location.href = "index.html";
 
         const userRef = doc(db, "usuarios", usuarioLogado);
-        let goldDB = 0;
-        let acertosNoCiclo = 0;
+        let goldDB, acertosNoCiclo, videosAssistidos, totalVideosHoje;
         let jogoInicializado = false;
 
         const perguntasBase = [
@@ -150,39 +151,40 @@
             { q: "Quem é o Rei Destruído?", a: ["Mordekaiser", "Viego", "Thresh", "Karthus"], correct: "Viego" }
         ];
 
-        // SINCRONIZAÇÃO EM TEMPO REAL
         onSnapshot(userRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 goldDB = data.saldo || 0;
                 acertosNoCiclo = data.acertos || 0;
+                videosAssistidos = data.videosAssistidos || 0;
+                totalVideosHoje = data.totalVideosHoje || 0;
                 
                 atualizarInterface();
-
-                // Só gera a pergunta após o Firebase confirmar os acertos salvos
-                if (!jogoInicializado) {
-                    jogoInicializado = true;
-                    carregarQuestao();
-                }
+                if (!jogoInicializado) { jogoInicializado = true; carregarQuestao(); }
             }
         });
 
         function atualizarInterface() {
             document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
-            document.getElementById('txtMeta').innerText = "Meta: " + (metaAtual / 1000).toFixed(1) + "k Gold";
+            document.getElementById('limitDiario').innerText = `${totalVideosHoje}/${LIMITE_DIARIO}`;
+            
             let progresso = Math.min((goldDB / metaAtual) * 100, 100);
             document.getElementById('progressBar').style.width = progresso + "%";
             document.getElementById('txtPorcentagem').innerText = Math.floor(progresso) + "%";
 
             const btnVideo = document.getElementById('btnVideo');
-            const avisoStatus = document.getElementById('avisoStatusQuiz');
+            const aviso = document.getElementById('avisoStatusQuiz');
 
-            if (acertosNoCiclo < REQUISITO_ACERTOS) {
+            // LÓGICA DE BLOQUEIO
+            if (totalVideosHoje >= LIMITE_DIARIO) {
                 btnVideo.disabled = true;
-                avisoStatus.innerHTML = `Acerte mais <span class="contador-verde">${REQUISITO_ACERTOS - acertosNoCiclo}</span> para liberar anúncios`;
+                aviso.innerText = "LIMITE DIÁRIO ATINGIDO! VOLTE AMANHÃ.";
+            } else if (acertosNoCiclo < REQUISITO_ACERTOS) {
+                btnVideo.disabled = true;
+                aviso.innerHTML = `ACERTE <span class="contador-verde">${REQUISITO_ACERTOS - acertosNoCiclo}</span> QUESTÕES PARA LIBERAR VÍDEOS`;
             } else {
                 btnVideo.disabled = false;
-                avisoStatus.innerText = "VÍDEOS LIBERADOS!";
+                aviso.innerHTML = `ASSISTA <span class="contador-verde">${REQUISITO_VIDEOS - videosAssistidos}</span> VÍDEOS PARA VOLTAR AO QUIZ`;
             }
         }
 
@@ -199,7 +201,7 @@
 
             if (acertosNoCiclo >= REQUISITO_ACERTOS) {
                 textoQuestao.innerText = "Meta de acertos atingida!";
-                container.innerHTML = "<p style='text-align:center; color:var(--gold);'>Assista ao vídeo para ganhar 300 Gold e resetar o Quiz.</p>";
+                container.innerHTML = `<p style='text-align:center; color:var(--gold);'>Assista ${REQUISITO_VIDEOS} vídeos para liberar mais perguntas.<br><br>Vídeos concluídos: ${videosAssistidos}/${REQUISITO_VIDEOS}</p>`;
                 return;
             }
 
@@ -212,19 +214,11 @@
                 btn.className = "option-btn";
                 btn.innerText = opt;
                 btn.onclick = async () => {
-                    const botoes = container.querySelectorAll('button');
-                    botoes.forEach(b => b.style.pointerEvents = 'none');
-
                     if (opt === q.correct) {
                         btn.classList.add('btn-correct');
-                        await updateDoc(userRef, { 
-                            saldo: increment(10),
-                            acertos: increment(1)
-                        });
-                    } else {
-                        btn.classList.add('btn-wrong');
-                    }
-                    setTimeout(carregarQuestao, 1000);
+                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1) });
+                    } else { btn.classList.add('btn-wrong'); }
+                    setTimeout(carregarQuestao, 800);
                 };
                 container.appendChild(btn);
             });
@@ -240,48 +234,41 @@
                 if (tempo <= 0) {
                     clearInterval(timer);
                     overlay.style.display = 'none';
-                    
-                    await updateDoc(userRef, { 
-                        saldo: increment(300),
-                        acertos: 0 
-                    });
-                    
                     document.getElementById('adTimer').innerText = "5";
-                    // O onSnapshot detectará acertos:0 e atualizará a interface
+
+                    let novoVideosAssistidos = videosAssistidos + 1;
+                    let updates = { 
+                        saldo: increment(300), 
+                        totalVideosHoje: increment(1),
+                        videosAssistidos: novoVideosAssistidos
+                    };
+
+                    // Se completou os 3 vídeos, reseta o ciclo de acertos
+                    if (novoVideosAssistidos >= REQUISITO_VIDEOS) {
+                        updates.acertos = 0;
+                        updates.videosAssistidos = 0;
+                    }
+
+                    await updateDoc(userRef, updates);
+                    carregarQuestao();
                 }
             }, 1000);
         };
 
         document.getElementById('btnResgate').onclick = async () => {
             const pix = document.getElementById('chavePix').value;
-            const btn = document.getElementById('btnResgate');
-
             if (goldDB < metaAtual) return alert("SALDO INSUFICIENTE!");
             if (pix.length < 5) return alert("INSIRA UMA CHAVE PIX!");
 
-            btn.disabled = true;
-            btn.innerText = "PROCESSANDO...";
-
             try {
-                const saldoAntes = goldDB;
-                const saldoDepois = goldDB - metaAtual;
-
+                const sAntes = goldDB;
+                const sDepois = goldDB - metaAtual;
                 await addDoc(collection(db, "pedidos_resgate"), {
-                    user: usuarioLogado,
-                    pix: pix,
-                    gold_antes: saldoAntes,
-                    gold_depois: saldoDepois,
-                    data: new Date().toLocaleString('pt-BR')
+                    user: usuarioLogado, pix: pix, gold_antes: sAntes, gold_depois: sDepois, data: new Date().toLocaleString('pt-BR')
                 });
-
                 await updateDoc(userRef, { saldo: increment(-metaAtual) });
-                alert("PEDIDO ENVIADO COM SUCESSO!");
-            } catch (e) { 
-                alert("ERRO: " + e.message); 
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "SOLICITAR RESGATE PIX";
-            }
+                alert("PEDIDO ENVIADO!");
+            } catch (e) { alert("ERRO: " + e.message); }
         };
     </script>
 </body>
