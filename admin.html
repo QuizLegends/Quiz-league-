@@ -5,59 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Admin - Quiz Legends</title>
     <style>
-        body { background: #010a13; color: white; font-family: sans-serif; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; display: none; } /* Escondido por padrão */
+        body { background: #010a13; color: white; font-family: sans-serif; padding: 20px; margin: 0; }
         
-        /* Estilo da tela de bloqueio */
-        #lock-screen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: #010a13; display: flex; align-items: center; justify-content: center; z-index: 999; }
-        .lock-box { border: 2px solid #c89b3c; padding: 30px; background: #091428; border-radius: 10px; text-align: center; }
+        /* Tela de Bloqueio */
+        #lock-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #010a13; display: flex; align-items: center; justify-content: center; z-index: 10000; 
+        }
+        .lock-box { border: 2px solid #c89b3c; padding: 40px; background: #091428; border-radius: 10px; text-align: center; width: 300px; }
         
-        h2 { color: #c89b3c; border-bottom: 2px solid #c89b3c; padding-bottom: 10px; }
+        /* Painel escondido */
+        #painel_conteudo { display: none; max-width: 800px; margin: 0 auto; }
+        
+        h2 { color: #c89b3c; border-bottom: 2px solid #c89b3c; padding-bottom: 10px; text-transform: uppercase; }
+        input { padding: 14px; border-radius: 5px; border: 1px solid #c89b3c; background: #000; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-size: 16px; }
+        button.btn-entrar { background: #c89b3c; color: black; border: none; padding: 14px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        
         .pedido-card { background: #091428; border: 1px solid #c89b3c; padding: 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .info b { color: #c89b3c; }
-        .saldos { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid #c89b3c; }
-        input { padding: 12px; border-radius: 5px; border: 1px solid #c89b3c; background: #000; color: #fff; width: 200px; margin-bottom: 10px; }
-        .btn-pago { background: #28a745; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-entrar { background: #c89b3c; color: black; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .saldos { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid #c89b3c; font-size: 14px; }
+        .btn-pago { background: #28a745; color: white; border: none; padding: 12px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
         <div class="lock-box">
-            <h2 style="border:none">ACESSO RESTRITO</h2>
-            <input type="password" id="admin_pass" placeholder="Senha do Admin">
-            <button class="btn-entrar" id="btn_acessar">ENTRAR NO PAINEL</button>
-            <p id="erro_msg" style="color: #ff4444; font-size: 13px; margin-top: 10px;"></p>
+            <h2 style="border:none; margin-top:0;">ADMIN</h2>
+            <input type="password" id="admin_pass" placeholder="Digite a Senha Mestra">
+            <button class="btn-entrar" id="btn_acessar">LIBERAR ACESSO</button>
+            <p id="erro_msg" style="color: #ff4444; font-size: 13px; margin-top: 15px;"></p>
         </div>
     </div>
 
-    <div class="container" id="painel_conteudo">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <h2>GERENCIAR RESGATES</h2>
-            <button onclick="location.reload()" style="background:none; border: 1px solid #c89b3c; color:#c89b3c; padding:5px; cursor:pointer; border-radius:5px">Sair</button>
+    <div id="painel_conteudo">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>PAINEL DE RESGATES</h2>
+            <button onclick="location.reload()" style="background:#444; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px">Sair</button>
         </div>
-        <div id="lista_pedidos">Buscando pedidos...</div>
+        <div id="lista_pedidos">Aguardando autorização...</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-        // CONFIGURAÇÃO DA SENHA MESTRA
-        const SENHA_MESTRA = "Belial10"; // <--- MUDE SUA SENHA AQUI!
+        // SUA SENHA AQUI
+        const SENHA_MESTRA = "Belial10"; 
 
-        document.getElementById('btn_acessar').onclick = () => {
-            const senhaDigitada = document.getElementById('admin_pass').value;
-            if(senhaDigitada === SENHA_MESTRA) {
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('painel_conteudo').style.display = 'block';
-            } else {
-                document.getElementById('erro_msg').innerText = "Senha incorreta!";
-            }
-        };
-
-        // --- CÓDIGO DO FIREBASE ABAIXO ---
         const firebaseConfig = {
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
             authDomain: "quizlegends-f58fc.firebaseapp.com",
@@ -66,33 +61,57 @@
             messagingSenderId: "1050463164018",
             appId: "1:1050463164018:web:91de002b8afc8e678f54eb"
         };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        onSnapshot(collection(db, "pedidos_resgate"), (snapshot) => {
-            const container = document.getElementById('lista_pedidos');
-            container.innerHTML = "";
-            snapshot.forEach((pedido) => {
-                const data = pedido.data();
-                const id = pedido.id;
-                const card = document.createElement('div');
-                card.className = 'pedido-card';
-                card.innerHTML = `
-                    <div class="info">
-                        <p><b>Usuário:</b> ${data.user || data.cliente}</p>
-                        <p><b>Pix:</b> ${data.pix || data.chave_pix}</p>
-                        <div class="saldos">
-                            <p>🟡 <b>Antes:</b> ${Number(data.gold_antes).toLocaleString('pt-BR')} | 📉 <b>Atual:</b> ${Number(data.gold_depois).toLocaleString('pt-BR')}</p>
-                        </div>
-                    </div>
-                    <button class="btn-pago" onclick="confirmarPagamento('${id}')">PAGO</button>
-                `;
-                container.appendChild(card);
-            });
-        });
+        // FUNÇÃO QUE REALMENTE BUSCA OS DADOS
+        function iniciarPainel() {
+            onSnapshot(collection(db, "pedidos_resgate"), (snapshot) => {
+                const container = document.getElementById('lista_pedidos');
+                container.innerHTML = "";
+                
+                if (snapshot.empty) {
+                    container.innerHTML = "<p style='color:#888'>Nenhum pedido pendente.</p>";
+                    return;
+                }
 
+                snapshot.forEach((pedido) => {
+                    const data = pedido.data();
+                    const id = pedido.id;
+                    const card = document.createElement('div');
+                    card.className = 'pedido-card';
+                    card.innerHTML = `
+                        <div class="info">
+                            <p><b>Usuário:</b> ${data.user}</p>
+                            <p><b>Pix:</b> ${data.pix}</p>
+                            <div class="saldos">
+                                <b>Gold Antes:</b> ${Number(data.gold_antes).toLocaleString('pt-BR')} <br>
+                                <b>Gold Atual:</b> ${Number(data.gold_depois).toLocaleString('pt-BR')}
+                            </div>
+                        </div>
+                        <button class="btn-pago" onclick="confirmarPagamento('${id}')">PAGO</button>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // VERIFICAÇÃO DA SENHA
+        document.getElementById('btn_acessar').onclick = () => {
+            const senha = document.getElementById('admin_pass').value;
+            if (senha === SENHA_MESTRA) {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('painel_conteudo').style.display = 'block';
+                iniciarPainel(); // SÓ CHAMA O FIREBASE AQUI
+            } else {
+                document.getElementById('erro_msg').innerText = "Senha incorreta!";
+            }
+        };
+
+        // FUNÇÃO DELETAR
         window.confirmarPagamento = async (id) => {
-            if (confirm("Remover este pedido?")) {
+            if (confirm("Deseja marcar como pago?")) {
                 await deleteDoc(doc(db, "pedidos_resgate", id));
             }
         };
