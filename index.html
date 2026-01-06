@@ -3,42 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resgate Quiz Legends - Ian Felix</title>
+    <title>Diagnóstico Quiz Legends</title>
     <style>
         body { background: #010a13; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .caixa { border: 2px solid #c89b3c; padding: 20px; background: #091428; border-radius: 10px; max-width: 400px; margin: 0 auto; box-shadow: 0 0 15px rgba(200, 155, 60, 0.3); }
-        h2 { color: #c89b3c; margin-bottom: 5px; }
-        .usuario-badge { font-size: 14px; color: #888; margin-bottom: 20px; }
-        .gold-container { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px inset #c89b3c; }
-        .gold-label { font-size: 12px; color: #c89b3c; text-transform: uppercase; }
-        .gold-valor { font-size: 36px; font-weight: bold; color: #fff; }
-        input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 5px; border: 1px solid #c89b3c; background: #000; color: #fff; box-sizing: border-box; font-size: 16px; }
-        button { background: #c89b3c; color: black; padding: 18px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 16px; transition: 0.3s; }
-        button:disabled { background: #555; color: #888; cursor: not-allowed; }
-        #status { margin-top: 15px; font-size: 13px; color: #c89b3c; }
+        .caixa { border: 2px solid #c89b3c; padding: 20px; background: #091428; border-radius: 10px; max-width: 400px; margin: 0 auto; }
+        .gold-valor { font-size: 36px; font-weight: bold; color: #fff; margin: 10px 0; }
+        #status { margin-top: 20px; padding: 10px; background: rgba(255, 0, 0, 0.2); border-radius: 5px; color: #ffca28; font-size: 14px; border: 1px solid #c89b3c; }
+        .info { color: #888; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="caixa">
-        <h2>SOLICITAR RESGATE</h2>
-        <div class="usuario-badge">Logado como: <b>Ian Felix</b></div>
+        <h2 style="color: #c89b3c;">VERIFICANDO SISTEMA</h2>
+        <div class="usuario-badge">Buscando: <b>Ian Felix</b></div>
         
-        <div class="gold-container">
-            <div class="gold-label">Seu Saldo Atual</div>
-            <div class="gold-valor">🟡 <span id="saldo_tela">...</span></div>
-        </div>
+        <div class="gold-valor">🟡 <span id="saldo_tela">...</span></div>
 
-        <p style="font-size: 14px;">Custo do Resgate: <b>158.000 Gold</b></p>
+        <div id="status">Iniciando conexão...</div>
         
-        <input type="text" id="chave" placeholder="Digite sua Chave Pix">
-        <button id="btn">RESGATAR R$ 158,00 AGORA</button>
-        <div id="status">Sincronizado com Firebase</div>
+        <div class="info">Verifique a mensagem acima para saber o que ajustar no Firebase.</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
@@ -52,70 +41,34 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Referência exata ao documento que você criou
+        // Referência que estamos testando
         const usuarioRef = doc(db, "usuarios", "Ian Felix");
 
-        // MONITORAR SALDO EM TEMPO REAL
+        // MONITORAR COM DIAGNÓSTICO REAL
         onSnapshot(usuarioRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const saldo = snapshot.data().saldo;
-                document.getElementById('saldo_tela').innerText = Number(saldo).toLocaleString('pt-BR');
-            } else {
-                document.getElementById('saldo_tela').innerText = "ERRO";
-                document.getElementById('status').innerText = "Usuário 'Ian Felix' não encontrado no banco.";
-            }
-        });
-
-        // LÓGICA DE RESGATE
-        document.getElementById('btn').onclick = async () => {
-            const pix = document.getElementById('chave').value;
-            const btn = document.getElementById('btn');
+            const tela = document.getElementById('saldo_tela');
             const status = document.getElementById('status');
 
-            if (pix.length < 5) {
-                alert("Por favor, digite uma chave Pix válida!");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "PROCESSANDO...";
-            status.innerText = "Verificando saldo no servidor...";
-
-            try {
-                const snap = await getDoc(usuarioRef);
-                const saldoAtual = snap.data().saldo;
-                const valorResgate = 158000; // Valor a ser descontado
-
-                if (saldoAtual >= valorResgate) {
-                    // 1. Descontar o saldo primeiro (Segurança)
-                    await updateDoc(usuarioRef, {
-                        saldo: increment(-valorResgate)
-                    });
-
-                    // 2. Criar o pedido de resgate
-                    await addDoc(collection(db, "pedidos_resgate"), {
-                        cliente: "Ian Felix",
-                        chave_pix: pix,
-                        valor_reais: "158,00",
-                        data: new Date().toLocaleString('pt-BR'),
-                        status: "pendente"
-                    });
-
-                    alert("✅ SUCESSO!\nSeu pedido de R$ 158,00 foi enviado.\nO saldo foi atualizado.");
-                    status.innerText = "Pedido enviado com sucesso!";
+            if (snapshot.exists()) {
+                const dados = snapshot.data();
+                
+                // Verifica se o campo 'saldo' existe (exatamente com esse nome)
+                if (dados.saldo !== undefined) {
+                    const valor = Number(dados.saldo);
+                    tela.innerText = valor.toLocaleString('pt-BR');
+                    status.style.background = "rgba(0, 255, 0, 0.1)";
+                    status.innerText = "✅ TUDO OK! O campo 'saldo' foi encontrado.";
                 } else {
-                    alert("❌ SALDO INSUFICIENTE!\nVocê precisa de 158.000 Gold.");
-                    status.innerText = "Saldo insuficiente para este valor.";
+                    tela.innerText = "CAMPO?";
+                    status.innerText = "❌ ERRO: O documento 'Ian Felix' existe, mas não achei o campo escrito 'saldo' (minúsculo) dentro dele.";
                 }
-            } catch (erro) {
-                console.error(erro);
-                alert("Erro ao processar: " + erro.message);
-                status.innerText = "Erro na conexão.";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "RESGATAR R$ 158,00 AGORA";
+            } else {
+                tela.innerText = "ID?";
+                status.innerText = "❌ ERRO: Não existe um documento com o nome 'Ian Felix' dentro da coleção 'usuarios'. Verifique espaços ou letras maiúsculas.";
             }
-        };
+        }, (error) => {
+            document.getElementById('status').innerText = "❌ ERRO DE PERMISSÃO: Verifique as Regras do Firebase. " + error.message;
+        });
     </script>
 </body>
 </html>
