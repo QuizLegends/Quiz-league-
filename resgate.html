@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -78,7 +79,7 @@
         
         <div class="hex-frame">
             <div id="quizContent">
-                <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin: 0 0 10px 0;">Sincronizando...</p>
+                <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin: 0 0 10px 0;">Sincronizando com Nexus...</p>
                 <div id="opcoes"></div>
                 <p id="avisoStatusQuiz"></p>
             </div>
@@ -136,7 +137,8 @@
 
         const userRef = doc(db, "usuarios", usuarioLogado);
         let goldDB = 0;
-        let acertosNoCiclo = 0; // Agora virá do Firebase
+        let acertosNoCiclo = 0;
+        let jogoInicializado = false;
 
         const perguntasBase = [
             { q: "Quem é o cego de Ionia?", a: ["Jax", "Lee Sin", "Yi", "Yone"], correct: "Lee Sin" },
@@ -148,14 +150,20 @@
             { q: "Quem é o Rei Destruído?", a: ["Mordekaiser", "Viego", "Thresh", "Karthus"], correct: "Viego" }
         ];
 
-        // SINCRONIZAÇÃO EM TEMPO REAL (Saldo e Acertos)
-        onSnapshot(userRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
+        // SINCRONIZAÇÃO EM TEMPO REAL
+        onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
                 goldDB = data.saldo || 0;
-                // Se o campo acertos não existir ainda no Firebase, ele assume 0
-                acertosNoCiclo = data.acertos || 0; 
+                acertosNoCiclo = data.acertos || 0;
+                
                 atualizarInterface();
+
+                // Só gera a pergunta após o Firebase confirmar os acertos salvos
+                if (!jogoInicializado) {
+                    jogoInicializado = true;
+                    carregarQuestao();
+                }
             }
         });
 
@@ -167,12 +175,14 @@
             document.getElementById('txtPorcentagem').innerText = Math.floor(progresso) + "%";
 
             const btnVideo = document.getElementById('btnVideo');
+            const avisoStatus = document.getElementById('avisoStatusQuiz');
+
             if (acertosNoCiclo < REQUISITO_ACERTOS) {
                 btnVideo.disabled = true;
-                document.getElementById('avisoStatusQuiz').innerHTML = `Acerte mais <span class="contador-verde">${REQUISITO_ACERTOS - acertosNoCiclo}</span> para liberar anúncios`;
+                avisoStatus.innerHTML = `Acerte mais <span class="contador-verde">${REQUISITO_ACERTOS - acertosNoCiclo}</span> para liberar anúncios`;
             } else {
                 btnVideo.disabled = false;
-                document.getElementById('avisoStatusQuiz').innerText = "VÍDEOS LIBERADOS!";
+                avisoStatus.innerText = "VÍDEOS LIBERADOS!";
             }
         }
 
@@ -184,18 +194,29 @@
         }
 
         function carregarQuestao() {
-            const q = perguntasBase[Math.floor(Math.random() * perguntasBase.length)];
-            document.getElementById('perguntaTexto').innerText = q.q;
             const container = document.getElementById('opcoes');
+            const textoQuestao = document.getElementById('perguntaTexto');
+
+            if (acertosNoCiclo >= REQUISITO_ACERTOS) {
+                textoQuestao.innerText = "Meta de acertos atingida!";
+                container.innerHTML = "<p style='text-align:center; color:var(--gold);'>Assista ao vídeo para ganhar 300 Gold e resetar o Quiz.</p>";
+                return;
+            }
+
+            const q = perguntasBase[Math.floor(Math.random() * perguntasBase.length)];
+            textoQuestao.innerText = q.q;
             container.innerHTML = "";
+            
             q.a.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = "option-btn";
                 btn.innerText = opt;
                 btn.onclick = async () => {
+                    const botoes = container.querySelectorAll('button');
+                    botoes.forEach(b => b.style.pointerEvents = 'none');
+
                     if (opt === q.correct) {
                         btn.classList.add('btn-correct');
-                        // Salva acerto e saldo no Firebase
                         await updateDoc(userRef, { 
                             saldo: increment(10),
                             acertos: increment(1)
@@ -220,14 +241,13 @@
                     clearInterval(timer);
                     overlay.style.display = 'none';
                     
-                    // Reset de acertos e bónus de Gold no Firebase
                     await updateDoc(userRef, { 
                         saldo: increment(300),
                         acertos: 0 
                     });
                     
                     document.getElementById('adTimer').innerText = "5";
-                    carregarQuestao();
+                    // O onSnapshot detectará acertos:0 e atualizará a interface
                 }
             }, 1000);
         };
@@ -255,7 +275,6 @@
                 });
 
                 await updateDoc(userRef, { saldo: increment(-metaAtual) });
-
                 alert("PEDIDO ENVIADO COM SUCESSO!");
             } catch (e) { 
                 alert("ERRO: " + e.message); 
@@ -264,8 +283,6 @@
                 btn.innerText = "SOLICITAR RESGATE PIX";
             }
         };
-
-        carregarQuestao();
     </script>
 </body>
 </html>
