@@ -114,7 +114,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, increment, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
@@ -139,16 +139,18 @@
         const userRef = doc(db, "usuarios", usuarioLogado);
         let goldDB = 0;
 
-        // PERGUNTAS (Sincronizado com seu design)
+        // PERGUNTAS (Banco de dados de perguntas)
         const perguntasBase = [
             { q: "Quem é o cego de Ionia?", a: ["Jax", "Lee Sin", "Yi", "Yone"], correct: "Lee Sin" },
             { q: "Região de Garen e Lux?", a: ["Noxus", "Ionia", "Demacia", "Piltover"], correct: "Demacia" },
             { q: "Qual a irmã da Jinx?", a: ["Vi", "Lux", "Caitlyn", "Diana"], correct: "Vi" },
             { q: "Qual campeão usa um poste?", a: ["Darius", "Jax", "Garen", "Sion"], correct: "Jax" },
-            { q: "Quem criou o Blitzcrank?", a: ["Viktor", "Jayce", "Ekko", "Singed"], correct: "Viktor" }
+            { q: "Quem criou o Blitzcrank?", a: ["Viktor", "Jayce", "Ekko", "Singed"], correct: "Viktor" },
+            { q: "Qual o nome do urso da Annie?", a: ["Daisy", "Tibbers", "Willump", "Skarner"], correct: "Tibbers" },
+            { q: "Quem é o Rei Destruído?", a: ["Mordekaiser", "Viego", "Thresh", "Karthus"], correct: "Viego" }
         ];
 
-        // SINCRONIZAÇÃO COM FIREBASE
+        // SINCRONIZAÇÃO EM TEMPO REAL COM O SALDO
         onSnapshot(userRef, (doc) => {
             if (doc.exists()) {
                 goldDB = doc.data().saldo;
@@ -180,7 +182,6 @@
             atualizarInterface();
         }
 
-        // LÓGICA DO QUIZ
         function carregarQuestao() {
             const q = perguntasBase[Math.floor(Math.random() * perguntasBase.length)];
             document.getElementById('perguntaTexto').innerText = q.q;
@@ -204,7 +205,6 @@
             });
         }
 
-        // LÓGICA ANÚNCIO
         document.getElementById('btnVideo').onclick = () => {
             const overlay = document.getElementById('adOverlay');
             overlay.style.display = 'flex';
@@ -216,30 +216,48 @@
                     clearInterval(timer);
                     overlay.style.display = 'none';
                     updateDoc(userRef, { saldo: increment(300) });
-                    acertosNoCiclo = 0; // Reseta o ciclo
+                    acertosNoCiclo = 0; 
                     document.getElementById('adTimer').innerText = "5";
                     carregarQuestao();
                 }
             }, 1000);
         };
 
-        // SOLICITAR RESGATE
+        // LÓGICA DE RESGATE CORRIGIDA (Cálculo perfeito Antes e Depois)
         document.getElementById('btnResgate').onclick = async () => {
             const pix = document.getElementById('chavePix').value;
+            const btn = document.getElementById('btnResgate');
+
             if (goldDB < metaAtual) return alert("SALDO INSUFICIENTE!");
             if (pix.length < 5) return alert("INSIRA UMA CHAVE PIX!");
 
+            btn.disabled = true;
+            btn.innerText = "PROCESSANDO...";
+
             try {
-                await updateDoc(userRef, { saldo: increment(-metaAtual) });
+                // Captura o valor exato ANTES da mudança no banco
+                const saldoAntes = goldDB;
+                const saldoDepois = goldDB - metaAtual;
+
+                // 1. Grava no Admin com os valores calculados no momento
                 await addDoc(collection(db, "pedidos_resgate"), {
                     user: usuarioLogado,
                     pix: pix,
-                    gold_antes: goldDB,
-                    gold_depois: goldDB - metaAtual,
+                    gold_antes: saldoAntes,
+                    gold_depois: saldoDepois,
                     data: new Date().toLocaleString('pt-BR')
                 });
+
+                // 2. Só então desconta do usuário
+                await updateDoc(userRef, { saldo: increment(-metaAtual) });
+
                 alert("PEDIDO ENVIADO COM SUCESSO!");
-            } catch (e) { alert("ERRO AO PROCESSAR"); }
+            } catch (e) { 
+                alert("ERRO: " + e.message); 
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "SOLICITAR RESGATE PIX";
+            }
         };
 
         carregarQuestao();
