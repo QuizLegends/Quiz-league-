@@ -77,7 +77,6 @@
             box-shadow: 0 0 15px rgba(200, 155, 60, 0.5);
         }
 
-        /* Estilização da Checkbox */
         .policy-group {
             display: flex;
             align-items: flex-start;
@@ -189,6 +188,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // FUNÇÃO PARA VALIDAR SENHA FRACA
+        function senhaEhFraca(s) {
+            const sequencias = ["123456", "654321", "111111", "222222", "333333", "444444", "555555", "000000", "123123", "abcabc"];
+            return sequencias.includes(s);
+        }
+
         document.getElementById('btnCadastrar').onclick = async () => {
             const usuario = document.getElementById('user').value.trim().toLowerCase();
             const senha = document.getElementById('pass').value;
@@ -196,9 +201,24 @@
             const msg = document.getElementById('msg');
             const btn = document.getElementById('btnCadastrar');
 
-            // VALIDAÇÕES
+            // LIMPAR MENSAGEM ANTERIOR
+            msg.innerText = "";
+
+            // VALIDAÇÕES BÁSICAS
             if (!usuario || !senha) {
                 msg.innerText = "Preencha todos os campos!";
+                return;
+            }
+
+            // VALIDAÇÃO DE TAMANHO DA SENHA (MÍNIMO 6 DÍGITOS)
+            if (senha.length < 6) {
+                msg.innerText = "A SENHA DEVE TER NO MÍNIMO 6 DÍGITOS!";
+                return;
+            }
+
+            // VALIDAÇÃO DE SENHA SEQUENCIAL
+            if (senhaEhFraca(senha)) {
+                msg.innerText = "SENHA MUITO FRACA! NÃO USE SEQUÊNCIAS.";
                 return;
             }
 
@@ -224,7 +244,6 @@
                     btn.disabled = false;
                     btn.innerText = "CRIAR CONTA LENDÁRIA";
                 } else {
-                    // CRIA O USUÁRIO COM SALDO INICIAL
                     await setDoc(docRef, {
                         senha: senha,
                         saldo: 0,
@@ -236,7 +255,7 @@
                         dataCadastro: new Date().toLocaleString('pt-BR')
                     });
 
-                    alert("Conta criada com sucesso!");
+                    alert("Sua jornada lendária começou! Conta criada.");
                     window.location.href = "index.html";
                 }
             } catch (e) {
