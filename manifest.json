@@ -1,0 +1,21 @@
+{
+  "name": "Admin Quiz Legends",
+  "short_name": "QuizAdmin",
+  "start_url": "admin.html",
+  "display": "standalone",
+  "background_color": "#010a13",
+  "theme_color": "#c89b3c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/218/218381.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/218/218381.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
