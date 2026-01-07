@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Quiz Legends v3</title>
+    <title>Admin - Quiz Legends vFinal</title>
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#010a13">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icone-admin.png">
+    <script>
+        // SCRIPT DE LIMPEZA TOTAL - Roda antes de carregar o Firebase
+        async function nukeAll() {
+            // 1. Deleta Service Workers
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for(let reg of regs) { await reg.unregister(); }
+            }
+            // 2. Limpa Cache e Storages
+            const cachesKeys = await caches.keys();
+            for(let key of cachesKeys) { await caches.delete(key); }
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log("Navegador limpo. Tentando sincronizar...");
+        }
+        nukeAll();
+    </script>
 
+    <link rel="manifest" href="manifest.json">
     <style>
         body { background: #010a13; color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; margin: 0; }
         #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #010a13; display: flex; align-items: center; justify-content: center; z-index: 10000; }
@@ -22,9 +35,7 @@
         .pedido-card { background: #091428; border: 1px solid #c89b3c; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
         .pix-box { background: #000; padding: 12px; border-radius: 4px; color: #00ffcc; font-family: monospace; font-size: 1.1em; margin: 10px 0; border: 1px dashed #444; word-break: break-all; }
         .saldos-container { margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 4px solid #c89b3c; font-size: 14px; }
-        .alerta-hacker { border-left-color: #ff4444 !important; background: rgba(255, 0, 0, 0.15) !important; animation: blink 1.5s infinite; }
         .btn-pago { background: #28a745; color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; font-size: 16px; }
-        @keyframes blink { 50% { opacity: 0.6; } }
     </style>
 </head>
 <body>
@@ -43,14 +54,14 @@
     <div id="painel_conteudo">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin:0;">PEDIDOS PIX</h2>
-            <button onclick="localStorage.clear(); location.reload();" style="background:#444; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px">Reiniciar</button>
+            <button onclick="location.reload()" style="background:#444; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px">Sair</button>
         </div>
-        <div id="lista_pedidos">Sincronizando banco de dados...</div>
+        <div id="lista_pedidos">Conectando ao banco...</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, deleteDoc, query, orderBy, clearIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, query, orderBy, disableNetwork, enableNetwork } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js";
 
         const SENHA_MESTRA = "Belial10"; 
@@ -68,53 +79,38 @@
         const messaging = getMessaging(app);
         const audio = document.getElementById("notifSound");
 
-        // --- LIMPEZA DE CACHE DO FIREBASE (PARA DESTRAVAR GUIA NORMAL) ---
-        clearIndexedDbPersistence(db).catch((err) => {
-            if (err.code == 'failed-precondition') {
-                console.log("Persistência já ativa em outra aba.");
-            } else if (err.code == 'unimplemented') {
-                console.log("O navegador não suporta persistência.");
-            }
-        });
-
         async function registrarPush() {
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === "granted") {
-                    const token = await getToken(messaging, { 
-                        vapidKey: "BLlYRA_DSLn_ACEEdqKEwACeDkrPfny85TnEFvCHDY9zktsOCPga-cAWjTeYS2UCReH43o9oUQFDjVoyxJhiKc0" 
-                    });
-                    if (token) console.log("Token Ativo!");
+                    await getToken(messaging, { vapidKey: "BLlYRA_DSLn_ACEEdqKEwACeDkrPfny85TnEFvCHDY9zktsOCPga-cAWjTeYS2UCReH43o9oUQFDjVoyxJhiKc0" });
                 }
-            } catch (err) {
-                console.log("Erro Push:", err);
-            }
+            } catch (e) {}
         }
 
         function iniciarPainel() {
             const q = query(collection(db, "resgates"), orderBy("timestamp", "desc"));
             
+            // Força o Firebase a re-conectar à rede
+            disableNetwork(db).then(() => enableNetwork(db));
+
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('lista_pedidos');
                 
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added" && !snapshot.metadata.fromCache) {
                         audio.play().catch(() => {});
-                        if (Notification.permission === "granted") {
-                            new Notification("💰 NOVO RESGATE!", { body: "Um usuário solicitou PIX", icon: "icone-admin.png" });
-                        }
                     }
                 });
 
                 container.innerHTML = "";
                 if (snapshot.empty) {
-                    container.innerHTML = "<p style='color:#888; text-align:center;'>Nenhum pedido pendente.</p>";
+                    container.innerHTML = "<p style='color:#888; text-align:center;'>Nenhum pedido.</p>";
                     return;
                 }
 
                 snapshot.forEach((pedido) => {
                     const data = pedido.data();
-                    const suspeito = Number(data.goldAnterior) < Number(data.valorGold);
                     const card = document.createElement('div');
                     card.className = 'pedido-card';
                     card.innerHTML = `
@@ -122,21 +118,19 @@
                             <p><b>Usuário:</b> ${data.usuarioId}</p>
                             <div class="pix-box">${data.chavePix}</div>
                             <p><b>Valor:</b> <span style="color:#28a745; font-weight:bold; font-size:1.3em;">R$ ${data.valorReais}</span></p>
-                            <div class="saldos-container ${suspeito ? 'alerta-hacker' : ''}">
+                            <div class="saldos-container">
                                 <b>Relatório:</b><br>
-                                • Anterior: ${Number(data.goldAnterior || 0).toLocaleString()} Gold<br>
-                                • Retirada: -${Number(data.valorGold || 0).toLocaleString()} Gold<br>
-                                • Atual: ${Number(data.goldPosResgate || 0).toLocaleString()} Gold
-                                ${suspeito ? '<br><b style="color:#ff4444;">⚠️ SALDO INSUFICIENTE!</b>' : ''}
+                                Anterior: ${data.goldAnterior || 0}<br>
+                                Atual: ${data.goldPosResgate || 0}
                             </div>
                         </div>
-                        <button class="btn-pago" onclick="confirmarPagamento('${pedido.id}')">MARCAR COMO PAGO</button>
+                        <button class="btn-pago" onclick="confirmarPagamento('${pedido.id}')">PAGO</button>
                     `;
                     container.appendChild(card);
                 });
             }, (error) => {
-                console.error("Erro Firebase:", error);
-                document.getElementById('lista_pedidos').innerHTML = "<p style='color:red'>Erro de conexão. Verifique se há bloqueadores de anúncios ativos.</p>";
+                console.error(error);
+                document.getElementById('lista_pedidos').innerHTML = "Erro de conexão. Verifique se há extensões bloqueando o site.";
             });
         }
 
@@ -152,7 +146,7 @@
         };
 
         window.confirmarPagamento = async (id) => {
-            if (confirm("Confirmar pagamento?")) await deleteDoc(doc(db, "resgates", id));
+            if (confirm("Remover pedido?")) await deleteDoc(doc(db, "resgates", id));
         };
     </script>
 </body>
