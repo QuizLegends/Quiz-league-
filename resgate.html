@@ -8,7 +8,7 @@
         :root { 
             --bg-dark: #010a13; --lol-blue: #091428; --gold: #c89b3c; 
             --gold-dark: #785a28; --gold-bright: #f0e6d2; --text: #f0e6d2;
-            --ad-space: 85px; /* ESPAÇO RESERVADO PARA O ANÚNCIO */
+            --ad-space: 80px; /* Altura do banner no rodapé */
             --correct: #28a745; --wrong: #dc3545;
         }
         html, body { 
@@ -17,71 +17,58 @@
             height: 100vh; width: 100vw; overflow: hidden; overscroll-behavior-y: contain;
         }
         
-        /* CONTAINER SUBIDO PARA DAR ESPAÇO AO RODAPÉ */
         .app-container { 
             flex: 1; display: flex; flex-direction: column; 
-            padding: 5px 0; gap: 8px; width: 94%; max-width: 400px; 
+            padding: 5px 0; gap: 5px; width: 94%; max-width: 400px; 
             box-sizing: border-box; 
-            margin-bottom: var(--ad-space); /* SOBE O CONTEÚDO */
+            margin-bottom: var(--ad-space); /* Espaço garantido para o banner */
         }
         
-        .header-section { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; flex-shrink: 0; width: 100%; box-sizing: border-box; }
+        .header-section { display: flex; justify-content: space-between; align-items: center; padding: 2px 10px; flex-shrink: 0; }
         .title-legends h1 {
-            font-size: 1.6rem; margin: 0; color: var(--gold); text-transform: uppercase;
+            font-size: 1.3rem; /* Título menor para ganhar espaço */
+            margin: 0; color: var(--gold); text-transform: uppercase;
             background: linear-gradient(to bottom, var(--gold-bright), var(--gold), var(--gold-dark));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         
-        .coin-badge { border: 2px solid var(--gold); padding: 6px 12px; background: rgba(1, 10, 19, 0.9); color: var(--gold); font-weight: 900; font-size: 1rem; }
+        .coin-badge { border: 2px solid var(--gold); padding: 4px 10px; background: rgba(1, 10, 19, 0.9); color: var(--gold); font-weight: 900; font-size: 0.9rem; }
         
         .hex-frame {
-            background: var(--lol-blue); border: 2px solid var(--gold); position: relative; padding: 12px; flex: 1;
-            display: flex; flex-direction: column; justify-content: flex-start;
+            background: var(--lol-blue); border: 2px solid var(--gold); position: relative; padding: 8px; flex: 1;
+            display: flex; flex-direction: column; justify-content: space-between;
             box-sizing: border-box;
             clip-path: polygon(4% 0, 96% 0, 100% 8%, 100% 92%, 96% 100%, 4% 100%, 0 92%, 0 8%);
         }
-        .hex-frame::after {
-            content: ""; position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px; border: 1px solid var(--gold-dark); 
-            pointer-events: none; clip-path: polygon(4% 0, 96% 0, 100% 8%, 100% 92%, 96% 100%, 4% 100%, 0 92%, 0 8%);
-        }
 
-        .quiz-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 5px; }
+        /* Reduzi o wrapper do quiz para ele ser mais compacto verticalmente */
+        .quiz-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
         .option-btn { 
-            background: #1e2328; border: 1px solid var(--gold-dark); color: var(--gold-bright); padding: 10px; 
-            margin: 4px 0; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.8rem;
+            background: #1e2328; border: 1px solid var(--gold-dark); color: var(--gold-bright); padding: 8px; 
+            margin: 3px 0; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.75rem;
         }
-        .btn-correct { background-color: var(--correct) !important; border-color: #fff !important; color: white !important; }
-        .btn-wrong { background-color: var(--wrong) !important; border-color: #fff !important; color: white !important; }
         
-        .video-wrapper { text-align: center; margin-top: auto; padding-top: 5px; width: 100%; z-index: 2; }
-        .limit-label { font-size: 0.65rem; color: var(--gold); display: block; margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
         .video-btn { 
             background: linear-gradient(to bottom, #c8a355, #785a28); border: 1px solid var(--gold-bright); 
-            color: #f0e6d2; padding: 10px; width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 0.7rem;
+            color: #f0e6d2; padding: 8px; width: 100%; font-weight: bold; text-transform: uppercase; font-size: 0.65rem;
         }
 
-        .resgate-selector { display: flex; justify-content: space-between; gap: 4px; margin-top: 8px; }
+        .resgate-selector { display: flex; justify-content: space-between; gap: 4px; margin-top: 5px; }
         .resgate-opt {
             flex: 1; background: #010a13; border: 1px solid var(--gold-dark); color: var(--gold);
-            padding: 10px 2px; font-size: 0.8rem; font-weight: 900; cursor: pointer; text-align: center;
+            padding: 8px 2px; font-size: 0.75rem; font-weight: 900; cursor: pointer; text-align: center;
         }
-        .resgate-opt.active { background: var(--gold); color: #000; border-color: var(--gold-bright); }
-
-        .progress-bg { background: #000; height: 10px; border: 1px solid var(--gold-dark); margin-top: 4px; }
-        .progress-fill { background: var(--gold); height: 100%; width: 0%; transition: 0.7s; }
         
-        input { width: 100%; padding: 12px; background: #010a13; color: white; border: 1px solid var(--gold-dark); margin: 6px 0; box-sizing: border-box; font-size: 0.9rem; }
-        #avisoStatusQuiz { text-align: center; font-size: 0.8rem; color: var(--gold); font-weight: bold; margin-top: 5px; text-transform: uppercase; }
-
-        /* ESPAÇO FIXO DO ANÚNCIO NO RODAPÉ */
+        input { width: 100%; padding: 10px; background: #010a13; color: white; border: 1px solid var(--gold-dark); margin: 4px 0; box-sizing: border-box; font-size: 0.85rem; }
+        
+        /* BANNER FIXO NO FUNDO */
         .footer-ad-space {
             position: fixed; bottom: 0; left: 0; width: 100%;
             height: var(--ad-space); background: #000;
             border-top: 2px solid var(--gold);
             display: flex; align-items: center; justify-content: center;
-            color: var(--gold); font-size: 0.7rem; font-weight: bold;
-            z-index: 999;
+            color: var(--gold); font-size: 0.7rem; z-index: 1000;
         }
     </style>
 </head>
@@ -93,22 +80,20 @@
             <div class="coin-badge">🟡 <span id="goldAmount">...</span></div>
         </div>
         
-        <div class="hex-frame">
+        <div class="hex-frame" style="max-height: 45%;">
             <div class="quiz-wrapper" id="quizContent">
-                <p id="perguntaTexto" style="text-align: center; font-size: 0.95rem; color: var(--gold-bright); font-weight: bold; margin-bottom: 10px;">Carregando Questão...</p>
+                <p id="perguntaTexto" style="text-align: center; font-size: 0.85rem; color: var(--gold-bright); font-weight: bold; margin: 0 0 5px 0;">Sincronizando...</p>
                 <div id="opcoes"></div>
-                <p id="avisoStatusQuiz"></p>
             </div>
-
-            <div class="video-wrapper">
-                <span class="limit-label">Limite: <span id="limitDiario">0/35</span> Vídeos</span>
-                <button id="btnVideo" class="video-btn">📺 ASSISTIR ANÚNCIO (+300)</button>
+            <div style="text-align: center; margin-top: 5px;">
+                <span style="font-size: 0.6rem; color: var(--gold); text-transform: uppercase;">Limite: <span id="limitDiario">0/35</span></span>
+                <button id="btnVideo" class="video-btn">📺 +300 GOLD</button>
             </div>
         </div>
 
-        <div class="hex-frame" style="flex: 0;">
-            <div class="progress-bg"><div id="progressBar" class="progress-fill"></div></div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 6px 0; font-weight: bold;">
+        <div class="hex-frame" style="flex: 0; margin-top: 5px;">
+            <div class="progress-bg" style="background: #000; height: 8px; border: 1px solid var(--gold-dark);"><div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--gold); margin: 4px 0;">
                 <span id="txtMeta">Meta: 15.8k</span>
                 <span id="txtPorcentagem">0%</span>
             </div>
@@ -120,13 +105,11 @@
             </div>
 
             <input type="text" id="chavePix" placeholder="CHAVE PIX">
-            <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); width:100%; padding: 15px;">RESGATAR AGORA</button>
+            <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); padding: 12px;">SOLICITAR RESGATE PIX</button>
         </div>
     </div>
 
-    <div class="footer-ad-space">
-        ESPAÇO PARA BANNER DE ANÚNCIO
-    </div>
+    <div class="footer-ad-space">ANÚNCIO AQUI</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -181,45 +164,27 @@
             document.getElementById('txtPorcentagem').innerText = Math.floor(progresso) + "%";
             
             const btnVideo = document.getElementById('btnVideo');
-            const aviso = document.getElementById('avisoStatusQuiz');
-            
-            if (totalVideosHoje >= 35) {
-                btnVideo.disabled = true; aviso.innerText = "LIMITE DIÁRIO ATINGIDO!";
-            } else if (acertosNoCiclo < 10) {
-                btnVideo.disabled = true; aviso.innerHTML = `ACERTE <span style="color:#28a745">${10 - acertosNoCiclo}</span> QUESTÕES`;
-            } else {
-                btnVideo.disabled = false; aviso.innerHTML = `ASSISTA <span style="color:#28a745">${3 - videosAssistidos}</span> VÍDEOS`;
-            }
+            if (totalVideosHoje >= 35 || acertosNoCiclo < 10) btnVideo.disabled = true;
+            else btnVideo.disabled = false;
         }
 
         document.getElementById('btnVideo').onclick = async () => {
-            const btn = document.getElementById('btnVideo');
-            btn.disabled = true;
-            let tempo = 3;
-            const intervalo = setInterval(() => {
-                btn.innerText = `ASSISTINDO... ${tempo}s`;
-                tempo--;
-                if (tempo < 0) { clearInterval(intervalo); finalizarVideo(); }
-            }, 1000);
+            const btn = document.getElementById('btnVideo'); btn.disabled = true;
+            setTimeout(async () => {
+                let novosV = videosAssistidos + 1;
+                let dados = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
+                if (novosV >= 3) { dados.acertos = 0; dados.videosAssistidos = 0; }
+                await updateDoc(userRef, dados);
+                carregarQuestao();
+            }, 3000);
         };
-
-        async function finalizarVideo() {
-            let novosVideos = videosAssistidos + 1;
-            let dados = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-            if (novosVideos >= 3) { dados.acertos = 0; dados.videosAssistidos = 0; }
-            await updateDoc(userRef, dados);
-            document.getElementById('btnVideo').innerText = "📺 ASSISTIR ANÚNCIO (+300)";
-            carregarQuestao();
-        }
 
         document.getElementById('btnResgate').onclick = async () => {
             const chave = document.getElementById('chavePix').value;
-            if (goldDB < metaAtual || chave.length < 5) { alert("Saldo insuficiente ou chave inválida!"); return; }
-            await addDoc(collection(db, "resgates"), {
-                usuarioId: usuarioLogado, chavePix: chave, valorGold: metaAtual, status: "Pendente", data: new Date().toLocaleString('pt-BR')
-            });
+            if (goldDB < metaAtual || chave.length < 5) { alert("Erro no saldo ou chave"); return; }
+            await addDoc(collection(db, "resgates"), { usuarioId: usuarioLogado, chavePix: chave, valorGold: metaAtual, status: "Pendente", data: new Date().toLocaleString('pt-BR') });
             await updateDoc(userRef, { saldo: increment(-metaAtual) });
-            alert("Solicitado!");
+            alert("Sucesso!");
         };
 
         window.setResgate = (el, valor) => {
@@ -233,23 +198,17 @@
             const container = document.getElementById('opcoes');
             const texto = document.getElementById('perguntaTexto');
             if (acertosNoCiclo >= 10) {
-                texto.innerText = "Meta de questões atingida!";
-                container.innerHTML = "<p style='text-align:center;'>Assista aos vídeos para liberar mais.</p>";
-                return;
+                texto.innerText = "Meta atingida! Assista vídeos.";
+                container.innerHTML = ""; return;
             }
             const q = perguntasBase[Math.floor(Math.random() * perguntasBase.length)];
-            texto.innerText = q.q;
-            container.innerHTML = "";
+            texto.innerText = q.q; container.innerHTML = "";
             q.a.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "option-btn";
-                btn.innerText = opt;
+                btn.className = "option-btn"; btn.innerText = opt;
                 btn.onclick = async () => {
-                    if (opt === q.correct) {
-                        btn.classList.add('btn-correct');
-                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1) });
-                    } else { btn.classList.add('btn-wrong'); }
-                    setTimeout(carregarQuestao, 800);
+                    if (opt === q.correct) await updateDoc(userRef, { saldo: increment(10), acertos: increment(1) });
+                    setTimeout(carregarQuestao, 600);
                 };
                 container.appendChild(btn);
             });
