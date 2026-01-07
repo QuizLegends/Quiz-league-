@@ -207,14 +207,14 @@
             const saldoDepois = goldDB - metaAtual;
 
             try {
-                // REGISTRO NO PAINEL COM SALDO INICIAL E FINAL
+                // REGISTRO NO PAINEL COM OS CAMPOS CORRIGIDOS PARA O ADMIN
                 await addDoc(collection(db, "resgates"), { 
                     usuarioId: usuarioLogado, 
                     chavePix: chave, 
                     valorGold: metaAtual, 
-                    valorReais: "R$ " + valorReaisMeta,
-                    saldoAnterior: saldoAntes,
-                    saldoFinal: saldoDepois,
+                    valorReais: valorReaisMeta,
+                    goldAnterior: saldoAntes, // Campo sincronizado
+                    goldPosResgate: saldoDepois, // Campo sincronizado
                     status: "Pendente", 
                     data: new Date().toLocaleString('pt-BR'), 
                     timestamp: Date.now() 
