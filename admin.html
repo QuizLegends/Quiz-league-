@@ -25,7 +25,7 @@
         
         h2 { color: var(--ouro); border-bottom: 2px solid var(--ouro); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: space-between; align-items: center; }
         
-        input { padding: 14px; border-radius: 5px; border: 1px solid var(--ouro); background: #000; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-size: 16px; }
+        input { padding: 14px; border-radius: 5px; border: 1px solid var(--ouro); background: #000; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-size: 16px; outline: none; }
         
         button.primary { background: var(--ouro); color: black; border: none; padding: 14px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
@@ -97,7 +97,12 @@
                 if (permission === "granted") {
                     await getToken(messaging, { vapidKey: "BLlYRA_DSLn_ACEEdqKEwACeDkrPfny85TnEFvCHDY9zktsOCPga-cAWjTeYS2UCReH43o9oUQFDjVoyxJhiKc0" });
                 }
-            } catch (e) { console.warn("Push bloqueado ou sem HTTPS"); }
+            } catch (e) { console.warn("Push desativado ou erro de permissão."); }
+        }
+
+        // Função para formatar Gold removendo decimais e adicionando pontos
+        function formatarGold(valor) {
+            return Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
         }
 
         function formatarData(timestamp) {
@@ -118,7 +123,7 @@
 
                 container.innerHTML = "";
                 if (snapshot.empty) {
-                    container.innerHTML = "<p style='text-align:center; color:#666; margin-top:40px;'>Tudo limpo por aqui! Ninguém pediu saque ainda.</p>";
+                    container.innerHTML = "<p style='text-align:center; color:#666; margin-top:40px;'>Nenhum pedido pendente.</p>";
                     return;
                 }
 
@@ -134,7 +139,7 @@
                             <b>Usuário:</b> <span style="color:var(--ouro)">${data.usuarioId}</span>
                             
                             <div class="pix-container" onclick="navigator.clipboard.writeText('${data.chavePix}'); alert('PIX Copiado!')">
-                                <span class="copy-label">CLIQUE PARA COPIAR</span>
+                                <span class="copy-label">CLIQUE PARA COPIAR PIX</span>
                                 <span class="pix-text">${data.chavePix}</span>
                             </div>
 
@@ -142,9 +147,9 @@
                             
                             <div class="status-box ${suspeito ? 'alerta-fraude' : ''}">
                                 <strong>📊 Relatório de Gold:</strong><br>
-                                • Saldo Inicial: ${Number(data.goldAnterior || 0).toLocaleString()} <br>
-                                • Custo Saque: -${Number(data.valorGold || 0).toLocaleString()} <br>
-                                • Saldo Final: ${Number(data.goldPosResgate || 0).toLocaleString()}
+                                • Saldo Inicial: ${formatarGold(data.goldAnterior)} <br>
+                                • Custo Saque: -${formatarGold(data.valorGold)} <br>
+                                • Saldo Final: ${formatarGold(data.goldPosResgate)}
                                 ${suspeito ? '<br><br><strong style="color:#ff4444;">⚠️ ALERTA: SALDO INSUFICIENTE!</strong>' : ''}
                             </div>
                         </div>
@@ -152,6 +157,9 @@
                     `;
                     container.appendChild(card);
                 });
+            }, (error) => {
+                console.error("Erro de conexão:", error);
+                document.getElementById('lista_pedidos').innerHTML = "<p style='color:red; text-align:center;'>Erro ao conectar com o banco. Recarregue a página.</p>";
             });
         }
 
@@ -167,7 +175,7 @@
         };
 
         window.confirmarPagamento = async (id) => {
-            if (confirm("Você confirma que o PIX foi enviado? O pedido sairá da lista.")) {
+            if (confirm("Confirmar pagamento? O pedido será removido permanentemente.")) {
                 await deleteDoc(doc(db, "resgates", id));
             }
         };
