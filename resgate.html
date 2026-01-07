@@ -61,6 +61,7 @@
             background: linear-gradient(to bottom, #c8a355, #785a28); border: 1px solid var(--gold-bright); 
             color: #f0e6d2; padding: 12px; width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 0.7rem;
         }
+        .video-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .resgate-selector { display: flex; justify-content: space-between; gap: 4px; margin-top: 8px; }
         .resgate-opt {
@@ -189,6 +190,42 @@
                 btnVideo.disabled = false;
                 aviso.innerHTML = `ASSISTA <span style="color:#28a745">${REQUISITO_VIDEOS - videosAssistidos}</span> VÍDEOS`;
             }
+        }
+
+        // LÓGICA DE SIMULAÇÃO DO VÍDEO
+        document.getElementById('btnVideo').onclick = async () => {
+            const btn = document.getElementById('btnVideo');
+            btn.disabled = true;
+            let tempo = 3;
+            
+            const intervalo = setInterval(() => {
+                btn.innerText = `ASSISTINDO... ${tempo}s`;
+                tempo--;
+                if (tempo < 0) {
+                    clearInterval(intervalo);
+                    finalizarVideo();
+                }
+            }, 1000);
+        };
+
+        async function finalizarVideo() {
+            const btn = document.getElementById('btnVideo');
+            let novosVideosAssistidos = videosAssistidos + 1;
+            let dadosUpdate = {
+                saldo: increment(300),
+                videosAssistidos: increment(1),
+                totalVideosHoje: increment(1)
+            };
+
+            // Se completou os 3 vídeos, reseta os acertos e os vídeos do ciclo
+            if (novosVideosAssistidos >= REQUISITO_VIDEOS) {
+                dadosUpdate.acertos = 0;
+                dadosUpdate.videosAssistidos = 0;
+            }
+
+            await updateDoc(userRef, dadosUpdate);
+            btn.innerText = "📺 ASSISTIR ANÚNCIO (300 GOLD)";
+            carregarQuestao(); // Recarrega para caso o ciclo tenha resetado
         }
 
         window.setResgate = (el, valor) => {
