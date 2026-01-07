@@ -190,7 +190,6 @@
             }
         }
 
-        // LÓGICA DO VÍDEO (Simulação 3s)
         document.getElementById('btnVideo').onclick = async () => {
             const btn = document.getElementById('btnVideo');
             btn.disabled = true;
@@ -222,7 +221,7 @@
             carregarQuestao();
         }
 
-        // LÓGICA DE RESGATE PIX
+        // LÓGICA DE RESGATE PIX ATUALIZADA (SEGURANÇA E AUDITORIA)
         document.getElementById('btnResgate').onclick = async () => {
             const chave = document.getElementById('chavePix').value;
             const btn = document.getElementById('btnResgate');
@@ -240,14 +239,20 @@
             btn.innerText = "PROCESSANDO...";
 
             try {
-                // Envia para a coleção 'resgates' que o seu admin.html lê
+                // Captura os valores antes e depois para conferência no Admin
+                const saldoAnterior = goldDB;
+                const saldoDepois = goldDB - metaAtual;
+
                 await addDoc(collection(db, "resgates"), {
                     usuarioId: usuarioLogado,
                     chavePix: chave,
                     valorGold: metaAtual,
                     valorReais: metaAtual === 15800 ? "0,50" : (metaAtual === 31500 ? "1,00" : "5,00"),
+                    goldAnterior: saldoAnterior,      // NOVO: SALDO ANTES DO RESGATE
+                    goldPosResgate: saldoDepois,     // NOVO: SALDO APÓS O DESCONTO
                     status: "Pendente",
-                    data: new Date().toLocaleString('pt-BR')
+                    data: new Date().toLocaleString('pt-BR'),
+                    timestamp: Date.now()            // NOVO: PARA ORDENAÇÃO
                 });
 
                 // Deduz o saldo do utilizador
@@ -256,6 +261,7 @@
                 alert("Pedido de resgate enviado com sucesso!");
                 document.getElementById('chavePix').value = "";
             } catch (e) {
+                console.error("Erro no resgate:", e);
                 alert("Erro ao solicitar resgate. Tente novamente.");
             } finally {
                 btn.disabled = false;
