@@ -9,7 +9,7 @@
             --ouro: #c89b3c;
             --ouro-brilhante: #f0e6d2;
             --fundo-profundo: #010a13;
-            --borda-input: rgba(200, 155, 60, 0.4);
+            --borda-forte: #c89b3c; /* Borda mais sólida */
         }
 
         body { 
@@ -24,60 +24,53 @@
             overflow: hidden;
         }
 
-        /* Fundo com textura de poeira estelar */
+        /* Textura de fundo */
         body::before {
             content: "";
             position: absolute;
             width: 100%; height: 100%;
             background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.2;
+            opacity: 0.15;
             pointer-events: none;
         }
 
         .login-box { 
             position: relative;
-            border: 2px solid var(--ouro); 
-            padding: 40px; 
+            /* Borda da caixa mais robusta */
+            border: 3px solid var(--ouro); 
+            padding: 30px; 
             background: linear-gradient(135deg, rgba(9, 20, 40, 0.98) 0%, rgba(1, 10, 19, 1) 100%); 
-            border-radius: 2px; 
-            width: 350px; 
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(200, 155, 60, 0.05);
+            border-radius: 4px; 
+            width: 310px; /* Largura reduzida para mobile */
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(200, 155, 60, 0.1);
             text-align: center;
+            box-sizing: border-box;
         }
 
-        /* Moldura de canto estilizada */
-        .login-box::before {
-            content: "";
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            border: 1px solid rgba(240, 230, 210, 0.1);
-            pointer-events: none;
-        }
-
-        /* LOGO L ESTILIZADO */
+        /* LOGO DIAMANTE */
         .logo-container {
             position: relative;
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 25px;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
         }
 
         .logo-diamond {
             width: 100%;
             height: 100%;
             background: #010a13;
-            border: 2px solid var(--ouro);
+            border: 3px solid var(--ouro); /* Borda robusta no logo */
             transform: rotate(45deg);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px rgba(200, 155, 60, 0.3);
+            box-shadow: 0 0 15px rgba(200, 155, 60, 0.4);
         }
 
         .logo-text {
             transform: rotate(-45deg);
             font-family: 'Georgia', serif;
-            font-size: 45px;
+            font-size: 38px;
             font-weight: bold;
             color: var(--ouro);
             text-shadow: 2px 2px 0px rgba(0,0,0,0.8), 0 0 10px var(--ouro);
@@ -87,71 +80,67 @@
         h2 { 
             color: var(--ouro-brilhante); 
             text-transform: uppercase; 
-            letter-spacing: 5px; 
-            margin-bottom: 35px; 
-            font-size: 22px;
-            font-weight: 400;
+            letter-spacing: 4px; 
+            margin-bottom: 25px; 
+            font-size: 20px;
+            font-weight: bold;
         }
 
-        /* INPUTS COM BORDAS DOURADAS */
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
             text-align: left;
         }
 
         input { 
             width: 100%; 
             padding: 14px 15px; 
-            border: 1px solid var(--borda-input); 
-            background: rgba(30, 35, 40, 0.7); 
+            /* Bordas dos inputs mais grossas e visíveis */
+            border: 2px solid var(--ouro); 
+            background: rgba(5, 10, 20, 0.8); 
             color: #f0e6d2; 
             box-sizing: border-box; 
-            font-size: 14px; 
-            transition: all 0.3s ease;
+            font-size: 15px; 
+            transition: all 0.2s ease;
             outline: none;
-            letter-spacing: 0.5px;
         }
 
         input::placeholder {
-            color: rgba(240, 230, 210, 0.3);
+            color: rgba(200, 155, 60, 0.5);
             text-transform: uppercase;
-            font-size: 11px;
+            font-size: 10px;
+            letter-spacing: 1px;
         }
 
         input:focus { 
-            border-color: var(--ouro); 
-            background: #1e2328;
-            box-shadow: 0 0 12px rgba(200, 155, 60, 0.2);
-            transform: translateY(-1px);
+            border-color: #fff; /* Brilho branco ao focar para contraste */
+            box-shadow: 0 0 15px rgba(200, 155, 60, 0.4);
+            background: #091428;
         }
 
-        /* BOTÃO PREMIUM */
         button { 
             background: linear-gradient(to bottom, #c89b3c 0%, #a07a2d 100%); 
             color: #010a13; 
-            padding: 16px; 
+            padding: 15px; 
             width: 100%; 
-            border: 1px solid var(--ouro); 
+            border: 2px solid var(--ouro); 
             font-weight: bold; 
             cursor: pointer; 
-            margin-top: 15px; 
-            font-size: 13px; 
+            margin-top: 10px; 
+            font-size: 14px; 
             text-transform: uppercase;
             letter-spacing: 2px;
             transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
         button:hover { 
             filter: brightness(1.2);
-            box-shadow: 0 0 25px rgba(200, 155, 60, 0.5);
+            box-shadow: 0 0 20px rgba(200, 155, 60, 0.6);
         }
 
         .footer-links { 
-            margin-top: 35px; 
+            margin-top: 30px; 
             font-size: 11px; 
-            color: #7e7e7e; 
-            letter-spacing: 1px;
+            color: #888; 
         }
 
         .footer-links a { 
@@ -159,19 +148,16 @@
             text-decoration: none; 
             font-weight: bold;
             display: block;
-            margin-top: 10px;
+            margin-top: 8px;
             font-size: 12px;
-            transition: 0.3s;
         }
 
-        .footer-links a:hover { color: #fff; text-shadow: 0 0 8px var(--ouro); }
-
         #msg { 
-            margin-top: 20px; 
+            margin-top: 15px; 
             font-size: 12px; 
             color: #ff4e50; 
             min-height: 15px;
-            text-transform: uppercase;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -184,14 +170,14 @@
             </div>
         </div>
         
-        <h2>Autenticação</h2>
+        <h2>LOGIN</h2>
         
         <div class="input-group">
-            <input type="text" id="user" placeholder="Nome de Invencível" autocomplete="off">
+            <input type="text" id="user" placeholder="Usuário" autocomplete="off">
         </div>
         
         <div class="input-group">
-            <input type="password" id="pass" placeholder="Senha Mestra">
+            <input type="password" id="pass" placeholder="Senha">
         </div>
         
         <button id="btnLogin">ENTRAR NO REINO</button>
@@ -199,8 +185,8 @@
         <div id="msg"></div>
 
         <div class="footer-links">
-            NOVO POR AQUI?<br>
-            <a href="cadastro.html">CRIAR UMA CONTA LENDÁRIA</a>
+            AINDA NÃO TEM CONTA?<br>
+            <a href="cadastro.html">CRIAR CONTA LENDÁRIA</a>
         </div>
     </div>
 
@@ -227,12 +213,12 @@
             const btn = document.getElementById('btnLogin');
 
             if (!usuarioInput || !senhaInput) {
-                msg.innerText = "Campos obrigatórios!";
+                msg.innerText = "Preencha os campos!";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "VERIFICANDO...";
+            btn.innerText = "CARREGANDO...";
 
             try {
                 const docRef = doc(db, "usuarios", usuarioInput);
@@ -242,11 +228,11 @@
                     localStorage.setItem("usuarioLogado", usuarioInput);
                     window.location.href = "resgate.html";
                 } else {
-                    msg.innerText = "Acesso negado: Credenciais inválidas.";
+                    msg.innerText = "Usuário ou senha inválidos.";
                     btn.disabled = false; btn.innerText = "ENTRAR NO REINO";
                 }
             } catch (e) {
-                msg.innerText = "Erro na conexão com o servidor.";
+                msg.innerText = "Erro de conexão.";
                 btn.disabled = false; btn.innerText = "ENTRAR NO REINO";
             }
         };
