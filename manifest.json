@@ -1,6 +1,7 @@
 {
   "name": "Admin Quiz Legends",
   "short_name": "QuizAdmin",
+  "description": "Painel de Controle e Pagamentos Quiz Legends",
   "start_url": "admin.html",
   "display": "standalone",
   "background_color": "#010a13",
@@ -8,14 +9,22 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/218/218381.png",
+      "src": "icone-admin.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/218/218381.png",
+      "src": "icone-admin.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-admin.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
