@@ -6,22 +6,16 @@
     <title>Painel Admin - Quiz Legends</title>
     <style>
         body { background: #010a13; color: white; font-family: sans-serif; padding: 20px; margin: 0; }
-        
-        #lock-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #010a13; display: flex; align-items: center; justify-content: center; z-index: 10000; 
-        }
+        #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #010a13; display: flex; align-items: center; justify-content: center; z-index: 10000; }
         .lock-box { border: 2px solid #c89b3c; padding: 40px; background: #091428; border-radius: 10px; text-align: center; width: 300px; }
-        
         #painel_conteudo { display: none; max-width: 800px; margin: 0 auto; }
-        
         h2 { color: #c89b3c; border-bottom: 2px solid #c89b3c; padding-bottom: 10px; text-transform: uppercase; }
         input { padding: 14px; border-radius: 5px; border: 1px solid #c89b3c; background: #000; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-size: 16px; }
         button.btn-entrar { background: #c89b3c; color: black; border: none; padding: 14px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        
         .pedido-card { background: #091428; border: 1px solid #c89b3c; padding: 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .info b { color: #c89b3c; }
-        .saldos { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid #c89b3c; font-size: 14px; }
+        .saldos { margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 5px; border-left: 4px solid #c89b3c; font-size: 13px; line-height: 1.6; }
+        .alerta-hacker { border-left-color: #ff4444 !important; background: rgba(255, 0, 0, 0.15) !important; }
         .btn-pago { background: #28a745; color: white; border: none; padding: 12px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -30,7 +24,7 @@
     <div id="lock-screen">
         <div class="lock-box">
             <h2 style="border:none; margin-top:0;">ADMIN</h2>
-            <input type="password" id="admin_pass" placeholder="Digite a Senha Mestra">
+            <input type="password" id="admin_pass" placeholder="Senha Mestra">
             <button class="btn-entrar" id="btn_acessar">LIBERAR ACESSO</button>
             <p id="erro_msg" style="color: #ff4444; font-size: 13px; margin-top: 15px;"></p>
         </div>
@@ -38,15 +32,15 @@
 
     <div id="painel_conteudo">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>PAINEL DE RESGATES</h2>
+            <h2>CONTROLE DE PAGAMENTOS</h2>
             <button onclick="location.reload()" style="background:#444; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px">Sair</button>
         </div>
-        <div id="lista_pedidos">Aguardando autorização...</div>
+        <div id="lista_pedidos">Carregando solicitações...</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const SENHA_MESTRA = "Belial10"; 
 
@@ -63,34 +57,41 @@
         const db = getFirestore(app);
 
         function iniciarPainel() {
-            // MUDANÇA AQUI: Alterado de 'pedidos_resgate' para 'resgates'
-            onSnapshot(collection(db, "resgates"), (snapshot) => {
+            const q = query(collection(db, "resgates"), orderBy("timestamp", "desc"));
+            
+            onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('lista_pedidos');
                 container.innerHTML = "";
                 
                 if (snapshot.empty) {
-                    container.innerHTML = "<p style='color:#888'>Nenhum pedido pendente.</p>";
+                    container.innerHTML = "<p style='color:#888'>Nenhum pedido na fila.</p>";
                     return;
                 }
 
                 snapshot.forEach((pedido) => {
                     const data = pedido.data();
                     const id = pedido.id;
+                    
+                    // Verificação de segurança: Se o gold anterior era menor que o custo, é suspeito
+                    const suspeito = data.goldAnterior < data.valorGold;
+
                     const card = document.createElement('div');
                     card.className = 'pedido-card';
-                    
-                    // MUDANÇA AQUI: Ajustado nomes dos campos para baterem com o jogo
                     card.innerHTML = `
                         <div class="info">
-                            <p><b>Usuário ID:</b> ${data.usuarioId}</p>
-                            <p><b>Pix:</b> ${data.chavePix}</p>
-                            <div class="saldos">
-                                <b>Valor em R$:</b> R$ ${data.valorReais} <br>
-                                <b>Custo Gold:</b> ${Number(data.valorGold).toLocaleString('pt-BR')} <br>
-                                <b>Data:</b> ${data.data}
+                            <p><b>Usuário:</b> ${data.usuarioId}</p>
+                            <p><b>PIX:</b> <span style="color:#fff; background:#222; padding:2px 5px;">${data.chavePix}</span></p>
+                            <p><b>Valor a Pagar:</b> <span style="color:#28a745; font-weight:bold;">R$ ${data.valorReais}</span></p>
+                            
+                            <div class="saldos ${suspeito ? 'alerta-hacker' : ''}">
+                                <b>Data do Pedido:</b> ${data.data} <br>
+                                <b>Saldo Anterior:</b> ${Number(data.goldAnterior).toLocaleString('pt-BR')} Gold <br>
+                                <b>Custo Resgate:</b> -${Number(data.valorGold).toLocaleString('pt-BR')} Gold <br>
+                                <b>Saldo Resultante:</b> ${Number(data.goldPosResgate).toLocaleString('pt-BR')} Gold
+                                ${suspeito ? '<br><b style="color:#ff4444;">⚠️ ALERTA: Saldo insuficiente detectado!</b>' : ''}
                             </div>
                         </div>
-                        <button class="btn-pago" onclick="confirmarPagamento('${id}')">MARCAR PAGO</button>
+                        <button class="btn-pago" onclick="confirmarPagamento('${id}')">CONCLUIR</button>
                     `;
                     container.appendChild(card);
                 });
@@ -98,8 +99,7 @@
         }
 
         document.getElementById('btn_acessar').onclick = () => {
-            const senha = document.getElementById('admin_pass').value;
-            if (senha === SENHA_MESTRA) {
+            if (document.getElementById('admin_pass').value === SENHA_MESTRA) {
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('painel_conteudo').style.display = 'block';
                 iniciarPainel();
@@ -109,8 +109,7 @@
         };
 
         window.confirmarPagamento = async (id) => {
-            if (confirm("Deseja marcar como pago? Isso removerá o pedido da lista.")) {
-                // MUDANÇA AQUI: Alterado de 'pedidos_resgate' para 'resgates'
+            if (confirm("Confirmar pagamento e remover da lista?")) {
                 await deleteDoc(doc(db, "resgates", id));
             }
         };
