@@ -8,7 +8,7 @@
         :root { 
             --bg-dark: #010a13; --lol-blue: #091428; --gold: #c89b3c; 
             --gold-dark: #785a28; --gold-bright: #f0e6d2; --text: #f0e6d2;
-            --ad-space: 80px; /* Ajustado para 80px conforme solicitado */
+            --ad-space: 80px; 
             --correct: #28a745; --wrong: #dc3545;
         }
         html, body { 
@@ -20,9 +20,7 @@
         .app-container { 
             flex: 1; display: flex; flex-direction: column; 
             padding: 10px 0; gap: 10px; width: 94%; max-width: 400px; 
-            box-sizing: border-box; 
-            margin-bottom: var(--ad-space); /* Garante que o conteúdo não fique sob o banner */
-            justify-content: center; 
+            box-sizing: border-box; margin-bottom: var(--ad-space); justify-content: center; 
         }
         
         .header-section { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; flex-shrink: 0; }
@@ -72,16 +70,19 @@
             display: flex; align-items: center; justify-content: center;
             color: var(--gold); font-size: 0.8rem; font-weight: bold; z-index: 1000;
         }
-
-        /* Link de Privacidade discreto posicionado acima do banner */
-        .disclaimer-link {
-            text-align: center;
-            font-size: 10px;
-            opacity: 0.5;
-            margin-top: 15px;
-            color: var(--text);
+        
+        /* Estilo do link dentro do quadro */
+        .link-politica-quadro {
+            display: block; 
+            text-align: center; 
+            color: var(--gold); 
+            font-size: 9px; 
+            text-decoration: none; 
+            margin-top: 12px; 
+            opacity: 0.5; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
         }
-        .disclaimer-link a { color: var(--gold); text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -119,10 +120,8 @@
 
             <input type="text" id="chavePix" placeholder="SUA CHAVE PIX">
             <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); padding: 15px;">SOLICITAR RESGATE PIX</button>
-        </div>
-
-        <div class="disclaimer-link">
-            Ao jogar você concorda com nossa <a href="politica.html">Política de Privacidade</a>
+            
+            <a href="politica.html" class="link-politica-quadro">Política de Privacidade</a>
         </div>
     </div>
 
