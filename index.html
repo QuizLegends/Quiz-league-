@@ -14,6 +14,8 @@
             --ouro: #c89b3c;
             --ouro-brilhante: #f0e6d2;
             --fundo-profundo: #010a13;
+            --card-azul: #091428;
+            --erro: #ff4e50;
         }
 
         body { 
@@ -47,6 +49,7 @@
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(200, 155, 60, 0.1);
             text-align: center;
             box-sizing: border-box;
+            z-index: 1;
         }
 
         .logo-container {
@@ -83,13 +86,9 @@
             font-weight: bold;
             text-align: left;
             display: block;
-            text-shadow: 0 0 8px rgba(200, 155, 60, 0.3);
         }
 
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
+        .input-group { margin-bottom: 20px; text-align: left; }
 
         input { 
             width: 100%; 
@@ -99,14 +98,10 @@
             color: #f0e6d2; 
             box-sizing: border-box; 
             font-size: 16px; 
-            transition: all 0.2s ease;
             outline: none;
         }
 
-        input:focus { 
-            border-color: #fff;
-            box-shadow: 0 0 15px rgba(200, 155, 60, 0.5);
-        }
+        input:focus { border-color: #fff; box-shadow: 0 0 15px rgba(200, 155, 60, 0.5); }
 
         button { 
             background: linear-gradient(to bottom, #c89b3c 0%, #a07a2d 100%); 
@@ -120,39 +115,54 @@
             font-size: 14px; 
             text-transform: uppercase;
             letter-spacing: 2px;
-            transition: 0.3s;
         }
 
-        button:hover { 
-            filter: brightness(1.2);
-            box-shadow: 0 0 25px rgba(200, 155, 60, 0.6);
+        .footer-links { margin-top: 35px; font-size: 11px; color: #888; }
+        .footer-links a { color: var(--ouro) !important; text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 13px; }
+
+        #msg { margin-top: 15px; font-size: 12px; color: var(--erro); font-weight: bold; text-transform: uppercase; }
+
+        /* --- MODAL DESIGN --- */
+        #modal-alerta {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
         }
 
-        .footer-links { 
-            margin-top: 35px; 
-            font-size: 11px; 
-            color: #888; 
+        .modal-content {
+            background: var(--card-azul);
+            border: 2px solid var(--ouro);
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 300px;
+            width: 85%;
+            box-shadow: 0 0 40px rgba(200, 155, 60, 0.5);
+            animation: surgindo 0.3s ease-out;
         }
 
-        .footer-links a { 
-            color: var(--ouro); 
-            text-decoration: none; 
+        .modal-content h3 { margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
+        .modal-content p { color: #fff; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
+
+        .btn-modal {
+            background: var(--ouro);
+            color: #010a13;
+            border: none;
+            padding: 12px;
+            width: 100%;
             font-weight: bold;
-            display: block;
-            margin-top: 10px;
-            font-size: 13px;
+            cursor: pointer;
         }
 
-        #msg { 
-            margin-top: 15px; 
-            font-size: 12px; 
-            color: #ff4e50; 
-            min-height: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
+        @keyframes surgindo {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        /* Link de instalação discreto */
         #btnInstall {
             display: none; 
             font-size: 10px;
@@ -165,6 +175,14 @@
     </style>
 </head>
 <body>
+
+    <div id="modal-alerta">
+        <div class="modal-content">
+            <h3 id="modal-titulo">AVISO</h3>
+            <p id="modal-msg">Mensagem...</p>
+            <button class="btn-modal" id="btnAcaoModal">ENTENDIDO</button>
+        </div>
+    </div>
 
     <div class="login-box">
         <div class="logo-container">
@@ -191,7 +209,6 @@
             AINDA NÃO TEM CONTA?<br>
             <a href="cadastro.html">CRIAR CONTA LENDÁRIA</a>
             <a href="politica.html" style="font-size: 10px; opacity: 0.6; margin-top: 20px;">POLÍTICA DE PRIVACIDADE</a>
-            
             <a id="btnInstall">INSTALE O APP NO CELULAR</a>
         </div>
     </div>
@@ -212,13 +229,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // FUNÇÃO EXIBIR MODAL
+        function exibirModal(titulo, mensagem, corTitulo) {
+            const modal = document.getElementById('modal-alerta');
+            const tituloH3 = document.getElementById('modal-titulo');
+            const msgP = document.getElementById('modal-msg');
+            const btn = document.getElementById('btnAcaoModal');
+
+            tituloH3.innerText = titulo;
+            tituloH3.style.color = corTitulo;
+            msgP.innerText = mensagem;
+            modal.style.display = 'flex';
+
+            btn.onclick = () => { modal.style.display = 'none'; };
+        }
+
         // --- LÓGICA DO PWA ---
         let deferredPrompt;
         const btnInstall = document.getElementById('btnInstall');
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Registramos com um parâmetro para forçar atualização se necessário
                 navigator.serviceWorker.register('sw.js?v=2')
                     .then(reg => console.log('PWA ativo'))
                     .catch(err => console.error('Erro SW:', err));
@@ -235,47 +266,61 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    btnInstall.style.display = 'none';
-                }
+                if (outcome === 'accepted') btnInstall.style.display = 'none';
                 deferredPrompt = null;
             }
         });
 
-        window.addEventListener('appinstalled', () => {
-            btnInstall.style.display = 'none';
-            deferredPrompt = null;
-        });
-
         // --- LÓGICA DE LOGIN ---
         document.getElementById('btnLogin').onclick = async () => {
-            const usuarioInput = document.getElementById('user').value.trim();
+            const usuarioInput = document.getElementById('user').value.trim().toLowerCase();
             const senhaInput = document.getElementById('pass').value;
             const msg = document.getElementById('msg');
             const btn = document.getElementById('btnLogin');
 
+            msg.innerText = "";
+
+            // VERIFICAÇÃO DE INTERNET
+            if (!navigator.onLine) {
+                exibirModal("FALHA DE CONEXÃO", "Você precisa ter acesso à internet para entrar no reino.", "var(--erro)");
+                return;
+            }
+
             if (!usuarioInput || !senhaInput) {
-                msg.innerText = "Campos obrigatórios!";
+                msg.innerText = "Preencha todos os campos!";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "ENTRANDO...";
+            btn.innerText = "AUTENTICANDO...";
 
             try {
                 const docRef = doc(db, "usuarios", usuarioInput);
+                
+                // Timeout de segurança
+                const timeout = setTimeout(() => {
+                    if (btn.disabled) {
+                        exibirModal("ERRO DE RESPOSTA", "O servidor está demorando. Verifique seu sinal.", "var(--erro)");
+                        btn.disabled = false;
+                        btn.innerText = "Entrar no Reino";
+                    }
+                }, 6000);
+
                 const snap = await getDoc(docRef);
+                clearTimeout(timeout);
 
                 if (snap.exists() && snap.data().senha === senhaInput) {
                     localStorage.setItem("usuarioLogado", usuarioInput);
                     window.location.href = "resgate.html";
                 } else {
-                    msg.innerText = "Dados inválidos.";
-                    btn.disabled = false; btn.innerText = "ENTRAR NO REINO";
+                    exibirModal("ACESSO NEGADO", "Usuário ou senha incorretos!", "var(--erro)");
+                    btn.disabled = false;
+                    btn.innerText = "Entrar no Reino";
                 }
             } catch (e) {
-                msg.innerText = "Falha de conexão.";
-                btn.disabled = false; btn.innerText = "ENTRAR NO REINO";
+                exibirModal("FALHA TÉCNICA", "Não foi possível conectar ao servidor agora.", "var(--erro)");
+                btn.disabled = false;
+                btn.innerText = "Entrar no Reino";
             }
         };
     </script>
