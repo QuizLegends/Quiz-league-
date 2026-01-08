@@ -1,67 +1,62 @@
-const CACHE_NAME = 'quiz-legends-v2';
+importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
+
+// 1. Inicialização do Firebase
+firebase.initializeApp({
+    apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
+    projectId: "quizlegends-f58fc",
+    messagingSenderId: "1050463164018",
+    appId: "1:1050463164018:web:91de002b8afc8e678f54eb"
+});
+
+const messaging = firebase.messaging();
+
+// 2. Gerenciamento de Notificações
+messaging.onBackgroundMessage((payload) => {
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: 'admin.png' // Usando o ícone do admin que você renomeou
+    };
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// 3. LÓGICA PWA - CACHE ESSENCIAL (NOMES ATUALIZADOS)
+const CACHE_NAME = 'quiz-legends-v2'; // Mudamos para v2 para forçar o navegador a limpar o lixo antigo
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './resgate.html',
-  './pergunta.js',
-  './manifest.json',
-  // Adicione aqui outros arquivos que você tenha, como imagens ou ícones:
-  // './icon.png',
-  // './logo.png'
+    './',
+    'index.html',
+    'manifest-jogo.json',
+    'app-192.png',
+    'app-512.png',
+    'admin.png'
 ];
 
-// Instalação do Service Worker e Cache dos arquivos estáticos
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Cache aberto: Armazenando recursos do Quiz Legends');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-  self.skipWaiting();
-});
-
-// Ativação e limpeza de caches antigos
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Removendo cache antigo:', cacheName);
-            return caches.delete(cacheName);
-          }
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            // Tentamos adicionar um por um para evitar que um erro em um ícone trave tudo
+            return cache.addAll(ASSETS_TO_CACHE);
         })
-      );
-    })
-  );
-  self.clients.claim();
+    );
+    self.skipWaiting();
 });
 
-// Estratégia de Fetch: Network First (Tenta rede, se falhar, usa cache)
-// Ideal para apps que dependem de dados em tempo real (Firebase), mas precisam abrir rápido.
-self.addEventListener('fetch', (event) => {
-  // Ignora requisições do Firebase/Firestore para não causar conflito com o SDK
-  if (event.request.url.includes('firestore.googleapis.com') || 
-      event.request.url.includes('googleapis.com')) {
-    return;
-  }
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+            );
+        })
+    );
+});
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Se a rede funcionar, clona a resposta para o cache
-        if (event.request.method === 'GET') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Se a rede falhar (offline), tenta buscar no cache
-        return caches.match(event.request);
-      })
-  );
+// Evento Fetch (Crucial para o link de instalação aparecer)
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
+        })
+    );
 });
