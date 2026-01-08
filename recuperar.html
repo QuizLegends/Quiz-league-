@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperação - Quiz Legends</title>
+    <style>
+        :root {
+            --ouro: #c89b3c;
+            --fundo-profundo: #010a13;
+            --card-azul: #091428;
+            --erro: #ff4e50;
+            --sucesso: #28a745;
+        }
+
+        body { 
+            background: radial-gradient(circle at center, #091428 0%, #010a13 100%);
+            color: white; font-family: 'Segoe UI', sans-serif; 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+
+        .login-box { 
+            border: 3px solid var(--ouro); padding: 40px 35px; 
+            background: linear-gradient(135deg, rgba(9, 20, 40, 0.98) 0%, rgba(1, 10, 19, 1) 100%); 
+            border-radius: 4px; width: 330px; text-align: center; box-sizing: border-box;
+        }
+
+        .login-title { color: var(--ouro); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; font-weight: bold; display: block; }
+
+        input { 
+            width: 100%; padding: 14px 15px; border: 2px solid var(--ouro); 
+            background: rgba(5, 10, 20, 0.9); color: #f0e6d2; 
+            box-sizing: border-box; font-size: 16px; outline: none; margin-bottom: 15px;
+        }
+
+        button { 
+            background: var(--ouro); color: #010a13; padding: 16px; width: 100%; 
+            border: none; font-weight: bold; cursor: pointer; text-transform: uppercase;
+        }
+
+        .step-2 { display: none; } /* Escondido inicialmente */
+
+        #msg { margin-top: 15px; font-size: 12px; color: var(--erro); font-weight: bold; text-transform: uppercase; }
+
+        /* MODAL */
+        #modal-alerta { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card-azul); border: 2px solid var(--ouro); padding: 30px; border-radius: 8px; text-align: center; width: 85%; max-width: 300px; }
+    </style>
+</head>
+<body>
+
+    <div id="modal-alerta">
+        <div class="modal-content">
+            <h3 id="modal-titulo">AVISO</h3>
+            <p id="modal-msg"></p>
+            <button onclick="document.getElementById('modal-alerta').style.display='none'" style="padding:10px; width:100%; background:var(--ouro); border:none; font-weight:bold;">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div class="login-box">
+        <label class="login-title">Recuperar Acesso</label>
+        
+        <div id="step1">
+            <p style="font-size: 13px; color: #ccc; margin-bottom: 20px;">Digite o e-mail cadastrado na sua conta.</p>
+            <input type="email" id="emailBusca" placeholder="SEU E-MAIL">
+            <button id="btnVerificar">Verificar E-mail</button>
+        </div>
+
+        <div id="step2" class="step-2">
+            <p style="font-size: 13px; color: #ccc;">Conta encontrada!</p>
+            <p id="usuarioEncontrado" style="color: var(--ouro); font-weight: bold; font-size: 18px; margin-bottom: 20px;"></p>
+            
+            <input type="password" id="novaSenha" placeholder="NOVA SENHA">
+            <button id="btnRedefinir">Alterar Senha</button>
+        </div>
+        
+        <div id="msg"></div>
+        <a href="index.html" style="color: var(--ouro); text-decoration: none; font-size: 12px; display: block; margin-top: 25px; font-weight: bold;">VOLTAR AO LOGIN</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
+            authDomain: "quizlegends-f58fc.firebaseapp.com",
+            projectId: "quizlegends-f58fc",
+            storageBucket: "quizlegends-f58fc.firebasestorage.app",
+            messagingSenderId: "1050463164018",
+            appId: "1:1050463164018:web:91de002b8afc8e678f54eb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let usuarioDocumentoId = ""; // Guardará o nome do usuário encontrado
+
+        function alerta(titulo, texto, cor) {
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-titulo').style.color = cor;
+            document.getElementById('modal-msg').innerText = texto;
+            document.getElementById('modal-alerta').style.display = 'flex';
+        }
+
+        // --- VERIFICAR E-MAIL ---
+        document.getElementById('btnVerificar').onclick = async () => {
+            const email = document.getElementById('emailBusca').value.trim();
+            const btn = document.getElementById('btnVerificar');
+            const msg = document.getElementById('msg');
+
+            if(!email) { msg.innerText = "Digite o e-mail!"; return; }
+            
+            btn.disabled = true; btn.innerText = "BUSCANDO...";
+            msg.innerText = "";
+
+            try {
+                const q = query(collection(db, "usuarios"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alerta("ERRO", "Nenhuma conta encontrada com este e-mail.", "#ff4e50");
+                    btn.disabled = false; btn.innerText = "Verificar E-mail";
+                } else {
+                    // Encontrou!
+                    querySnapshot.forEach((doc) => {
+                        usuarioDocumentoId = doc.id; // O ID é o nome do usuário
+                    });
+
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
+                    document.getElementById('usuarioEncontrado').innerText = "Usuário: " + usuarioDocumentoId;
+                }
+            } catch (e) {
+                alerta("FALHA", "Erro ao conectar ao servidor.", "#ff4e50");
+                btn.disabled = false; btn.innerText = "Verificar E-mail";
+            }
+        };
+
+        // --- REDEFINIR SENHA ---
+        document.getElementById('btnRedefinir').onclick = async () => {
+            const novaSenha = document.getElementById('novaSenha').value;
+            const btn = document.getElementById('btnRedefinir');
+
+            if(novaSenha.length < 6) { 
+                document.getElementById('msg').innerText = "A senha deve ter 6+ dígitos!"; 
+                return; 
+            }
+
+            btn.disabled = true; btn.innerText = "SALVANDO...";
+
+            try {
+                const userRef = doc(db, "usuarios", usuarioDocumentoId);
+                await updateDoc(userRef, { senha: novaSenha });
+
+                alerta("SUCESSO", "Sua senha foi atualizada com sucesso!", "#c89b3c");
+                
+                setTimeout(() => { window.location.href = "index.html"; }, 2500);
+            } catch (e) {
+                alerta("ERRO", "Não foi possível mudar a senha.", "#ff4e50");
+                btn.disabled = false; btn.innerText = "Alterar Senha";
+            }
+        };
+    </script>
+</body>
+</html>
