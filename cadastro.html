@@ -75,6 +75,8 @@
             outline: none;
         }
 
+        input:focus { border-color: #fff; box-shadow: 0 0 15px rgba(200, 155, 60, 0.5); }
+
         .policy-group {
             display: flex;
             align-items: flex-start;
@@ -84,6 +86,8 @@
             font-size: 12px;
             color: #ccc;
         }
+
+        .policy-group input[type="checkbox"] { accent-color: var(--ouro); cursor: pointer; }
 
         button { 
             background: linear-gradient(to bottom, #c89b3c 0%, #a07a2d 100%); 
@@ -99,6 +103,8 @@
             transition: 0.3s;
         }
 
+        button:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(200, 155, 60, 0.6); }
+
         #msg { 
             margin-top: 15px; 
             font-size: 12px; 
@@ -108,18 +114,11 @@
             text-transform: uppercase;
         }
 
-        .footer-links a { 
-            color: var(--ouro); 
-            text-decoration: none; 
-            font-weight: bold;
-            display: block;
-            margin-top: 25px;
-            font-size: 13px;
-        }
+        .footer-links a { color: var(--ouro); text-decoration: none; font-weight: bold; display: block; margin-top: 25px; font-size: 13px; }
 
-        /* --- ESTILO DO MODAL (TESTE DE FORÇA ATIVADO) --- */
+        /* --- MODAL DESIGN FINAL --- */
         #modal-alerta {
-            display: flex; /* Mude para 'none' depois que o teste funcionar */
+            display: none; /* Escondido por padrão */
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.9);
@@ -140,20 +139,8 @@
             animation: surgindo 0.3s ease-out;
         }
 
-        .modal-content h3 {
-            margin: 0 0 15px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 20px;
-            color: var(--ouro);
-        }
-
-        .modal-content p {
-            color: #fff;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 25px;
-        }
+        .modal-content h3 { margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
+        .modal-content p { color: #fff; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
 
         .btn-modal {
             background: var(--ouro);
@@ -176,37 +163,23 @@
 
     <div id="modal-alerta">
         <div class="modal-content">
-            <h3 id="modal-titulo">TESTE DE DESIGN</h3>
-            <p id="modal-msg">Se você está vendo isso, o novo design carregou com sucesso! Clique no botão para fechar e usar o sistema.</p>
-            <button class="btn-modal" id="btnAcaoModal">FECHAR TESTE</button>
+            <h3 id="modal-titulo">AVISO</h3>
+            <p id="modal-msg">Mensagem do sistema.</p>
+            <button class="btn-modal" id="btnAcaoModal">ENTENDIDO</button>
         </div>
     </div>
 
     <div class="login-box">
         <label class="login-title">Nova Conta</label>
-        
-        <div class="input-group">
-            <input type="text" id="user" placeholder="ESCOLHA UM USUÁRIO" autocomplete="off">
-        </div>
-        
-        <div class="input-group">
-            <input type="password" id="pass" placeholder="CRIE UMA SENHA">
-        </div>
-
+        <div class="input-group"><input type="text" id="user" placeholder="ESCOLHA UM USUÁRIO" autocomplete="off"></div>
+        <div class="input-group"><input type="password" id="pass" placeholder="CRIE UMA SENHA"></div>
         <div class="policy-group">
             <input type="checkbox" id="checkPolicy">
-            <label for="checkPolicy">
-                Eu li e aceito a <a href="politica.html" target="_blank">Política de Privacidade</a>.
-            </label>
+            <label for="checkPolicy">Eu li e aceito a <a href="politica.html" target="_blank">Política de Privacidade</a>.</label>
         </div>
-        
         <button id="btnCadastrar">Criar Conta Lendária</button>
-        
         <div id="msg"></div>
-
-        <div class="footer-links">
-            <a href="index.html">JÁ TENHO UMA CONTA</a>
-        </div>
+        <div class="footer-links"><a href="index.html">JÁ TENHO UMA CONTA</a></div>
     </div>
 
     <script type="module">
@@ -242,11 +215,6 @@
             };
         }
 
-        // Fecha o modal de teste inicial
-        document.getElementById('btnAcaoModal').onclick = () => {
-            document.getElementById('modal-alerta').style.display = 'none';
-        };
-
         document.getElementById('btnCadastrar').onclick = async () => {
             const usuario = document.getElementById('user').value.trim().toLowerCase();
             const senha = document.getElementById('pass').value;
@@ -255,12 +223,12 @@
             const btn = document.getElementById('btnCadastrar');
 
             if (!navigator.onLine) {
-                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet para logar.", "#ff4e50");
+                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet para criar sua conta lendária.", "#ff4e50");
                 return;
             }
 
             if (!usuario || senha.length < 6 || !policy) {
-                msg.innerText = "Verifique os campos e a política!";
+                msg.innerText = "Preencha tudo e aceite a política!";
                 return;
             }
 
@@ -286,12 +254,12 @@
                         dataCadastro: new Date().toLocaleString('pt-BR')
                     });
 
-                    exibirModal("SUCESSO!", "Conta criada com sucesso!", "#c89b3c", () => {
+                    exibirModal("SUCESSO!", "Sua jornada lendária começou!", "#c89b3c", () => {
                         window.location.href = "index.html";
                     });
                 }
             } catch (e) {
-                exibirModal("ERRO", "Falha ao conectar ao servidor.", "#ff4e50");
+                exibirModal("ERRO DE SISTEMA", "Não foi possível conectar ao servidor.", "#ff4e50");
                 btn.disabled = false; btn.innerText = "CRIAR CONTA LENDÁRIA";
             }
         };
