@@ -70,7 +70,6 @@
             outline: none;
         }
 
-        /* CORRIGINDO O LINK DA POLÍTICA PARA FICAR SEMPRE DOURADO */
         .policy-group { text-align: left; font-size: 12px; color: #ccc; margin: 20px 0; display: flex; gap: 10px; }
         .policy-group a { color: var(--ouro) !important; text-decoration: underline !important; font-weight: bold; }
         .policy-group a:visited { color: var(--ouro) !important; }
@@ -91,7 +90,6 @@
 
         .footer-links a { color: var(--ouro) !important; text-decoration: none; font-weight: bold; display: block; margin-top: 25px; font-size: 13px; }
 
-        /* MODAL FINAL */
         #modal-alerta {
             display: none;
             position: fixed;
@@ -190,7 +188,8 @@
         }
 
         document.getElementById('btnCadastrar').onclick = async () => {
-            const usuario = document.getElementById('user').value.trim().toLowerCase();
+            // MUDANÇA AQUI: Removido o .toLowerCase() para aceitar Maiúsculas
+            const usuario = document.getElementById('user').value.trim();
             const senha = document.getElementById('pass').value;
             const policy = document.getElementById('checkPolicy').checked;
             const btn = document.getElementById('btnCadastrar');
@@ -198,7 +197,6 @@
 
             msg.innerText = "";
 
-            // 1. TESTE DE CONEXÃO IMEDIATO
             if (!navigator.onLine) {
                 exibirModal("FALHA DE CONEXÃO", "Sua jornada parou! Você precisa estar conectado à internet.", "#ff4e50");
                 return;
@@ -214,18 +212,7 @@
 
             try {
                 const docRef = doc(db, "usuarios", usuario);
-                
-                // Definir um tempo limite para a resposta do Firebase
-                const timeout = setTimeout(() => {
-                    if (btn.disabled) {
-                        exibirModal("ERRO DE REDE", "O servidor está demorando a responder. Verifique sua conexão.", "#ff4e50");
-                        btn.disabled = false;
-                        btn.innerText = "Criar Conta";
-                    }
-                }, 5000);
-
                 const snap = await getDoc(docRef);
-                clearTimeout(timeout);
 
                 if (snap.exists()) {
                     msg.innerText = "USUÁRIO JÁ EXISTE!";
@@ -243,7 +230,6 @@
                     });
                 }
             } catch (e) {
-                // QUALQUER ERRO DE CATCH VIRA MODAL AGORA
                 exibirModal("FALHA TÉCNICA", "Não conseguimos conectar ao servidor lendário.", "#ff4e50");
                 btn.disabled = false;
                 btn.innerText = "Criar Conta";
