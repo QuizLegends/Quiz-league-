@@ -75,11 +75,6 @@
             outline: none;
         }
 
-        input:focus { 
-            border-color: #fff;
-            box-shadow: 0 0 15px rgba(200, 155, 60, 0.5);
-        }
-
         .policy-group {
             display: flex;
             align-items: flex-start;
@@ -88,18 +83,6 @@
             text-align: left;
             font-size: 12px;
             color: #ccc;
-        }
-
-        .policy-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--ouro);
-        }
-
-        .policy-group a {
-            color: var(--ouro);
-            text-decoration: underline;
         }
 
         button { 
@@ -114,17 +97,6 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             transition: 0.3s;
-        }
-
-        button:hover { 
-            filter: brightness(1.2);
-            box-shadow: 0 0 25px rgba(200, 155, 60, 0.6);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            filter: grayscale(1);
         }
 
         #msg { 
@@ -145,12 +117,12 @@
             font-size: 13px;
         }
 
-        /* --- ESTILO DO MODAL CUSTOMIZADO --- */
+        /* --- ESTILO DO MODAL (TESTE DE FORÇA ATIVADO) --- */
         #modal-alerta {
-            display: none;
+            display: flex; /* Mude para 'none' depois que o teste funcionar */
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -164,7 +136,7 @@
             text-align: center;
             max-width: 300px;
             width: 85%;
-            box-shadow: 0 0 30px rgba(200, 155, 60, 0.4);
+            box-shadow: 0 0 40px rgba(200, 155, 60, 0.5);
             animation: surgindo 0.3s ease-out;
         }
 
@@ -173,6 +145,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             font-size: 20px;
+            color: var(--ouro);
         }
 
         .modal-content p {
@@ -191,12 +164,11 @@
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
-            letter-spacing: 1px;
         }
 
         @keyframes surgindo {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: scale(0.7); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
@@ -204,9 +176,9 @@
 
     <div id="modal-alerta">
         <div class="modal-content">
-            <h3 id="modal-titulo">Lendário!</h3>
-            <p id="modal-msg">Mensagem do sistema.</p>
-            <button class="btn-modal" id="btnAcaoModal">ENTENDIDO</button>
+            <h3 id="modal-titulo">TESTE DE DESIGN</h3>
+            <p id="modal-msg">Se você está vendo isso, o novo design carregou com sucesso! Clique no botão para fechar e usar o sistema.</p>
+            <button class="btn-modal" id="btnAcaoModal">FECHAR TESTE</button>
         </div>
     </div>
 
@@ -224,7 +196,7 @@
         <div class="policy-group">
             <input type="checkbox" id="checkPolicy">
             <label for="checkPolicy">
-                Eu li e aceito a <a href="politica.html" target="_blank">Política de Privacidade</a> e autorizo o uso dos meus dados para o jogo.
+                Eu li e aceito a <a href="politica.html" target="_blank">Política de Privacidade</a>.
             </label>
         </div>
         
@@ -253,7 +225,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // FUNÇÃO PARA MOSTRAR O MODAL (VERSÁTIL)
         function exibirModal(titulo, mensagem, corTitulo, acaoFinal) {
             const modal = document.getElementById('modal-alerta');
             const tituloH3 = document.getElementById('modal-titulo');
@@ -263,7 +234,6 @@
             tituloH3.innerText = titulo;
             tituloH3.style.color = corTitulo;
             msgP.innerText = mensagem;
-            
             modal.style.display = 'flex';
 
             btn.onclick = () => {
@@ -272,10 +242,10 @@
             };
         }
 
-        function senhaEhFraca(s) {
-            const sequencias = ["123456", "654321", "111111", "222222", "333333", "444444", "555555", "000000", "123123", "abcabc"];
-            return sequencias.includes(s);
-        }
+        // Fecha o modal de teste inicial
+        document.getElementById('btnAcaoModal').onclick = () => {
+            document.getElementById('modal-alerta').style.display = 'none';
+        };
 
         document.getElementById('btnCadastrar').onclick = async () => {
             const usuario = document.getElementById('user').value.trim().toLowerCase();
@@ -284,36 +254,13 @@
             const msg = document.getElementById('msg');
             const btn = document.getElementById('btnCadastrar');
 
-            msg.innerText = "";
-
-            // VERIFICAÇÃO DE INTERNET ANTES DE COMEÇAR
             if (!navigator.onLine) {
-                exibirModal("FALHA DE CONEXÃO", "Você precisa ter acesso à internet para logar ou criar uma conta lendária.", "var(--erro)");
+                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet para logar.", "#ff4e50");
                 return;
             }
 
-            if (!usuario || !senha) {
-                msg.innerText = "Preencha todos os campos!";
-                return;
-            }
-
-            if (senha.length < 6) {
-                msg.innerText = "A SENHA DEVE TER NO MÍNIMO 6 DÍGITOS!";
-                return;
-            }
-
-            if (senhaEhFraca(senha)) {
-                msg.innerText = "SENHA MUITO FRACA! NÃO USE SEQUÊNCIAS.";
-                return;
-            }
-
-            if (!policy) {
-                msg.innerText = "Você deve aceitar a política!";
-                return;
-            }
-
-            if (usuario.length < 3) {
-                msg.innerText = "Usuário muito curto!";
+            if (!usuario || senha.length < 6 || !policy) {
+                msg.innerText = "Verifique os campos e a política!";
                 return;
             }
 
@@ -325,9 +272,8 @@
                 const snap = await getDoc(docRef);
 
                 if (snap.exists()) {
-                    msg.innerText = "Este usuário já existe!";
-                    btn.disabled = false;
-                    btn.innerText = "CRIAR CONTA LENDÁRIA";
+                    msg.innerText = "USUÁRIO JÁ EXISTE!";
+                    btn.disabled = false; btn.innerText = "CRIAR CONTA LENDÁRIA";
                 } else {
                     await setDoc(docRef, {
                         senha: senha,
@@ -340,20 +286,13 @@
                         dataCadastro: new Date().toLocaleString('pt-BR')
                     });
 
-                    // SUCESSO: Título Dourado e Redireciona ao fechar
-                    exibirModal("CONTA CRIADA", "Sua jornada lendária começou! Clique abaixo para entrar.", "var(--ouro)", () => {
+                    exibirModal("SUCESSO!", "Conta criada com sucesso!", "#c89b3c", () => {
                         window.location.href = "index.html";
                     });
                 }
             } catch (e) {
-                // ERRO DE REDE DURANTE O PROCESSO
-                if (!navigator.onLine) {
-                    exibirModal("FALHA DE CONEXÃO", "Sua internet caiu! Verifique o sinal para continuar.", "var(--erro)");
-                } else {
-                    msg.innerText = "Erro ao cadastrar. Tente novamente.";
-                }
-                btn.disabled = false;
-                btn.innerText = "CRIAR CONTA LENDÁRIA";
+                exibirModal("ERRO", "Falha ao conectar ao servidor.", "#ff4e50");
+                btn.disabled = false; btn.innerText = "CRIAR CONTA LENDÁRIA";
             }
         };
     </script>
