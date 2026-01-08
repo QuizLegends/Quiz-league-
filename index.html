@@ -7,7 +7,7 @@
     
     <link rel="manifest" href="manifest-jogo.json">
     <meta name="theme-color" content="#c89b3c">
-    <link rel="apple-touch-icon" href="icone-jogo.png">
+    <link rel="apple-touch-icon" href="icone-192.png">
 
     <style>
         :root {
@@ -151,6 +151,16 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+
+        /* Estilo do link de instalação discreto */
+        #btnInstall {
+            display: none; /* Começa escondido */
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 15px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -180,6 +190,8 @@
             AINDA NÃO TEM CONTA?<br>
             <a href="cadastro.html">CRIAR CONTA LENDÁRIA</a>
             <a href="politica.html" style="font-size: 10px; opacity: 0.6; margin-top: 20px;">POLÍTICA DE PRIVACIDADE</a>
+            
+            <a id="btnInstall">INSTALE O APP NO CELULAR</a>
         </div>
     </div>
 
@@ -199,14 +211,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // REGISTRO DO SERVICE WORKER PARA HABILITAR PWA
+        // --- LÓGICA DO PWA E LINK DE INSTALAÇÃO ---
+        let deferredPrompt;
+        const btnInstall = document.getElementById('btnInstall');
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA carregado com sucesso!'))
-                    .catch(err => console.log('Falha ao carregar PWA:', err));
+                    .then(reg => console.log('PWA ativo'))
+                    .catch(err => console.log('Erro SW:', err));
             });
         }
+
+        // Captura o evento de instalação
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            btnInstall.style.display = 'block'; // Só mostra o link se for instalável
+        });
+
+        btnInstall.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    btnInstall.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            btnInstall.style.display = 'none';
+            deferredPrompt = null;
+        });
+        // --- FIM DA LÓGICA PWA ---
 
         document.getElementById('btnLogin').onclick = async () => {
             const usuarioInput = document.getElementById('user').value.trim();
