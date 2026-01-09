@@ -218,17 +218,14 @@
             } catch (e) { openModal("ERRO", "Falha ao processar."); }
         }
 
-        // --- LÓGICA DO ANÚNCIO ADSTERRA ---
         const linkAnuncioAdsterra = "https://www.effectivegatecpm.com/jt82yz19rk?key=427afd02462871777b7bf2742e74b44f";
 
         document.getElementById('btnVideo').onclick = async () => {
             const btn = document.getElementById('btnVideo'); 
             if(btn.disabled || !btn.classList.contains('active')) return;
             
-            // 1. Abre o anúncio em nova aba
             window.open(linkAnuncioAdsterra, '_blank');
 
-            // 2. Inicia contador visual no botão
             btn.disabled = true; btn.classList.remove('active');
             let tempo = 5;
             const intervalo = setInterval(async () => {
@@ -249,13 +246,16 @@
                 totalVideosHoje: increment(1) 
             };
             
-            // Se completou 3 vídeos, reseta para voltar ao quiz
             if (nv >= 3) { 
                 dadosUpdate.acertos = 0; 
                 dadosUpdate.videosAssistidos = 0; 
+                await updateDoc(userRef, dadosUpdate);
+                acertosNoCiclo = 0;
+                videosAssistidos = 0;
+            } else {
+                await updateDoc(userRef, dadosUpdate);
             }
             
-            await updateDoc(userRef, dadosUpdate); 
             document.getElementById('btnVideo').innerText = "📺 ASSISTIR ANÚNCIO (+300)";
             openModal("RECOMPENSA", "Você recebeu 300 moedas!");
             carregarQuestao();
@@ -265,7 +265,7 @@
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
             if (acertosNoCiclo >= 10) { 
                 t.innerText = "META DE ACERTOS ATINGIDA!"; 
-                c.innerHTML = "<p style='font-size:0.8rem; opacity:0.7;'>Assista aos anúncios abaixo para liberar mais perguntas.</p>"; 
+                c.innerHTML = ""; 
                 return; 
             }
             const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
@@ -276,10 +276,13 @@
                 b.onclick = async () => {
                     const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
                     if (o.correta) { b.classList.add('btn-correct'); await updateDoc(userRef, { saldo: increment(10), acertos: increment(1) }); }
-                    else { b.classList.add('btn-wrong'); opts.forEach((obj, idx) => { if(obj.correta) {
-                        // Encontra o botão que tem o texto da resposta correta e pinta de verde
-                        all.forEach(btnInner => { if(btnInner.innerText === obj.texto) btnInner.classList.add('btn-correct'); });
-                    }}); }
+                    else { 
+                        b.classList.add('btn-wrong'); 
+                        all.forEach(btnInner => {
+                            const corretaOriginal = opts.find(opt => opt.texto === btnInner.innerText && opt.correta);
+                            if(corretaOriginal) btnInner.classList.add('btn-correct');
+                        }); 
+                    }
                     setTimeout(carregarQuestao, 1200);
                 };
                 c.appendChild(b);
