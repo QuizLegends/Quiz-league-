@@ -138,10 +138,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { 
-            getFirestore, doc, getDoc, setDoc, 
-            collection, query, where, getDocs 
-        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
@@ -153,6 +151,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         function exibirModal(titulo, mensagem, corTitulo, acaoFinal) {
@@ -168,7 +167,7 @@
         }
 
         document.getElementById('btnCadastrar').onclick = async () => {
-            const usuario = document.getElementById('user').value.trim();
+            const usuarioNome = document.getElementById('user').value.trim();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('pass').value;
             const policy = document.getElementById('checkPolicy').checked;
@@ -185,7 +184,7 @@
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const temLetra = /[a-zA-Z]/.test(senha);
 
-            if (!usuario || !email || !policy) {
+            if (!usuarioNome || !email || !policy) {
                 msg.innerText = "Preencha todos os campos!";
                 return;
             }
@@ -204,40 +203,39 @@
             btn.innerText = "PROCESSANDO...";
 
             try {
-                const userRef = doc(db, "usuarios", usuario);
-                const userSnap = await getDoc(userRef);
+                // 1. Criar usuário no Firebase Auth (Seguro)
+                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
 
-                if (userSnap.exists()) {
-                    msg.innerText = "USUÁRIO JÁ EM USO!";
-                    btn.disabled = false; btn.innerText = "Criar Conta";
-                    return;
-                }
-
-                const usuariosRef = collection(db, "usuarios");
-                const q = query(usuariosRef, where("email", "==", email));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    msg.innerText = "E-MAIL JÁ CADASTRADO!";
-                    btn.disabled = false; btn.innerText = "Criar Conta";
-                    return;
-                }
-
-                await setDoc(userRef, {
+                // 2. Criar o documento do usuário no Firestore usando o UID como ID
+                await setDoc(doc(db, "usuarios", user.uid), {
+                    nomeExibicao: usuarioNome,
                     email: email,
-                    senha: senha,
                     saldo: 0,
                     acertos: 0,
-                    ultimaDataAcesso: new Date().toLocaleDateString('pt-BR')
+                    videosAssistidos: 0,
+                    totalVideosHoje: 0,
+                    ultimaDataAcesso: new Date().toLocaleDateString('pt-BR'),
+                    uid: user.uid
                 });
 
                 exibirModal("SUCESSO!", "Sua conta lendária foi criada!", "#c89b3c", () => {
                     window.location.href = "index.html";
                 });
 
-            } catch (e) {
-                exibirModal("FALHA TÉCNICA", "Erro ao conectar ao servidor.", "#ff4e50");
-                btn.disabled = false; btn.innerText = "Criar Conta";
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerText = "Criar Conta";
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    msg.innerText = "E-MAIL JÁ CADASTRADO!";
+                } else if (error.code === 'auth/invalid-email') {
+                    msg.innerText = "E-MAIL INVÁLIDO!";
+                } else if (error.code === 'auth/weak-password') {
+                    msg.innerText = "SENHA MUITO FRACA!";
+                } else {
+                    exibirModal("FALHA TÉCNICA", "Erro ao conectar ao servidor.", "#ff4e50");
+                }
             }
         };
     </script>
