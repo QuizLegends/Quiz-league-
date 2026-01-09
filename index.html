@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>        
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quiz Legends</title>
-    
-    <link rel="manifest" href="manifest-jogo.json">
-    <meta name="theme-color" content="#c89b3c">
-    <link rel="apple-touch-icon" href="app-192.png">
-
     <style>
         :root {
             --ouro: #c89b3c;
-            --ouro-brilhante: #f0e6d2;
             --fundo-profundo: #010a13;
             --card-azul: #091428;
             --erro: #ff4e50;
@@ -27,129 +21,88 @@
             justify-content: center; 
             height: 100vh; 
             margin: 0;
-            overflow: hidden;
         }
 
-        /* --- MODAL DE AVISO (FORMATO NORMAL) --- */
-        #modal-boas-vindas {
-            display: none; /* Controlado pelo JavaScript */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 20000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-aviso-content {
-            background: var(--card-azul);
-            border: 2px solid var(--ouro);
-            padding: 35px 25px;
-            text-align: center;
-            max-width: 320px;
-            width: 88%;
-            border-radius: 4px; /* Formato normal */
-            box-shadow: 0 0 50px rgba(200, 155, 60, 0.3);
-        }
-
-        .destaque-ouro {
-            color: var(--ouro);
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        /* --- DESIGN DO LOGIN --- */
         .login-box { 
             border: 3px solid var(--ouro); 
-            padding: 45px 35px; 
-            background: linear-gradient(135deg, rgba(9, 20, 40, 0.98) 0%, rgba(1, 10, 19, 1) 100%); 
-            width: 330px; 
+            padding: 30px 35px; 
+            background: rgba(9, 20, 40, 0.95); 
+            border-radius: 4px; 
+            width: 340px; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
             text-align: center;
-            box-sizing: border-box;
         }
 
-        .logo-container { width: 75px; height: 75px; margin: 0 auto 30px; }
-        .logo-diamond { width: 100%; height: 100%; background: #010a13; border: 3px solid var(--ouro); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
-        .logo-text { transform: rotate(-45deg); font-family: 'Georgia', serif; font-size: 42px; font-weight: bold; color: var(--ouro); }
-        
-        .login-title { color: var(--ouro); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; font-size: 18px; font-weight: bold; text-align: left; display: block; }
-        input { width: 100%; padding: 16px 15px; border: 2px solid var(--ouro); background: rgba(5, 10, 20, 0.9); color: #f0e6d2; box-sizing: border-box; margin-bottom: 20px; outline: none; }
-        
+        .login-title { 
+            color: var(--ouro); 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            margin-bottom: 25px; 
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .input-group { margin-bottom: 15px; }
+
+        input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid var(--ouro); 
+            background: #050a14; 
+            color: #f0e6d2; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            outline: none;
+        }
+
         button { 
-            background: var(--ouro); color: #010a13; padding: 18px; width: 100%; border: none; 
-            font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            background: linear-gradient(to bottom, #c89b3c 0%, #a07a2d 100%); 
+            color: #010a13; 
+            padding: 15px; 
+            width: 100%; 
+            border: 2px solid var(--ouro); 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.2s;
         }
 
-        .botoes-auxiliares { display: flex; justify-content: space-between; margin-top: 15px; font-size: 11px; }
-        .botoes-auxiliares a { color: var(--ouro); text-decoration: none; }
-        
-        .footer-links { margin-top: 30px; }
-        .footer-links a { color: var(--ouro); text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 11px; }
+        button:hover { filter: brightness(1.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        #modal-alerta { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 10000; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card-azul); border: 2px solid var(--ouro); padding: 30px; text-align: center; max-width: 300px; width: 85%; }
+        #msg { margin-top: 15px; color: var(--erro); font-size: 12px; font-weight: bold; text-transform: uppercase; }
+
+        .links { margin-top: 20px; font-size: 12px; }
+        .links a { color: var(--ouro); text-decoration: none; font-weight: bold; margin: 0 10px; }
     </style>
 </head>
 <body>
 
-    <div id="modal-boas-vindas">
-        <div class="modal-aviso-content">
-            <h3 style="color: var(--ouro); margin-top: 0;">ATENÇÃO INVOCADOR!</h3>
-            <p style="font-size: 14px; line-height: 1.6;">
-                Este aplicativo tem como objetivo principal oferecer <span class="destaque-ouro">ENTRETENIMENTO</span> e competição saudável entre os fãs de League of Legends.<br><br>
-                O sistema de recompensas é apenas um humilde bônus por suas vitórias e méritos dentro dos desafios.<br><br>
-                Divirta-se e prove que você é uma verdadeira lenda!
-            </p>
-            <button onclick="fecharBoasVindas()">VAMOS JOGAR!</button>
-        </div>
-    </div>
-
-    <div id="modal-alerta">
-        <div class="modal-content">
-            <h3 id="modal-titulo">AVISO</h3>
-            <p id="modal-msg">Mensagem...</p>
-            <button id="btnAcaoModal" style="padding: 10px;">ENTENDIDO</button>
-        </div>
-    </div>
-
     <div class="login-box">
-        <div class="logo-container">
-            <div class="logo-diamond"><span class="logo-text">L</span></div>
+        <div class="login-title">Invocador</div>
+        
+        <div class="input-group">
+            <input type="email" id="email" placeholder="E-MAIL" autocomplete="off">
         </div>
         
-        <label class="login-title">Login</label>
-        <input type="text" id="user" placeholder="USUÁRIO" autocomplete="off">
-        <input type="password" id="pass" placeholder="SENHA">
-        <button id="btnLogin">Entrar no Reino</button>
+        <div class="input-group">
+            <input type="password" id="pass" placeholder="SENHA">
+        </div>
+
+        <button id="btnLogin">Entrar</button>
         
-        <div class="botoes-auxiliares">
+        <div id="msg"></div>
+
+        <div class="links">
+            <a href="cadastro.html">CRIAR CONTA</a> | 
             <a href="recuperar.html">ESQUECI A SENHA</a>
-            <a href="cadastro.html">CRIAR CONTA</a>
-        </div>
-        
-        <div class="footer-links">
-            <a href="politica.html" style="opacity: 0.6;">POLÍTICA DE PRIVACIDADE</a>
-            <a id="btnInstall" style="display: none; cursor: pointer;">INSTALE O APP NO CELULAR</a>
         </div>
     </div>
 
     <script type="module">
-        // Lógica para aparecer apenas na primeira visita
-        window.addEventListener('DOMContentLoaded', () => {
-            const jaViu = localStorage.getItem("avisoLido");
-            if (!jaViu) {
-                document.getElementById('modal-boas-vindas').style.display = 'flex';
-            }
-        });
-
-        window.fecharBoasVindas = function() {
-            document.getElementById('modal-boas-vindas').style.display = 'none';
-            localStorage.setItem("avisoLido", "true");
-        }
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
@@ -161,55 +114,45 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        // Funções de Modal e Login permanecem as mesmas...
-        function exibirModal(titulo, mensagem, corTitulo) {
-            const modal = document.getElementById('modal-alerta');
-            document.getElementById('modal-titulo').innerText = titulo;
-            document.getElementById('modal-titulo').style.color = corTitulo;
-            document.getElementById('modal-msg').innerText = mensagem;
-            modal.style.display = 'flex';
-            document.getElementById('btnAcaoModal').onclick = () => modal.style.display = 'none';
-        }
-
-        // Lógica PWA (Reativada)
-        let deferredPrompt;
-        const btnInstall = document.getElementById('btnInstall');
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            btnInstall.style.display = 'block';
+        // Se o usuário já estiver logado, redireciona direto
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "resgate.html";
+            }
         });
 
-        btnInstall.onclick = async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                btnInstall.style.display = 'none';
-            }
-        };
-
         document.getElementById('btnLogin').onclick = async () => {
-            const u = document.getElementById('user').value.trim();
-            const s = document.getElementById('pass').value;
-            if(!u || !s) return exibirModal("ERRO", "Preencha tudo!", "var(--ouro)");
-            
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('pass').value;
             const btn = document.getElementById('btnLogin');
-            btn.disabled = true; btn.innerText = "CARREGANDO...";
+            const msg = document.getElementById('msg');
+
+            if (!email || !senha) {
+                msg.innerText = "Preencha todos os campos!";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "AUTENTICANDO...";
+            msg.innerText = "";
 
             try {
-                const snap = await getDoc(doc(db, "usuarios", u));
-                if (snap.exists() && snap.data().senha === s) {
-                    localStorage.setItem("usuarioLogado", u);
-                    window.location.href = "resgate.html";
+                // Realiza o login oficial
+                await signInWithEmailAndPassword(auth, email, senha);
+                // O onAuthStateChanged acima cuidará do redirecionamento
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerText = "Entrar";
+                
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    msg.innerText = "E-MAIL OU SENHA INCORRETOS!";
+                } else if (error.code === 'auth/too-many-requests') {
+                    msg.innerText = "MUITAS TENTATIVAS. TENTE MAIS TARDE!";
                 } else {
-                    exibirModal("ERRO", "Dados incorretos!", "var(--erro)");
-                    btn.disabled = false; btn.innerText = "Entrar no Reino";
+                    msg.innerText = "ERRO AO CONECTAR AO SERVIDOR.";
                 }
-            } catch (e) {
-                exibirModal("ERRO", "Falha na conexão.", "var(--erro)");
-                btn.disabled = false; btn.innerText = "Entrar no Reino";
             }
         };
     </script>
