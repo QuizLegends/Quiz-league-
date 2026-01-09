@@ -147,14 +147,14 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { initializeFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection, persistentLocalCache, persistentMultipleTabManager, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { bancoPerguntas } from './pergunta.js';
 
         const firebaseConfig = { apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E", authDomain: "quizlegends-f58fc.firebaseapp.com", projectId: "quizlegends-f58fc", storageBucket: "quizlegends-f58fc.firebasestorage.app", messagingSenderId: "1050463164018", appId: "1:1050463164018:web:91de002b8afc8e678f54eb" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        // --- MELHORIA DE VELOCIDADE: CACHE ATIVADO ---
+        // Inicialização robusta do Firestore
         const db = initializeFirestore(app, {
             localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
         });
@@ -184,9 +184,11 @@
         let goldDB = 0, acertosNoCiclo = 0, videosAssistidos = 0, totalVideosHoje = 0, jogoInicializado = false;
         let userRef = null;
 
+        // Listener de Autenticação com Fallback
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 userRef = doc(db, "usuarios", user.uid);
+                // Inicia o app. Se o cache falhar, o onSnapshot buscará do servidor.
                 inicializarApp(user);
             } else {
                 window.location.href = "index.html";
@@ -194,14 +196,17 @@
         });
 
         function inicializarApp(user) {
-            onSnapshot(userRef, async (docSnap) => {
+            // onSnapshot garante que o dado venha do cache primeiro E se atualize com o servidor depois
+            onSnapshot(userRef, { includeMetadataChanges: true }, async (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     const hoje = new Date().toLocaleDateString('pt-BR');
                     
                     if (data.ultimaDataAcesso !== hoje) { 
-                        await updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje }); 
-                        return; 
+                        // Reset diário (apenas se estiver online)
+                        if(!docSnap.metadata.fromCache) {
+                            await updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje }); 
+                        }
                     }
                     
                     goldDB = parseFloat(data.saldo) || 0; 
@@ -210,11 +215,16 @@
                     totalVideosHoje = data.totalVideosHoje || 0;
                     
                     atualizarInterface();
+                    
                     if (!jogoInicializado) { 
                         jogoInicializado = true; 
                         carregarQuestao(); 
                     }
                 }
+            }, (error) => {
+                console.error("Erro ao carregar dados:", error);
+                // Se der erro de permissão ou conexão, tenta recarregar a questão pelo menos uma vez
+                if(!jogoInicializado) carregarQuestao();
             });
         }
 
@@ -326,34 +336,4 @@
                     const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
                     if (o.correta) { 
                         b.classList.add('btn-correct'); 
-                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1) }); 
-                    }
-                    else { 
-                        b.classList.add('btn-wrong'); 
-                        all.forEach(btnInner => {
-                            const corretaOriginal = opts.find(opt => opt.texto === btnInner.innerText && opt.correta);
-                            if(corretaOriginal) btnInner.classList.add('btn-correct');
-                        }); 
-                    }
-                    setTimeout(carregarQuestao, 1200);
-                };
-                c.appendChild(b);
-            });
-        }
-        
-        let sY = 0; window.addEventListener('touchstart', (e) => { if(window.scrollY === 0) sY = e.touches[0].pageY; }, {passive:true});
-        window.addEventListener('touchmove', (e) => {
-            const p = e.touches[0].pageY - sY;
-            if(window.scrollY === 0 && p > 0) {
-                const m = Math.min(p*0.5, 80);
-                document.getElementById('pull-to-refresh').style.transform = `translateY(${m}px)`;
-                document.getElementById('main-content').style.transform = `translateY(${m}px)`;
-            }
-        }, {passive:true});
-        window.addEventListener('touchend', () => {
-            if (new WebKitCSSMatrix(window.getComputedStyle(document.getElementById('pull-to-refresh')).transform).m42 >= 60) location.reload();
-            else { document.getElementById('pull-to-refresh').style.transform = 'translateY(0)'; document.getElementById('main-content').style.transform = 'translateY(0)'; }
-        });
-    </script>
-</body>
-</html>
+                        await updateDoc(userRef, { sald
