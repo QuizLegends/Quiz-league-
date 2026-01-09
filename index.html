@@ -31,15 +31,37 @@
             overflow: hidden;
         }
 
-        body::before {
-            content: "";
-            position: absolute;
-            width: 100%; height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.15;
-            pointer-events: none;
+        /* --- DESIGN DO MODAL DE BOAS-VINDAS --- */
+        #modal-boas-vindas {
+            display: flex; /* Começa visível */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
         }
 
+        .modal-aviso-content {
+            background: var(--card-azul);
+            border: 2px solid var(--ouro);
+            padding: 35px 25px;
+            text-align: center;
+            max-width: 320px;
+            width: 88%;
+            box-shadow: 0 0 50px rgba(200, 155, 60, 0.3);
+            position: relative;
+            clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%);
+        }
+
+        .destaque-ouro {
+            color: var(--ouro);
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(200, 155, 60, 0.6);
+        }
+
+        /* --- RESTANTE DO SEU CSS ORIGINAL --- */
         .login-box { 
             position: relative;
             border: 3px solid var(--ouro); 
@@ -47,153 +69,46 @@
             background: linear-gradient(135deg, rgba(9, 20, 40, 0.98) 0%, rgba(1, 10, 19, 1) 100%); 
             border-radius: 4px; 
             width: 330px; 
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(200, 155, 60, 0.1);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
             text-align: center;
             box-sizing: border-box;
             z-index: 1;
         }
 
-        .logo-container {
-            position: relative;
-            width: 75px;
-            height: 75px;
-            margin: 0 auto 30px;
-        }
-
-        .logo-diamond {
-            width: 100%; height: 100%;
-            background: #010a13;
-            border: 3px solid var(--ouro); 
-            transform: rotate(45deg);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(200, 155, 60, 0.4);
-        }
-
-        .logo-text {
-            transform: rotate(-45deg);
-            font-family: 'Georgia', serif;
-            font-size: 42px;
-            font-weight: bold;
-            color: var(--ouro);
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.8), 0 0 10px var(--ouro);
-        }
-
-        .login-title { 
-            color: var(--ouro); 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-            margin-bottom: 10px; 
-            font-size: 18px;
-            font-weight: bold;
-            text-align: left;
-            display: block;
-        }
-
-        .input-group { margin-bottom: 20px; text-align: left; }
-
-        input { 
-            width: 100%; 
-            padding: 16px 15px; 
-            border: 2px solid var(--ouro); 
-            background: rgba(5, 10, 20, 0.9); 
-            color: #f0e6d2; 
-            box-sizing: border-box; 
-            font-size: 16px; 
-            outline: none;
-        }
-
-        input:focus { border-color: #fff; box-shadow: 0 0 15px rgba(200, 155, 60, 0.5); }
-
+        .logo-container { position: relative; width: 75px; height: 75px; margin: 0 auto 30px; }
+        .logo-diamond { width: 100%; height: 100%; background: #010a13; border: 3px solid var(--ouro); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
+        .logo-text { transform: rotate(-45deg); font-family: 'Georgia', serif; font-size: 42px; font-weight: bold; color: var(--ouro); }
+        
+        .login-title { color: var(--ouro); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; font-size: 18px; font-weight: bold; text-align: left; display: block; }
+        input { width: 100%; padding: 16px 15px; border: 2px solid var(--ouro); background: rgba(5, 10, 20, 0.9); color: #f0e6d2; box-sizing: border-box; font-size: 16px; outline: none; margin-bottom: 20px; }
+        
         button { 
             background: linear-gradient(to bottom, #c89b3c 0%, #a07a2d 100%); 
-            color: #010a13; 
-            padding: 18px; 
-            width: 100%; 
-            border: 2px solid var(--ouro); 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-top: 10px; 
-            font-size: 14px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px;
+            color: #010a13; padding: 18px; width: 100%; border: 2px solid var(--ouro); 
+            font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;
         }
 
-        /* --- NOVO ESTILO PARA OS LINKS ABAIXO DO BOTÃO --- */
-        .botoes-auxiliares {
-            display: flex;
-            justify-content: space-between; /* Um na esq, outro na dir */
-            margin-top: 15px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .botoes-auxiliares a {
-            color: var(--ouro);
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-
-        .botoes-auxiliares a:hover {
-            opacity: 1;
-        }
-
-        .footer-links { margin-top: 35px; font-size: 11px; color: #888; }
-        .footer-links a { color: var(--ouro) !important; text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 13px; }
-
-        /* --- DESIGN DO MODAL --- */
-        #modal-alerta {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--card-azul);
-            border: 2px solid var(--ouro);
-            padding: 30px;
-            border-radius: 8px;
-            text-align: center;
-            max-width: 300px;
-            width: 85%;
-            box-shadow: 0 0 40px rgba(200, 155, 60, 0.5);
-            animation: surgindo 0.3s ease-out;
-        }
-
-        .modal-content h3 { margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
-        .modal-content p { color: #fff; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
-
-        .btn-modal {
-            background: var(--ouro);
-            color: #010a13;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        @keyframes surgindo {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        #btnInstall {
-            display: none; 
-            font-size: 10px;
-            opacity: 0.6;
-            margin-top: 15px;
-            text-decoration: underline;
-            cursor: pointer;
-            color: var(--ouro);
-        }
+        #modal-alerta { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card-azul); border: 2px solid var(--ouro); padding: 30px; text-align: center; max-width: 300px; width: 85%; }
+        
+        .botoes-auxiliares { display: flex; justify-content: space-between; margin-top: 15px; font-size: 11px; }
+        .botoes-auxiliares a { color: var(--ouro); text-decoration: none; font-weight: bold; }
+        .footer-links a { color: var(--ouro) !important; text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 11px; }
     </style>
 </head>
 <body>
+
+    <div id="modal-boas-vindas">
+        <div class="modal-aviso-content">
+            <h3 style="color: var(--ouro); margin-top: 0;">ATENÇÃO INVOCADOR!</h3>
+            <p style="font-size: 14px; line-height: 1.6;">
+                Este aplicativo tem como objetivo principal oferecer <span class="destaque-ouro">ENTRETENIMENTO</span> e competição saudável entre os fãs de League of Legends.<br><br>
+                O sistema de recompensas é apenas um humilde bônus por suas vitórias e méritos dentro dos desafios.<br><br>
+                Divirta-se e prove que você é uma verdadeira lenda!
+            </p>
+            <button class="btn-modal" onclick="fecharBoasVindas()" style="margin-top: 10px;">VAMOS JOGAR!</button>
+        </div>
+    </div>
 
     <div id="modal-alerta">
         <div class="modal-content">
@@ -211,31 +126,27 @@
         </div>
         
         <label class="login-title">Login</label>
-        
-        <div class="input-group">
-            <input type="text" id="user" placeholder="USUÁRIO" autocomplete="off">
-        </div>
-        
-        <div class="input-group">
-            <input type="password" id="pass" placeholder="SENHA">
-        </div>
-        
+        <input type="text" id="user" placeholder="USUÁRIO" autocomplete="off">
+        <input type="password" id="pass" placeholder="SENHA">
         <button id="btnLogin">Entrar no Reino</button>
         
         <div class="botoes-auxiliares">
-            <a href="recuperar.html">ESQUECI MINHA SENHA</a>
+            <a href="recuperar.html">ESQUECI A SENHA</a>
             <a href="cadastro.html">CRIAR CONTA</a>
         </div>
         
-        <div id="msg"></div>
-
         <div class="footer-links">
-            <a href="politica.html" style="font-size: 10px; opacity: 0.6; margin-top: 20px;">POLÍTICA DE PRIVACIDADE</a>
-            <a id="btnInstall">INSTALE O APP NO CELULAR</a>
+            <a href="politica.html" style="opacity: 0.6;">POLÍTICA DE PRIVACIDADE</a>
+            <a id="btnInstall" style="display:none;">INSTALE O APP NO CELULAR</a>
         </div>
     </div>
 
     <script type="module">
+        // Função para fechar o aviso inicial
+        window.fecharBoasVindas = function() {
+            document.getElementById('modal-boas-vindas').style.display = 'none';
+        }
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
@@ -251,61 +162,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // FUNÇÃO EXIBIR MODAL
+        // FUNÇÃO EXIBIR MODAL DE ERRO/AVISO COMUM
         function exibirModal(titulo, mensagem, corTitulo) {
             const modal = document.getElementById('modal-alerta');
             const tituloH3 = document.getElementById('modal-titulo');
             const msgP = document.getElementById('modal-msg');
             const btn = document.getElementById('btnAcaoModal');
-
             tituloH3.innerText = titulo;
             tituloH3.style.color = corTitulo;
             msgP.innerText = mensagem;
             modal.style.display = 'flex';
-
             btn.onclick = () => { modal.style.display = 'none'; };
         }
 
-        // --- LÓGICA DO PWA ---
-        let deferredPrompt;
-        const btnInstall = document.getElementById('btnInstall');
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=2')
-                    .then(reg => console.log('PWA ativo'))
-                    .catch(err => console.error('Erro SW:', err));
-            });
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            btnInstall.style.display = 'block'; 
-        });
-
-        btnInstall.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') btnInstall.style.display = 'none';
-                deferredPrompt = null;
-            }
-        });
-
-        // --- LÓGICA DE LOGIN ---
+        // LOGIN
         document.getElementById('btnLogin').onclick = async () => {
             const usuarioInput = document.getElementById('user').value.trim();
             const senhaInput = document.getElementById('pass').value;
             const btn = document.getElementById('btnLogin');
 
-            if (!navigator.onLine) {
-                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet para entrar no reino.", "var(--erro)");
-                return;
-            }
-
             if (!usuarioInput || !senhaInput) {
-                exibirModal("CAMPOS VAZIOS", "Por favor, preencha todos os campos.", "var(--ouro)");
+                exibirModal("CAMPOS VAZIOS", "Preencha tudo, Invocador!", "var(--ouro)");
                 return;
             }
 
@@ -325,7 +202,7 @@
                     btn.innerText = "Entrar no Reino";
                 }
             } catch (e) {
-                exibirModal("FALHA TÉCNICA", "Erro ao conectar ao servidor.", "var(--erro)");
+                exibirModal("ERRO", "Falha ao conectar.", "var(--erro)");
                 btn.disabled = false;
                 btn.innerText = "Entrar no Reino";
             }
