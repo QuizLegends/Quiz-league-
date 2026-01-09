@@ -163,7 +163,10 @@
             tituloH3.style.color = corTitulo;
             msgP.innerText = mensagem;
             modal.style.display = 'flex';
-            btn.onclick = () => { modal.style.display = 'none'; if (acaoFinal) acaoFinal(); };
+            btn.onclick = () => { 
+                modal.style.display = 'none'; 
+                if (acaoFinal) acaoFinal(); 
+            };
         }
 
         document.getElementById('btnCadastrar').onclick = async () => {
@@ -177,49 +180,42 @@
             msg.innerText = "";
 
             if (!navigator.onLine) {
-                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet!", "#ff4e50");
+                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet!", "var(--erro)");
                 return;
             }
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const temLetra = /[a-zA-Z]/.test(senha);
-
-            if (!usuarioNome || !email || !policy) {
-                msg.innerText = "Preencha todos os campos!";
+            if (!usuarioNome || !email || !senha || !policy) {
+                msg.innerText = "Preencha tudo e aceite os termos!";
                 return;
             }
 
-            if (senha.length < 6 || !temLetra) {
-                msg.innerText = "SENHA: MÍN. 6 DÍGITOS E 1 LETRA!";
-                return;
-            }
-
-            if (!emailRegex.test(email)) {
-                msg.innerText = "Digite um e-mail válido!";
+            if (senha.length < 6) {
+                msg.innerText = "SENHA DEVE TER NO MÍNIMO 6 DÍGITOS!";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "PROCESSANDO...";
+            btn.innerText = "FORJANDO CONTA...";
 
             try {
-                // 1. Criar usuário no Firebase Auth (Seguro)
+                // 1. Criar no Firebase Auth (Gera o UID)
                 const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
                 const user = userCredential.user;
 
-                // 2. Criar o documento do usuário no Firestore usando o UID como ID
+                // 2. Salvar dados iniciais no Firestore usando o UID como chave
                 await setDoc(doc(db, "usuarios", user.uid), {
-                    nomeExibicao: usuarioNome,
+                    nome: usuarioNome,
                     email: email,
                     saldo: 0,
                     acertos: 0,
                     videosAssistidos: 0,
                     totalVideosHoje: 0,
                     ultimaDataAcesso: new Date().toLocaleDateString('pt-BR'),
+                    dataCriacao: new Date().toISOString(),
                     uid: user.uid
                 });
 
-                exibirModal("SUCESSO!", "Sua conta lendária foi criada!", "#c89b3c", () => {
+                exibirModal("CONTA CRIADA", "Sua jornada começa agora!", "var(--ouro)", () => {
                     window.location.href = "index.html";
                 });
 
@@ -228,13 +224,11 @@
                 btn.innerText = "Criar Conta";
                 
                 if (error.code === 'auth/email-already-in-use') {
-                    msg.innerText = "E-MAIL JÁ CADASTRADO!";
+                    msg.innerText = "ESTE E-MAIL JÁ ESTÁ EM USO!";
                 } else if (error.code === 'auth/invalid-email') {
                     msg.innerText = "E-MAIL INVÁLIDO!";
-                } else if (error.code === 'auth/weak-password') {
-                    msg.innerText = "SENHA MUITO FRACA!";
                 } else {
-                    exibirModal("FALHA TÉCNICA", "Erro ao conectar ao servidor.", "#ff4e50");
+                    exibirModal("ERRO", "Falha ao criar conta. Tente novamente.", "var(--erro)");
                 }
             }
         };
