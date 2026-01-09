@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>        
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quiz Legends</title>
@@ -31,9 +30,9 @@
             overflow: hidden;
         }
 
-        /* --- DESIGN DO MODAL DE BOAS-VINDAS --- */
+        /* --- MODAL DE AVISO (FORMATO NORMAL) --- */
         #modal-boas-vindas {
-            display: flex; /* Começa visível */
+            display: none; /* Controlado pelo JavaScript */
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95);
@@ -50,50 +49,46 @@
             text-align: center;
             max-width: 320px;
             width: 88%;
+            border-radius: 4px; /* Formato normal */
             box-shadow: 0 0 50px rgba(200, 155, 60, 0.3);
-            position: relative;
-            clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%);
         }
 
         .destaque-ouro {
             color: var(--ouro);
-            font-weight: 900;
-            text-shadow: 0 0 8px rgba(200, 155, 60, 0.6);
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
-        /* --- RESTANTE DO SEU CSS ORIGINAL --- */
+        /* --- DESIGN DO LOGIN --- */
         .login-box { 
-            position: relative;
             border: 3px solid var(--ouro); 
             padding: 45px 35px; 
             background: linear-gradient(135deg, rgba(9, 20, 40, 0.98) 0%, rgba(1, 10, 19, 1) 100%); 
-            border-radius: 4px; 
             width: 330px; 
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
             text-align: center;
             box-sizing: border-box;
-            z-index: 1;
         }
 
-        .logo-container { position: relative; width: 75px; height: 75px; margin: 0 auto 30px; }
+        .logo-container { width: 75px; height: 75px; margin: 0 auto 30px; }
         .logo-diamond { width: 100%; height: 100%; background: #010a13; border: 3px solid var(--ouro); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; }
         .logo-text { transform: rotate(-45deg); font-family: 'Georgia', serif; font-size: 42px; font-weight: bold; color: var(--ouro); }
         
         .login-title { color: var(--ouro); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; font-size: 18px; font-weight: bold; text-align: left; display: block; }
-        input { width: 100%; padding: 16px 15px; border: 2px solid var(--ouro); background: rgba(5, 10, 20, 0.9); color: #f0e6d2; box-sizing: border-box; font-size: 16px; outline: none; margin-bottom: 20px; }
+        input { width: 100%; padding: 16px 15px; border: 2px solid var(--ouro); background: rgba(5, 10, 20, 0.9); color: #f0e6d2; box-sizing: border-box; margin-bottom: 20px; outline: none; }
         
         button { 
-            background: linear-gradient(to bottom, #c89b3c 0%, #a07a2d 100%); 
-            color: #010a13; padding: 18px; width: 100%; border: 2px solid var(--ouro); 
-            font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;
+            background: var(--ouro); color: #010a13; padding: 18px; width: 100%; border: none; 
+            font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
         }
+
+        .botoes-auxiliares { display: flex; justify-content: space-between; margin-top: 15px; font-size: 11px; }
+        .botoes-auxiliares a { color: var(--ouro); text-decoration: none; }
+        
+        .footer-links { margin-top: 30px; }
+        .footer-links a { color: var(--ouro); text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 11px; }
 
         #modal-alerta { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 10000; align-items: center; justify-content: center; }
         .modal-content { background: var(--card-azul); border: 2px solid var(--ouro); padding: 30px; text-align: center; max-width: 300px; width: 85%; }
-        
-        .botoes-auxiliares { display: flex; justify-content: space-between; margin-top: 15px; font-size: 11px; }
-        .botoes-auxiliares a { color: var(--ouro); text-decoration: none; font-weight: bold; }
-        .footer-links a { color: var(--ouro) !important; text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -106,7 +101,7 @@
                 O sistema de recompensas é apenas um humilde bônus por suas vitórias e méritos dentro dos desafios.<br><br>
                 Divirta-se e prove que você é uma verdadeira lenda!
             </p>
-            <button class="btn-modal" onclick="fecharBoasVindas()" style="margin-top: 10px;">VAMOS JOGAR!</button>
+            <button onclick="fecharBoasVindas()">VAMOS JOGAR!</button>
         </div>
     </div>
 
@@ -114,15 +109,13 @@
         <div class="modal-content">
             <h3 id="modal-titulo">AVISO</h3>
             <p id="modal-msg">Mensagem...</p>
-            <button class="btn-modal" id="btnAcaoModal">ENTENDIDO</button>
+            <button id="btnAcaoModal" style="padding: 10px;">ENTENDIDO</button>
         </div>
     </div>
 
     <div class="login-box">
         <div class="logo-container">
-            <div class="logo-diamond">
-                <span class="logo-text">L</span>
-            </div>
+            <div class="logo-diamond"><span class="logo-text">L</span></div>
         </div>
         
         <label class="login-title">Login</label>
@@ -137,14 +130,22 @@
         
         <div class="footer-links">
             <a href="politica.html" style="opacity: 0.6;">POLÍTICA DE PRIVACIDADE</a>
-            <a id="btnInstall" style="display:none;">INSTALE O APP NO CELULAR</a>
+            <a id="btnInstall" style="display: none; cursor: pointer;">INSTALE O APP NO CELULAR</a>
         </div>
     </div>
 
     <script type="module">
-        // Função para fechar o aviso inicial
+        // Lógica para aparecer apenas na primeira visita
+        window.addEventListener('DOMContentLoaded', () => {
+            const jaViu = localStorage.getItem("avisoLido");
+            if (!jaViu) {
+                document.getElementById('modal-boas-vindas').style.display = 'flex';
+            }
+        });
+
         window.fecharBoasVindas = function() {
             document.getElementById('modal-boas-vindas').style.display = 'none';
+            localStorage.setItem("avisoLido", "true");
         }
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -162,49 +163,53 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // FUNÇÃO EXIBIR MODAL DE ERRO/AVISO COMUM
+        // Funções de Modal e Login permanecem as mesmas...
         function exibirModal(titulo, mensagem, corTitulo) {
             const modal = document.getElementById('modal-alerta');
-            const tituloH3 = document.getElementById('modal-titulo');
-            const msgP = document.getElementById('modal-msg');
-            const btn = document.getElementById('btnAcaoModal');
-            tituloH3.innerText = titulo;
-            tituloH3.style.color = corTitulo;
-            msgP.innerText = mensagem;
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-titulo').style.color = corTitulo;
+            document.getElementById('modal-msg').innerText = mensagem;
             modal.style.display = 'flex';
-            btn.onclick = () => { modal.style.display = 'none'; };
+            document.getElementById('btnAcaoModal').onclick = () => modal.style.display = 'none';
         }
 
-        // LOGIN
-        document.getElementById('btnLogin').onclick = async () => {
-            const usuarioInput = document.getElementById('user').value.trim();
-            const senhaInput = document.getElementById('pass').value;
-            const btn = document.getElementById('btnLogin');
+        // Lógica PWA (Reativada)
+        let deferredPrompt;
+        const btnInstall = document.getElementById('btnInstall');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            btnInstall.style.display = 'block';
+        });
 
-            if (!usuarioInput || !senhaInput) {
-                exibirModal("CAMPOS VAZIOS", "Preencha tudo, Invocador!", "var(--ouro)");
-                return;
+        btnInstall.onclick = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                btnInstall.style.display = 'none';
             }
+        };
 
-            btn.disabled = true;
-            btn.innerText = "AUTENTICANDO...";
+        document.getElementById('btnLogin').onclick = async () => {
+            const u = document.getElementById('user').value.trim();
+            const s = document.getElementById('pass').value;
+            if(!u || !s) return exibirModal("ERRO", "Preencha tudo!", "var(--ouro)");
+            
+            const btn = document.getElementById('btnLogin');
+            btn.disabled = true; btn.innerText = "CARREGANDO...";
 
             try {
-                const docRef = doc(db, "usuarios", usuarioInput);
-                const snap = await getDoc(docRef);
-
-                if (snap.exists() && snap.data().senha === senhaInput) {
-                    localStorage.setItem("usuarioLogado", usuarioInput);
+                const snap = await getDoc(doc(db, "usuarios", u));
+                if (snap.exists() && snap.data().senha === s) {
+                    localStorage.setItem("usuarioLogado", u);
                     window.location.href = "resgate.html";
                 } else {
-                    exibirModal("ACESSO NEGADO", "Usuário ou senha incorretos!", "var(--erro)");
-                    btn.disabled = false;
-                    btn.innerText = "Entrar no Reino";
+                    exibirModal("ERRO", "Dados incorretos!", "var(--erro)");
+                    btn.disabled = false; btn.innerText = "Entrar no Reino";
                 }
             } catch (e) {
-                exibirModal("ERRO", "Falha ao conectar.", "var(--erro)");
-                btn.disabled = false;
-                btn.innerText = "Entrar no Reino";
+                exibirModal("ERRO", "Falha na conexão.", "var(--erro)");
+                btn.disabled = false; btn.innerText = "Entrar no Reino";
             }
         };
     </script>
