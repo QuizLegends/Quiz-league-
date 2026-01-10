@@ -188,7 +188,6 @@
         const mContent = document.getElementById('modal-body-content');
         const mFooter = document.getElementById('m-footer');
 
-        // --- CONTROLE DE TRAVA ---
         let tempoRestanteAnuncio = 10;
         let intervaloAnuncio = null;
         let anuncioEmAndamento = false;
@@ -333,7 +332,6 @@
             else aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
         }
 
-        // --- NOVA LÓGICA DE TRAVA REAL ---
         document.getElementById('btnVideo').onclick = () => iniciarFluxoAnuncio(true);
         document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio(false);
 
@@ -342,20 +340,15 @@
             anuncioEmAndamento = true;
             tempoRestanteAnuncio = 10;
             if(intervaloAnuncio) clearInterval(intervaloAnuncio);
-            
             window.open(linkAnuncioAdsterra, '_blank');
-            
             openModal("VALIDANDO RECOMPENSA", `Permaneça na página do anúncio.<br><div class="contador-video" id="modalContador">10</div>`, 'alert');
             mFooter.innerHTML = '<span style="font-size:0.7rem; color:var(--gold-dark); font-weight:900;">CONTANDO...</span>';
-            
-            // O contador SÓ roda se a página NÃO estiver visível (ou seja, se ele estiver no anúncio)
             intervaloAnuncio = setInterval(() => {
                 if (document.visibilityState === 'hidden') {
                     tempoRestanteAnuncio--;
                     const display = document.getElementById('modalContador');
                     if(display) display.innerText = tempoRestanteAnuncio;
                 }
-
                 if (tempoRestanteAnuncio <= 0) {
                     clearInterval(intervaloAnuncio);
                     anuncioEmAndamento = false;
@@ -364,17 +357,13 @@
             }, 1000);
         }
 
-        // SE O USUÁRIO VOLTAR PARA O JOGO
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && anuncioEmAndamento) {
-                // Ele voltou antes de acabar!
                 if (tempoRestanteAnuncio > 0) {
                     clearInterval(intervaloAnuncio);
-                    anuncioEmAndamento = false; // Cancela o processo
-                    
+                    anuncioEmAndamento = false;
                     mTitle.innerText = "VALIDAÇÃO FALHOU!";
                     mContent.innerHTML = `<div class="modal-text" style="color:var(--wrong)">Você voltou muito cedo! A recompensa foi cancelada. Clique abaixo para tentar novamente.</div>`;
-                    
                     mFooter.innerHTML = '';
                     const btnRetry = document.createElement('button');
                     btnRetry.className = 'modal-btn-confirm';
@@ -387,21 +376,36 @@
 
         async function finalizarRecompensa() {
             modal.style.display = 'none';
+            const novoTotalVideos = videosAssistidos + 1;
             let up = tipoRecompensaMoeda ? 
                 { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) } : 
                 { xp: increment(300), videosAssistidos: increment(1) };
             
-            if (videosAssistidos + 1 >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
+            if (novoTotalVideos >= 3) { 
+                up.acertos = 0; 
+                up.videosAssistidos = 0; 
+            }
+            
             await updateDoc(userRef, up);
             openModal("SUCESSO", `Você recebeu 300 ${tipoRecompensaMoeda ? 'moedas' : 'PDL'}!`);
+            
+            // ATENÇÃO: Se o ciclo de 3 vídeos acabou, carrega o quiz automaticamente
+            if (novoTotalVideos >= 3) {
+                setTimeout(() => carregarQuestao(), 500);
+            }
         }
 
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
-            if (bancoPerguntas.length === 0 || acertosNoCiclo >= 10) { 
-                t.innerText = acertosNoCiclo >= 10 ? "META DE ACERTOS ATINGIDA!" : "Sincronizando..."; 
-                c.innerHTML = ""; return; 
+            // Se ainda precisa ver vídeos ou já atingiu o limite diário, limpa o quiz
+            if (videosAssistidos < 3 && acertosNoCiclo >= 10) {
+                t.innerText = "ASSISTA OS ANÚNCIOS PARA LIBERAR";
+                c.innerHTML = ""; return;
             }
+            if (bancoPerguntas.length === 0) { t.innerText = "Sincronizando..."; return; }
+            if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
+            if (acertosNoCiclo >= 10) { t.innerText = "META DE ACERTOS ATINGIDA!"; c.innerHTML = ""; return; }
+
             const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
             let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
             t.innerText = q.pergunta; c.innerHTML = "";
@@ -438,3 +442,4 @@
     </script>
 </body>
 </html>
+        
