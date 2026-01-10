@@ -53,7 +53,22 @@
         .header-section { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
         .title-legends h1 { font-size: 1.6rem; margin: 0; color: var(--gold); text-transform: uppercase; background: linear-gradient(to bottom, var(--gold-bright), var(--gold), var(--gold-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        .elo-badge { border: 1px solid var(--gold); padding: 4px 10px; background: rgba(200, 155, 60, 0.1); color: var(--gold-bright); font-size: 0.65rem; font-weight: bold; text-transform: uppercase; clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%); margin-right: 5px;}
+        /* NOVO ESTILO DO ELO SEM HEXÁGONO */
+        .elo-container { 
+            display: flex; flex-direction: column; align-items: center; min-width: 85px; margin-right: 5px;
+        }
+        .elo-badge { 
+            border: 1px solid var(--gold); padding: 4px 8px; 
+            font-size: 0.65rem; font-weight: bold; text-transform: uppercase; 
+            border-radius: 4px; width: 100%; text-align: center;
+            box-sizing: border-box;
+        }
+        .xp-mini-bar-bg {
+            width: 100%; height: 4px; background: rgba(0,0,0,0.5); 
+            border: 1px solid rgba(200, 155, 60, 0.3); border-radius: 2px; margin-top: 3px; overflow: hidden;
+        }
+        .xp-mini-bar-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
+
         .coin-badge { border: 2px solid var(--gold); padding: 6px 12px; background: rgba(1, 10, 19, 0.9); color: var(--gold); font-weight: 900; }
         
         .hex-frame { background: var(--lol-blue); border: 2px solid var(--gold); position: relative; padding: 12px; display: flex; flex-direction: column; box-sizing: border-box; clip-path: polygon(4% 0, 96% 0, 100% 8%, 100% 92%, 96% 100%, 4% 100%, 0 92%, 0 8%); margin-bottom: 5px; }
@@ -107,7 +122,10 @@
         <div class="header-section">
             <div class="title-legends"><h1>QUIZ LEGENDS</h1></div>
             <div style="display: flex; align-items: center;">
-                <span class="elo-badge" id="txtElo">FERRO V</span>
+                <div class="elo-container">
+                    <span class="elo-badge" id="txtElo">...</span>
+                    <div class="xp-mini-bar-bg"><div id="xpMiniFill" class="xp-mini-bar-fill"></div></div>
+                </div>
                 <div class="coin-badge">🟡 <span id="goldAmount">...</span></div>
             </div>
         </div>
@@ -205,20 +223,25 @@
         let goldDB, acertosNoCiclo, videosAssistidos, totalVideosHoje, jogoInicializado = false, xpDB = 0;
         let userRef = null, nomeUsuario = "Usuário";
 
-        function calcularElo(xp) {
-            if (xp < 500) return "Ferro V";
-            if (xp < 1000) return "Ferro IV";
-            if (xp < 1500) return "Ferro III";
-            if (xp < 2000) return "Ferro II";
-            if (xp < 2500) return "Ferro I";
-            if (xp < 5000) return "Prata";
-            if (xp < 10000) return "Ouro";
-            if (xp < 20000) return "Platina";
-            if (xp < 40000) return "Esmeralda";
-            if (xp < 70000) return "Diamante";
-            if (xp < 100000) return "Mestre";
-            if (xp < 150000) return "Grão-Mestre";
-            return "Desafiante";
+        // CONFIGURAÇÕES DE ELO COM CORES E LIMITES
+        const configElo = [
+            { nome: "Ferro V", min: 0, max: 500, bg: "#2a2a2a", color: "#8a8a8a", bar: "#555" },
+            { nome: "Ferro IV", min: 500, max: 1000, bg: "#2a2a2a", color: "#8a8a8a", bar: "#555" },
+            { nome: "Ferro III", min: 1000, max: 1500, bg: "#2a2a2a", color: "#8a8a8a", bar: "#555" },
+            { nome: "Ferro II", min: 1500, max: 2000, bg: "#2a2a2a", color: "#8a8a8a", bar: "#555" },
+            { nome: "Ferro I", min: 2000, max: 2500, bg: "#2a2a2a", color: "#8a8a8a", bar: "#555" },
+            { nome: "Prata", min: 2500, max: 5000, bg: "#4a5d6e", color: "#e2e2e2", bar: "#a9b9c9" },
+            { nome: "Ouro", min: 5000, max: 10000, bg: "#7a5c12", color: "#f1d37e", bar: "#c89b3c" },
+            { nome: "Platina", min: 10000, max: 20000, bg: "#1d5c5c", color: "#a3e7e7", bar: "#46abb0" },
+            { nome: "Esmeralda", min: 20000, max: 40000, bg: "#0d5c2e", color: "#a3e7bc", bar: "#28a745" },
+            { nome: "Diamante", min: 40000, max: 70000, bg: "#1f3a7a", color: "#b3c7f7", bar: "#5c85d6" },
+            { nome: "Mestre", min: 70000, max: 100000, bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6" },
+            { nome: "Grão-Mestre", min: 100000, max: 150000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" },
+            { nome: "Desafiante", min: 150000, max: 9999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" }
+        ];
+
+        function getEloInfo(xp) {
+            return configElo.find(e => xp >= e.min && xp < e.max) || configElo[configElo.length - 1];
         }
 
         onAuthStateChanged(auth, (user) => {
@@ -235,15 +258,11 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     const hoje = new Date().toLocaleDateString('pt-BR');
-
                     if (data.ultimaDataAcesso !== hoje) { 
                         await updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje }); 
                         return; 
                     }
-                    
-                    // Salva valor anterior para checar transição
                     const acertosAnteriores = acertosNoCiclo;
-
                     goldDB = data.saldo || 0; 
                     acertosNoCiclo = data.acertos || 0; 
                     videosAssistidos = data.videosAssistidos || 0; 
@@ -253,12 +272,9 @@
                     
                     atualizarInterface();
 
-                    // LÓGICA DE VOLTA AUTOMÁTICA: 
-                    // Se o jogo já estava rodando, e os acertos resetaram (viraram 0), volta pro quiz
                     if (jogoInicializado && acertosNoCiclo === 0 && acertosAnteriores >= 10) {
                         carregarQuestao();
                     }
-
                     if (!jogoInicializado) { 
                         jogoInicializado = true; 
                         carregarQuestao(); 
@@ -272,8 +288,21 @@
             document.getElementById('limitDiario').innerText = `${totalVideosHoje}/35`;
             document.getElementById('progressBar').style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
             document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
-            document.getElementById('txtElo').innerText = calcularElo(xpDB);
             
+            // ATUALIZAÇÃO DO ELO E MINI BARRA DE XP
+            const info = getEloInfo(xpDB);
+            const eloBadge = document.getElementById('txtElo');
+            const xpFill = document.getElementById('xpMiniFill');
+            
+            eloBadge.innerText = info.nome;
+            eloBadge.style.backgroundColor = info.bg;
+            eloBadge.style.color = info.color;
+            eloBadge.style.borderColor = info.bar;
+
+            const percXP = ((xpDB - info.min) / (info.max - info.min)) * 100;
+            xpFill.style.width = Math.min(percXP, 100) + "%";
+            xpFill.style.backgroundColor = info.bar;
+
             let metaTexto = metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k";
             document.getElementById('txtMeta').innerText = `Meta: ${metaTexto}`;
             
@@ -292,9 +321,7 @@
                 } else {
                     btnV.innerHTML = "📺 MOEDAS<span>LIMITE ATINGIDO</span>";
                 }
-
                 btnVXP.disabled = false; btnVXP.classList.add('active');
-                
                 if (videosAssistidos < 3) {
                    aviso.innerHTML = `ASSISTA <span style="color:#28a745">${3-videosAssistidos}</span> ANÚNCIOS PARA LIBERAR O QUIZ`;
                 } else {
@@ -339,10 +366,8 @@
         async function processarVideo(isMoeda) {
             const btn = isMoeda ? document.getElementById('btnVideo') : document.getElementById('btnVideoXP');
             if(btn.disabled || !btn.classList.contains('active')) return;
-            
             window.open(linkAnuncioAdsterra, '_blank');
             btn.disabled = true; btn.classList.remove('active');
-            
             let tempo = 10; 
             const intervalo = setInterval(async () => {
                 btn.innerText = `PROCESSANDO... ${tempo}s`;
@@ -358,12 +383,7 @@
         async function finalizarVideoMoeda() {
             const proximoVideoCount = videosAssistidos + 1;
             let dadosUpdate = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-            
-            if (proximoVideoCount >= 3) { 
-                dadosUpdate.acertos = 0; 
-                dadosUpdate.videosAssistidos = 0; 
-            }
-            
+            if (proximoVideoCount >= 3) { dadosUpdate.acertos = 0; dadosUpdate.videosAssistidos = 0; }
             await updateDoc(userRef, dadosUpdate);
             document.getElementById('btnVideo').innerHTML = "📺 +300 MOEDAS <span>LIMITE DIÁRIO</span>";
             openModal("RECOMPENSA", "Você recebeu 300 moedas!");
@@ -372,12 +392,7 @@
         async function finalizarVideoXP() {
             const proximoVideoCount = videosAssistidos + 1;
             let dadosUpdate = { xp: increment(300), videosAssistidos: increment(1) };
-            
-            if (proximoVideoCount >= 3) { 
-                dadosUpdate.acertos = 0; 
-                dadosUpdate.videosAssistidos = 0; 
-            }
-            
+            if (proximoVideoCount >= 3) { dadosUpdate.acertos = 0; dadosUpdate.videosAssistidos = 0; }
             await updateDoc(userRef, dadosUpdate);
             document.getElementById('btnVideoXP').innerHTML = "📺 +300 XP <span>SUBIR DE ELO</span>";
             openModal("RECOMPENSA", "Você recebeu 300 XP!");
