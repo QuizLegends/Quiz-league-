@@ -188,7 +188,6 @@
         const mContent = document.getElementById('modal-body-content');
         const mFooter = document.getElementById('m-footer');
 
-        // --- VARIÁVEIS DE CONTROLE ---
         let tempoRestanteAnuncio = 10;
         let intervaloAnuncio = null;
         let anuncioEmAndamento = false;
@@ -266,7 +265,6 @@
             totalVideosHoje = data.totalVideosHoje || 0;
             nomeUsuario = data.nome || "Usuário";
             pdlInterno = data.xp || 0;
-            
             const infoNovoElo = getEloInfo(pdlInterno);
             if (ultimoEloNome && ultimoEloNome !== infoNovoElo.nome) {
                 exibirAnimacaoElo(infoNovoElo, (pdlInterno >= ultimoPdl));
@@ -326,16 +324,13 @@
             document.getElementById('xpMiniFill').style.width = Math.min(percXP, 100) + "%";
             document.getElementById('xpMiniFill').style.backgroundColor = info.bar;
             document.getElementById('txtMeta').innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k"}`;
-            
             const btnV = document.getElementById('btnVideo');
             const btnVXP = document.getElementById('btnVideoXP');
             const aviso = document.getElementById('avisoStatusQuiz');
-            
             btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
             btnVXP.disabled = (acertosNoCiclo < 10);
             btnV.classList.toggle('active', !btnV.disabled);
             btnVXP.classList.toggle('active', !btnVXP.disabled);
-
             if (acertosNoCiclo < 10) {
                 aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
             } else if (videosAssistidos < 3) {
@@ -346,23 +341,15 @@
         }
 
         function showFloatingPDL(text, color, x, y) {
-            const el = document.createElement('div');
-            el.className = 'floating-pdl';
-            el.innerText = text;
-            el.style.color = color;
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
+            const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
+            document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
         }
 
         document.getElementById('btnVideo').onclick = () => iniciarFluxoAnuncio(true);
         document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio(false);
 
         function iniciarFluxoAnuncio(isMoeda) {
-            tipoRecompensaMoeda = isMoeda;
-            anuncioEmAndamento = true;
-            tempoRestanteAnuncio = 10;
+            tipoRecompensaMoeda = isMoeda; anuncioEmAndamento = true; tempoRestanteAnuncio = 10;
             if(intervaloAnuncio) clearInterval(intervaloAnuncio);
             window.open(linkAnuncioAdsterra, '_blank');
             openModal("VALIDANDO RECOMPENSA", `Permaneça na página do anúncio.<br><div class="contador-video" id="modalContador">10</div>`, 'alert');
@@ -373,24 +360,17 @@
                     const display = document.getElementById('modalContador');
                     if(display) display.innerText = tempoRestanteAnuncio;
                 }
-                if (tempoRestanteAnuncio <= 0) {
-                    clearInterval(intervaloAnuncio);
-                    anuncioEmAndamento = false;
-                    finalizarRecompensa();
-                }
+                if (tempoRestanteAnuncio <= 0) { clearInterval(intervaloAnuncio); anuncioEmAndamento = false; finalizarRecompensa(); }
             }, 1000);
         }
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && anuncioEmAndamento && tempoRestanteAnuncio > 0) {
-                clearInterval(intervaloAnuncio);
-                anuncioEmAndamento = false;
+                clearInterval(intervaloAnuncio); anuncioEmAndamento = false;
                 mTitle.innerText = "VALIDAÇÃO FALHOU!";
-                mContent.innerHTML = `<div class="modal-text" style="color:var(--wrong)">Você voltou muito cedo! A recompensa foi cancelada.</div>`;
+                mContent.innerHTML = `<div class="modal-text" style="color:var(--wrong)">Você voltou muito cedo!</div>`;
                 mFooter.innerHTML = '';
-                const btnRetry = document.createElement('button');
-                btnRetry.className = 'modal-btn-confirm';
-                btnRetry.innerText = 'RE-TENTAR (ABRIR ANÚNCIO)';
+                const btnRetry = document.createElement('button'); btnRetry.className = 'modal-btn-confirm'; btnRetry.innerText = 'RE-TENTAR';
                 btnRetry.onclick = () => { modal.style.display='none'; iniciarFluxoAnuncio(tipoRecompensaMoeda); };
                 mFooter.appendChild(btnRetry);
             }
@@ -399,9 +379,7 @@
         async function finalizarRecompensa() {
             modal.style.display = 'none';
             const novoTotalVideos = videosAssistidos + 1;
-            let up = tipoRecompensaMoeda ? 
-                { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) } : 
-                { xp: increment(300), videosAssistidos: increment(1) };
+            let up = tipoRecompensaMoeda ? { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) } : { xp: increment(300), videosAssistidos: increment(1) };
             if (novoTotalVideos >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
             await updateDoc(userRef, up);
             openModal("SUCESSO", `Você recebeu 300 ${tipoRecompensaMoeda ? 'moedas' : 'PDL'}!`);
@@ -414,7 +392,6 @@
             if (bancoPerguntas.length === 0) { t.innerText = "Sincronizando..."; return; }
             if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
             if (acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
-
             const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
             let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
             t.innerText = q.pergunta; c.innerHTML = "";
@@ -423,15 +400,11 @@
                 b.onclick = async () => {
                     const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
                     const rect = b.getBoundingClientRect();
-                    const x = rect.left + rect.width / 2;
-                    const y = rect.top;
                     if (o.correta) {
-                        b.classList.add('btn-correct');
-                        showFloatingPDL("+10 PDL", "#28a745", x, y);
+                        b.classList.add('btn-correct'); showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
                         await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
                     } else {
-                        b.classList.add('btn-wrong');
-                        showFloatingPDL("-2 PDL", "#dc3545", x, y);
+                        b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
                         await updateDoc(userRef, { xp: increment(-2) });
                     }
                     setTimeout(carregarQuestao, 1200);
@@ -439,6 +412,31 @@
                 c.appendChild(b);
             });
         }
+
+        window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
+
+        // --- FUNÇÃO DE RESGATE BLINDADA (ESTÁ AQUI!) ---
+        document.getElementById('btnResgate').onclick = async () => {
+            const chave = document.getElementById('chavePix').value.trim();
+            if (goldDB < metaAtual || chave.length < 5) { openModal("ERRO", "Saldo insuficiente ou chave Pix inválida."); return; }
+            openModal("CONFIRMAR", `Deseja resgatar R$ ${valorReaisMeta} para: ${chave}?`, 'confirm', async () => {
+                modal.style.display = 'none';
+                try {
+                    await addDoc(collection(db, "resgates"), {
+                        usuarioId: auth.currentUser.uid,
+                        nome: nomeUsuario,
+                        chavePix: chave,
+                        valorGold: Number(metaAtual),
+                        saldoNoMomento: Number(goldDB),
+                        status: "Pendente",
+                        data: new Date().toLocaleString('pt-BR'),
+                        timestamp: Date.now()
+                    });
+                    await updateDoc(userRef, { saldo: increment(-Number(metaAtual)) });
+                    openModal("ENVIADO", "Solicitação feita com sucesso!");
+                } catch (e) { openModal("ERRO", "Falha ao processar."); }
+            });
+        };
 
         let sY = 0;
         const pullDiv = document.getElementById('pull-to-refresh');
@@ -448,8 +446,7 @@
             const p = e.touches[0].pageY - sY;
             if(window.scrollY === 0 && p > 0) {
                 const move = Math.min(p * 0.4, 70);
-                pullDiv.style.transform = `translateY(${move}px)`;
-                mainDiv.style.transform = `translateY(${move}px)`;
+                pullDiv.style.transform = `translateY(${move}px)`; mainDiv.style.transform = `translateY(${move}px)`;
                 if(move >= 60) pullDiv.querySelector('.refresh-badge').innerText = "Solte para Recarregar";
             }
         }, {passive:true});
@@ -457,37 +454,18 @@
             if (new WebKitCSSMatrix(window.getComputedStyle(pullDiv).transform).m42 >= 60) location.reload();
             else { pullDiv.style.transform = 'translateY(0)'; mainDiv.style.transform = 'translateY(0)'; }
         });
-
-        window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
-        document.getElementById('btnResgate').onclick = () => {
-            const chave = document.getElementById('chavePix').value.trim();
-            if (goldDB < metaAtual || chave.length < 5) { openModal("ERRO", "Verifique saldo ou chave Pix."); return; }
-            openModal("CONFIRMAR", "Sua chave Pix está correta?", 'confirm', async () => {
-                modal.style.display = 'none';
-                await addDoc(collection(db, "resgates"), { usuarioId: auth.currentUser.uid, nome: nomeUsuario, chavePix: chave, valorGold: metaAtual, status: "Pendente", data: new Date().toLocaleString('pt-BR') });
-                await updateDoc(userRef, { saldo: increment(-metaAtual) });
-                openModal("ENVIADO", "Solicitação feita com sucesso!");
-            });
-        };
     </script>
 
     <div id="footer-ad-container" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; border-top: 2px solid #c89b3c;">
         <div id="adsterra-banner">
             <script type="text/javascript">
-                atOptions = {
-                    'key' : '48065e37c41fa1904ce5bbacf7c25eb4',
-                    'format' : 'iframe',
-                    'height' : 50,
-                    'width' : 320,
-                    'params' : {}
-                };
+                atOptions = { 'key' : '48065e37c41fa1904ce5bbacf7c25eb4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
             </script>
             <script type="text/javascript" src="https://www.highperformanceformat.com/48065e37c41fa1904ce5bbacf7c25eb4/invoke.js"></script>
         </div>
     </div>
 </body>
 </html>
-                    
+                
+
         
-            
-            
