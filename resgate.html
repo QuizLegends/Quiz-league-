@@ -20,53 +20,23 @@
             overscroll-behavior-y: contain;
         }
 
-        /* --- ANIMAÇÃO DE TRANSIÇÃO DE ELO --- */
+        /* --- ANIMAÇÕES --- */
         #elo-transition-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 9999; flex-direction: column;
+            align-items: center; justify-content: center; backdrop-filter: blur(10px);
             animation: fadeInElo 0.5s ease forwards;
         }
-        .elo-ani-title {
-            color: var(--gold);
-            font-size: 1.1rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-        }
-        .elo-ani-name {
-            font-size: 2.8rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            text-align: center;
-            text-shadow: 0 0 20px currentColor;
-            animation: scaleUpElo 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .elo-ani-title { color: var(--gold); font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; }
+        .elo-ani-name { font-size: 2.8rem; font-weight: 900; text-transform: uppercase; text-align: center; text-shadow: 0 0 20px currentColor; animation: scaleUpElo 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
         @keyframes fadeInElo { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleUpElo { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* --- NOVO: ANIMAÇÃO DO PDL FLUTUANTE --- */
-        .floating-pdl {
-            position: fixed;
-            pointer-events: none;
-            font-weight: 900;
-            font-size: 1.2rem;
-            z-index: 5000;
-            animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 10px rgba(0,0,0,0.8);
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
+        .floating-pdl { position: fixed; pointer-events: none; font-weight: 900; font-size: 1.2rem; z-index: 5000; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
 
+        /* --- MODAL E COMPONENTES --- */
         #custom-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.9); z-index: 3000; align-items: center; justify-content: center;
@@ -76,8 +46,7 @@
             width: 85%; max-width: 350px; background: var(--lol-blue); border: 2px solid var(--gold);
             padding: 25px; text-align: center; position: relative;
             clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%);
-            box-shadow: 0 0 30px rgba(200, 155, 60, 0.4);
-            animation: modalPop 0.3s ease-out;
+            box-shadow: 0 0 30px rgba(200, 155, 60, 0.4); animation: modalPop 0.3s ease-out;
             max-height: 80vh; overflow-y: auto;
         }
         @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -85,12 +54,9 @@
         .modal-title { color: var(--gold); font-weight: 900; text-transform: uppercase; margin-bottom: 12px; font-size: 1.1rem; }
         .modal-text { font-size: 0.9rem; line-height: 1.4; color: var(--gold-bright); margin-bottom: 20px; }
         .modal-footer { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        
-        .elo-list-item {
-            display: flex; justify-content: space-between; padding: 8px 12px;
-            border: 1px solid rgba(200, 155, 60, 0.2); margin-bottom: 4px;
-            font-size: 0.75rem; font-weight: bold; border-radius: 4px;
-        }
+
+        /* NOVO: Contador de Anúncio */
+        .contador-video { font-size: 2.5rem; font-weight: 900; color: var(--gold); margin: 15px 0; text-shadow: 0 0 15px rgba(200, 155, 60, 0.6); }
 
         .modal-btn-confirm { 
             background: linear-gradient(to bottom, var(--gold), var(--gold-dark)); border: 1px solid var(--gold-bright);
@@ -103,7 +69,6 @@
         
         .elo-container { display: flex; flex-direction: column; align-items: center; min-width: 95px; margin-right: 5px; cursor: pointer; }
         .elo-badge { border: 1px solid var(--gold); padding: 4px 6px; font-size: 0.6rem; font-weight: bold; text-transform: uppercase; border-radius: 4px; width: 100%; text-align: center; box-sizing: border-box; transition: 0.2s; }
-        .elo-badge:active { transform: scale(0.95); }
         .xp-mini-bar-bg { width: 100%; height: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(200, 155, 60, 0.3); border-radius: 2px; margin-top: 3px; overflow: hidden; }
         .xp-mini-bar-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
 
@@ -117,10 +82,8 @@
         .video-buttons-container { display: flex; gap: 8px; margin-top: 8px; }
         .video-btn { flex: 1; background: #1e2328; border: 1px solid #333; color: #666; padding: 12px 5px; font-weight: bold; text-transform: uppercase; cursor: not-allowed; font-size: 0.55rem; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .video-btn.active { background: linear-gradient(to bottom, #c8a355, #785a28); border: 1px solid var(--gold-bright); color: #f0e6d2; cursor: pointer; box-shadow: 0 0 10px rgba(200, 155, 60, 0.4); }
-        .video-btn span { font-size: 0.5rem; opacity: 0.8; margin-top: 2px; }
 
-        .resgate-selector { display: flex; justify-content: flex-start; gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .resgate-selector::-webkit-scrollbar { display: none; }
+        .resgate-selector { display: flex; justify-content: flex-start; gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .resgate-opt { flex: 0 0 auto; min-width: 85px; background: #010a13; border: 1px solid var(--gold-dark); color: var(--gold); padding: 12px 5px; font-size: 0.8rem; font-weight: 900; cursor: pointer; text-align: center; }
         .resgate-opt.active { background: var(--gold); color: #000; border-color: var(--gold-bright); }
         input { width: 100%; padding: 12px; background: #010a13; color: white; border: 1px solid var(--gold-dark); margin: 8px 0; box-sizing: border-box; }
@@ -136,23 +99,19 @@
 <body>
 
     <div id="elo-transition-overlay">
-        <div class="elo-ani-title" id="elo-status-label">NOVO ELO ALCANÇADO</div>
+        <div class="elo-ani-title" id="elo-status-label">PROMOÇÃO DE ELO</div>
         <div class="elo-ani-name" id="elo-ani-text">PLATINA IV</div>
     </div>
 
     <div id="custom-modal">
         <div class="modal-content">
             <div class="modal-title" id="m-title">AVISO</div>
-            <div id="modal-body-content">
-                <div class="modal-text" id="m-text">Sua mensagem aqui.</div>
-            </div>
+            <div id="modal-body-content"><div class="modal-text" id="m-text">Sua mensagem aqui.</div></div>
             <div class="modal-footer" id="m-footer"></div>
         </div>
     </div>
 
-    <div id="pull-to-refresh">
-        <div class="refresh-badge">Solte para Recarregar</div>
-    </div>
+    <div id="pull-to-refresh"><div class="refresh-badge">Solte para Recarregar</div></div>
 
     <div class="app-container" id="main-content">
         <div class="header-section">
@@ -175,36 +134,22 @@
             
             <div style="text-align: center;">
                 <span style="font-size: 0.65rem; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 5px;">Limite Moedas Diário: <span id="limitDiario">0/35</span></span>
-                
                 <div class="video-buttons-container">
-                    <button id="btnVideo" class="video-btn">
-                        📺 +300 MOEDAS
-                        <span>LIMITE DIÁRIO</span>
-                    </button>
-                    <button id="btnVideoXP" class="video-btn">
-                        📺 +300 PDL
-                        <span>SUBIR DE ELO</span>
-                    </button>
+                    <button id="btnVideo" class="video-btn">📺 +300 MOEDAS <span>LIMITE DIÁRIO</span></button>
+                    <button id="btnVideoXP" class="video-btn">📺 +300 PDL <span>SUBIR DE ELO</span></button>
                 </div>
             </div>
         </div>
 
         <div class="hex-frame">
-            <div class="progress-bg" style="background: #000; height: 10px; border: 1px solid var(--gold-dark);">
-                <div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 5px 0; font-weight: bold;">
-                <span id="txtMeta">Meta: 195k</span>
-                <span id="txtPorcentagem">0%</span>
-            </div>
+            <div class="progress-bg" style="background: #000; height: 10px; border: 1px solid var(--gold-dark);"><div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 5px 0; font-weight: bold;"><span id="txtMeta">Meta: 195k</span><span id="txtPorcentagem">0%</span></div>
             
             <div class="resgate-selector">
                 <div class="resgate-opt active" onclick="setResgate(this, 195000, '0,50')">R$ 0,50</div>
                 <div class="resgate-opt" onclick="setResgate(this, 390000, '1,00')">R$ 1,00</div>
                 <div class="resgate-opt" onclick="setResgate(this, 1950000, '5,00')">R$ 5,00</div>
                 <div class="resgate-opt" onclick="setResgate(this, 39000000, '100,00')">R$ 100,00</div>
-                <div class="resgate-opt" onclick="setResgate(this, 78000000, '200,00')">R$ 200,00</div>
-                <div class="resgate-opt" onclick="setResgate(this, 117000000, '300,00')">R$ 300,00</div>
             </div>
 
             <input type="text" id="chavePix" placeholder="SUA CHAVE PIX">
@@ -219,14 +164,12 @@
         </script>
         <script type="text/javascript" src="https://www.highperformanceformat.com/48065e37c41fa1904ce5bbacf7c25eb4/invoke.js"></script>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         let bancoPerguntas = [];
-
         const firebaseConfig = { 
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E", 
             authDomain: "quizlegends-f58fc.firebaseapp.com", 
@@ -245,6 +188,17 @@
         const mContent = document.getElementById('modal-body-content');
         const mFooter = document.getElementById('m-footer');
 
+        // --- VARIÁVEIS DE CONTROLE DA TRAVA ---
+        let tempoRestanteAnuncio = 10;
+        let intervaloAnuncio = null;
+        let anuncioEmAndamento = false;
+        let tipoRecompensaMoeda = true;
+        const linkAnuncioAdsterra = "https://www.effectivegatecpm.com/jt82yz19rk?key=427afd02462871777b7bf2742e74b44f";
+
+        let metaAtual = 195000, valorReaisMeta = "0,50";
+        let goldDB, acertosNoCiclo, videosAssistidos, totalVideosHoje, jogoInicializado = false;
+        let pdlInterno = 0, userRef = null, nomeUsuario = "Usuário", carregadoPelaPrimeiraVez = false, ultimoEloNome = null;
+
         async function carregarBanco() {
             try {
                 const modulo = await import('./pergunta.js');
@@ -254,32 +208,7 @@
         }
         carregarBanco();
 
-        function showFloatingPDL(text, color, x, y) {
-            const el = document.createElement('div');
-            el.className = 'floating-pdl';
-            el.innerText = text;
-            el.style.color = color;
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
-        }
-
-        function openModal(title, text, type = 'alert', onConfirm = null) {
-            mTitle.innerText = title; 
-            mContent.innerHTML = `<div class="modal-text">${text}</div>`;
-            mFooter.innerHTML = '';
-            if (type === 'confirm') {
-                const bC = document.createElement('button'); bC.className = 'modal-btn-confirm'; bC.innerText = 'CONFIRMAR'; bC.onclick = onConfirm;
-                const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'VOLTAR'; bX.onclick = () => modal.style.display = 'none';
-                mFooter.appendChild(bC); mFooter.appendChild(bX);
-            } else {
-                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => modal.style.display = 'none';
-                mFooter.appendChild(bO);
-            }
-            modal.style.display = 'flex';
-        }
-
+        // --- SISTEMA DE ELO (Configurações) ---
         const configElo = [];
         const divisoes = ["V", "IV", "III", "II", "I"];
         const coresElos = {
@@ -308,40 +237,9 @@
         configElo.push({ nome: "GRÃO-MESTRE", min: 80000, max: 100000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" });
         configElo.push({ nome: "DESAFIANTE", min: 100000, max: 9999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" });
 
-        function getEloInfo(valorXP) { 
-            return configElo.find(e => valorXP >= e.min && valorXP < e.max) || configElo[configElo.length - 1]; 
-        }
+        function getEloInfo(valorXP) { return configElo.find(e => valorXP >= e.min && valorXP < e.max) || configElo[configElo.length - 1]; }
 
-        document.getElementById('btnVerElos').onclick = () => {
-            mTitle.innerText = "SISTEMA DE LIGA";
-            let html = `<div style="text-align:left; margin-bottom:15px; font-size:0.7rem; color:var(--gold-bright); border-bottom:1px solid var(--gold-dark); padding-bottom:10px;">
-                ✅ ACERTO: <span style="color:#28a745">+10 PDL</span> / ❌ ERRO: <span style="color:#dc3545">-2 PDL</span>
-            </div>`;
-            const marcosVisuais = [
-                {n: "FERRO V", p: "0"}, {n: "PRATA V", p: "2.500"}, {n: "OURO V", p: "5.000"},
-                {n: "PLATINA V", p: "15.000"}, {n: "ESMERALDA V", p: "25.000"}, {n: "DIAMANTE V", p: "40.000"},
-                {n: "MESTRE", p: "60.000"}, {n: "GRÃO-MESTRE", p: "80.000"}, {n: "DESAFIANTE", p: "100.000"}
-            ];
-            marcosVisuais.forEach(item => {
-                const eloRef = configElo.find(x => x.nome === item.n) || configElo.find(x => x.nome === item.n.split(' ')[0]);
-                html += `
-                <div class="elo-list-item" style="background:${eloRef.bg}; color:${eloRef.color}; border-color:${eloRef.bar}">
-                    <span>${item.n}</span>
-                    <span>${item.p} PDL</span>
-                </div>`;
-            });
-            mContent.innerHTML = html;
-            mFooter.innerHTML = `<button class="modal-btn-confirm" onclick="document.getElementById('custom-modal').style.display='none'">FECHAR</button>`;
-            modal.style.display = 'flex';
-        };
-
-        let metaAtual = 195000, valorReaisMeta = "0,50";
-        let goldDB, acertosNoCiclo, videosAssistidos, totalVideosHoje, jogoInicializado = false;
-        let pdlInterno = 0; 
-        let userRef = null, nomeUsuario = "Usuário";
-        let carregadoPelaPrimeiraVez = false;
-        let ultimoEloNome = null; // Rastreia mudança de elo
-
+        // --- LÓGICA DE FIREBASE ---
         onAuthStateChanged(auth, (user) => {
             if (user) { 
                 userRef = doc(db, "usuarios", user.uid); 
@@ -371,14 +269,9 @@
             totalVideosHoje = data.totalVideosHoje || 0;
             nomeUsuario = data.nome || "Usuário";
             
-            // Lógica de Detecção de Mudança de Elo
             const novoPdl = data.xp || 0;
             const infoNovoElo = getEloInfo(novoPdl);
-
-            if (ultimoEloNome && ultimoEloNome !== infoNovoElo.nome) {
-                exibirAnimacaoElo(infoNovoElo, novoPdl > pdlInterno);
-            }
-
+            if (ultimoEloNome && ultimoEloNome !== infoNovoElo.nome) exibirAnimacaoElo(infoNovoElo, novoPdl > pdlInterno);
             pdlInterno = novoPdl;
             ultimoEloNome = infoNovoElo.nome;
 
@@ -387,27 +280,20 @@
             jogoInicializado = true;
         }
 
-        // Função da Animação de Elo
-        function exibirAnimacaoElo(infoElo, subiu) {
-            const overlay = document.getElementById('elo-transition-overlay');
-            const label = document.getElementById('elo-status-label');
-            const text = document.getElementById('elo-ani-text');
-
-            label.innerText = subiu ? "PROMOÇÃO DE ELO" : "QUEDA DE ELO";
-            label.style.color = subiu ? "#28a745" : "#dc3545";
-            
-            text.innerText = infoElo.nome;
-            text.style.color = infoElo.color;
-            
-            overlay.style.display = 'flex';
-
-            setTimeout(() => {
-                overlay.style.animation = "fadeInElo 0.5s ease reverse";
-                setTimeout(() => { 
-                    overlay.style.display = 'none'; 
-                    overlay.style.animation = "fadeInElo 0.5s ease";
-                }, 450);
-            }, 3000);
+        // --- FUNÇÕES DE INTERFACE ---
+        function openModal(title, text, type = 'alert', onConfirm = null) {
+            mTitle.innerText = title; 
+            mContent.innerHTML = `<div class="modal-text">${text}</div>`;
+            mFooter.innerHTML = '';
+            if (type === 'confirm') {
+                const bC = document.createElement('button'); bC.className = 'modal-btn-confirm'; bC.innerText = 'CONFIRMAR'; bC.onclick = onConfirm;
+                const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'VOLTAR'; bX.onclick = () => modal.style.display = 'none';
+                mFooter.appendChild(bC); mFooter.appendChild(bX);
+            } else {
+                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => modal.style.display = 'none';
+                mFooter.appendChild(bO);
+            }
+            modal.style.display = 'flex';
         }
 
         function atualizarInterface() {
@@ -419,9 +305,7 @@
             const info = getEloInfo(pdlInterno);
             const eloBadge = document.getElementById('txtElo');
             eloBadge.innerText = info.nome;
-            eloBadge.style.backgroundColor = info.bg;
-            eloBadge.style.color = info.color;
-            eloBadge.style.borderColor = info.bar;
+            eloBadge.style.backgroundColor = info.bg; eloBadge.style.color = info.color; eloBadge.style.borderColor = info.bar;
 
             const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
             document.getElementById('xpMiniFill').style.width = Math.min(percXP, 100) + "%";
@@ -447,61 +331,60 @@
             }
         }
 
-        window.setResgate = (el, v, r) => { 
-            metaAtual = v; valorReaisMeta = r; 
-            document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); 
-            el.classList.add('active'); 
-            atualizarInterface(); 
-        }
-
-        document.getElementById('btnResgate').onclick = () => {
-            const chave = document.getElementById('chavePix').value.trim();
-            if (goldDB < metaAtual) { openModal("SALDO INSUFICIENTE", "Atinga a meta de moedas para resgatar."); return; }
-            if (chave.length < 5) { openModal("CHAVE PIX INVÁLIDA", "Insira sua chave Pix corretamente."); return; }
-            openModal("ATENÇÃO!", "Verifique se sua chave Pix está correta!", 'confirm', enviarResgateFirebase);
-        };
-
-        async function enviarResgateFirebase() {
-            const chave = document.getElementById('chavePix').value.trim();
-            modal.style.display = 'none';
-            try {
-                await addDoc(collection(db, "resgates"), { 
-                    usuarioId: auth.currentUser.uid, 
-                    nome: nomeUsuario, 
-                    email: auth.currentUser.email,
-                    chavePix: chave, 
-                    valorGold: metaAtual, 
-                    valorReais: valorReaisMeta, 
-                    status: "Pendente", 
-                    data: new Date().toLocaleString('pt-BR'), 
-                    timestamp: Date.now() 
-                });
-                await updateDoc(userRef, { saldo: increment(-metaAtual) });
-                document.getElementById('chavePix').value = "";
-                openModal("SOLICITAÇÃO FEITA", "O envio do Pix pode demorar até 2 horas.");
-            } catch (e) { openModal("ERRO", "Falha ao processar resgate."); }
-        }
-
-        const linkAnuncioAdsterra = "https://www.effectivegatecpm.com/jt82yz19rk?key=427afd02462871777b7bf2742e74b44f";
-
+        // --- NOVO SISTEMA DE TRAVA DE ANÚNCIOS ---
         document.getElementById('btnVideo').onclick = () => processarVideo(true);
         document.getElementById('btnVideoXP').onclick = () => processarVideo(false);
 
         async function processarVideo(isMoeda) {
             const btn = isMoeda ? document.getElementById('btnVideo') : document.getElementById('btnVideoXP');
             if(btn.disabled || !btn.classList.contains('active')) return;
+
+            tipoRecompensaMoeda = isMoeda;
+            anuncioEmAndamento = true;
+            tempoRestanteAnuncio = 10;
+
             window.open(linkAnuncioAdsterra, '_blank');
-            btn.disabled = true; btn.classList.remove('active');
-            let tempo = 10; 
-            const intervalo = setInterval(async () => {
-                btn.innerText = `PROCESSANDO... ${tempo}s`;
-                tempo--;
-                if(tempo < 0) {
-                    clearInterval(intervalo);
-                    isMoeda ? await finalizarVideoMoeda() : await finalizarVideoPDL();
-                    btn.innerText = isMoeda ? "📺 +300 MOEDAS" : "📺 +300 PDL";
+
+            openModal(
+                "VALIDANDO RECOMPENSA", 
+                `Não feche a página do anúncio por 10 segundos para validar sua recompensa.<br><div class="contador-video" id="modalContador">10</div>`, 
+                'alert'
+            );
+            
+            mFooter.innerHTML = '<span style="font-size:0.75rem; color:var(--gold-dark); font-weight:bold;">AGUARDE...</span>';
+            iniciarContadorAnuncio();
+        }
+
+        function iniciarContadorAnuncio() {
+            if(intervaloAnuncio) clearInterval(intervaloAnuncio);
+            intervaloAnuncio = setInterval(() => {
+                tempoRestanteAnuncio--;
+                const display = document.getElementById('modalContador');
+                if(display) display.innerText = tempoRestanteAnuncio;
+
+                if (tempoRestanteAnuncio <= 0) {
+                    clearInterval(intervaloAnuncio);
+                    validarRecompensaFinal();
                 }
             }, 1000);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && anuncioEmAndamento && tempoRestanteAnuncio > 0) {
+                tempoRestanteAnuncio = 10;
+                const display = document.getElementById('modalContador');
+                if(display) display.innerText = "10";
+                
+                mTitle.innerText = "TEMPO RESETADO!";
+                mContent.innerHTML = `<div class="modal-text" style="color:var(--wrong)">Você voltou muito cedo! Permaneça no anúncio por 10 segundos.<br><div class="contador-video" id="modalContador">10</div></div>`;
+                mFooter.innerHTML = '<span style="font-size:0.75rem; color:var(--wrong); font-weight:bold;">REINICIANDO...</span>';
+            }
+        });
+
+        async function validarRecompensaFinal() {
+            anuncioEmAndamento = false;
+            modal.style.display = 'none';
+            tipoRecompensaMoeda ? await finalizarVideoMoeda() : await finalizarVideoPDL();
         }
 
         async function finalizarVideoMoeda() {
@@ -520,52 +403,55 @@
             openModal("RECOMPENSA", "Você recebeu 300 PDL!");
         }
 
+        // --- LÓGICA DO QUIZ E OUTROS (Restante do código original) ---
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
             if (bancoPerguntas.length === 0) { t.innerText = "Sincronizando perguntas..."; return; }
-            if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) {
-                t.innerText = "LIMITE DIÁRIO ATINGIDO, VOLTE AMANHÃ!";
-                t.style.color = "var(--gold)"; c.innerHTML = ""; return;
-            }
-            if (acertosNoCiclo >= 10) { 
-                t.innerText = "META DE ACERTOS ATINGIDA!"; t.style.color = "var(--gold)"; c.innerHTML = ""; return; 
-            }
-            t.style.color = "var(--gold-bright)";
+            if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; return; }
+            if (acertosNoCiclo >= 10) { t.innerText = "META DE ACERTOS ATINGIDA!"; c.innerHTML = ""; return; }
+            
             const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
             let opts = q.opcoes.map((o, i) => { return { texto: o, correta: i === q.correta }; }).sort(() => Math.random() - 0.5);
-            t.innerText = q.pergunta; 
-            c.innerHTML = "";
+            t.innerText = q.pergunta; c.innerHTML = "";
             opts.forEach((o) => {
-                const b = document.createElement('button'); 
-                b.className = "option-btn"; 
-                b.innerText = o.texto;
-                b.onclick = async (event) => {
-                    const all = c.querySelectorAll('button'); 
-                    all.forEach(x => x.disabled = true);
-                    
+                const b = document.createElement('button'); b.className = "option-btn"; b.innerText = o.texto;
+                b.onclick = async () => {
+                    const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
                     const rect = b.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top;
-
-                    if (o.correta) { 
-                        b.classList.add('btn-correct'); 
-                        showFloatingPDL("+10 PDL", "#28a745", centerX, centerY);
-                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) }); 
-                    } else { 
-                        b.classList.add('btn-wrong'); 
-                        showFloatingPDL("-2 PDL", "#dc3545", centerX, centerY);
+                    if (o.correta) {
+                        b.classList.add('btn-correct'); showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
+                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
+                    } else {
+                        b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
                         await updateDoc(userRef, { xp: increment(-2) });
-                        all.forEach(btnInner => {
-                            if(opts.find(opt => opt.texto === btnInner.innerText && opt.correta)) btnInner.classList.add('btn-correct');
-                        }); 
                     }
                     setTimeout(carregarQuestao, 1200);
                 };
                 c.appendChild(b);
             });
         }
+
+        function showFloatingPDL(text, color, x, y) {
+            const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
+            document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
+        }
+
+        window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
         
-        let sY = 0; 
+        document.getElementById('btnResgate').onclick = () => {
+            const chave = document.getElementById('chavePix').value.trim();
+            if (goldDB < metaAtual) { openModal("SALDO INSUFICIENTE", "Atinga a meta de moedas."); return; }
+            if (chave.length < 5) { openModal("CHAVE PIX INVÁLIDA", "Insira corretamente."); return; }
+            openModal("ATENÇÃO!", "Sua chave Pix está correta?", 'confirm', async () => {
+                modal.style.display = 'none';
+                await addDoc(collection(db, "resgates"), { usuarioId: auth.currentUser.uid, nome: nomeUsuario, chavePix: chave, valorGold: metaAtual, status: "Pendente", data: new Date().toLocaleString('pt-BR') });
+                await updateDoc(userRef, { saldo: increment(-metaAtual) });
+                openModal("SOLICITAÇÃO FEITA", "Envio em até 2 horas.");
+            });
+        };
+
+        // --- PULL TO REFRESH ---
+        let sY = 0;
         window.addEventListener('touchstart', (e) => { if(window.scrollY === 0) sY = e.touches[0].pageY; }, {passive:true});
         window.addEventListener('touchmove', (e) => {
             const p = e.touches[0].pageY - sY;
@@ -577,10 +463,7 @@
         }, {passive:true});
         window.addEventListener('touchend', () => {
             if (new WebKitCSSMatrix(window.getComputedStyle(document.getElementById('pull-to-refresh')).transform).m42 >= 60) location.reload();
-            else { 
-                document.getElementById('pull-to-refresh').style.transform = 'translateY(0)'; 
-                document.getElementById('main-content').style.transform = 'translateY(0)'; 
-            }
+            else { document.getElementById('pull-to-refresh').style.transform = 'translateY(0)'; document.getElementById('main-content').style.transform = 'translateY(0)'; }
         });
     </script>
 </body>
