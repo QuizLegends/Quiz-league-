@@ -108,6 +108,7 @@
                     const id = pedido.id;
                     const saldoAntigo = Number(data.goldAnterior) || 0;
                     const custo = Number(data.valorGold) || 0;
+                    const saldoFinal = Number(data.goldPosResgate) || (saldoAntigo - custo); // Pega o valor do banco ou calcula
                     const isSuspeito = saldoAntigo < custo;
 
                     const card = document.createElement('div');
@@ -129,6 +130,7 @@
                                 <strong>📊 Auditoria de Saldo:</strong><br>
                                 • Saldo Inicial: ${saldoAntigo.toLocaleString()} moedas<br>
                                 • Custo Saque: -${custo.toLocaleString()} moedas<br>
+                                • Saldo Final: ${saldoFinal.toLocaleString()} moedas<br>
                                 ${isSuspeito ? '<br><strong style="color:var(--erro)">⚠️ ALERTA: SALDO INSUFICIENTE!</strong>' : ''}
                             </div>
                         </div>
@@ -136,7 +138,6 @@
                     `;
                     container.appendChild(card);
 
-                    // BUSCAR NOME REAL DO USUÁRIO NA COLEÇÃO "usuarios"
                     try {
                         const userDoc = await getDoc(doc(db, "usuarios", data.usuarioId));
                         if (userDoc.exists()) {
