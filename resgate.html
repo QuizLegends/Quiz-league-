@@ -187,7 +187,7 @@
         let metaAtual = 15800, valorReaisMeta = "0,50";
         let goldDB, acertosNoCiclo, videosAssistidos, totalVideosHoje, jogoInicializado = false;
         let userRef = null;
-        let nomeUsuario = "Usuário"; // Para enviar ao Admin
+        let nomeUsuario = "Usuário";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -239,9 +239,13 @@
             } else if (acertosNoCiclo < 10) {
                 btnV.disabled = true; btnV.classList.remove('active');
                 aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR VÍDEO`;
-            } else {
+            } else if (videosAssistidos < 3) {
                 btnV.disabled = false; btnV.classList.add('active');
                 aviso.innerHTML = `ASSISTA <span style="color:#28a745">${3-videosAssistidos}</span> VÍDEOS PARA LIBERAR O QUIZ`;
+            } else {
+                // Caso em que já assistiu os 3, mas o snapshot ainda não resetou os acertos
+                btnV.disabled = true; btnV.classList.remove('active');
+                aviso.innerText = "CARREGANDO NOVO QUIZ...";
             }
         }
 
@@ -260,20 +264,19 @@
             openModal("ATENÇÃO!", "Verifique se sua chave Pix está correta. Após o envio não será possível modificá-la!", 'confirm', enviarResgateFirebase);
         };
 
-        // --- FUNÇÃO ATUALIZADA PARA O ADMIN ---
         async function enviarResgateFirebase() {
             const chave = document.getElementById('chavePix').value.trim();
             const saldoDepois = goldDB - metaAtual;
             try {
                 await addDoc(collection(db, "resgates"), { 
-                    usuarioId: auth.currentUser.uid, // Campo padronizado
-                    uid: auth.currentUser.uid,        // Mantido por segurança
-                    nome: nomeUsuario,               // Envia o nome real para o Admin
+                    usuarioId: auth.currentUser.uid,
+                    uid: auth.currentUser.uid,
+                    nome: nomeUsuario,
                     email: auth.currentUser.email,
                     chavePix: chave, 
-                    valorGold: metaAtual,            // Custo do saque
-                    goldAnterior: goldDB,            // Saldo que ele tinha (ESSENCIAL PARA O ADMIN)
-                    goldPosResgate: saldoDepois,      // Saldo que sobrou
+                    valorGold: metaAtual, 
+                    goldAnterior: goldDB, 
+                    goldPosResgate: saldoDepois, 
                     valorReais: valorReaisMeta,
                     status: "Pendente", 
                     data: new Date().toLocaleString('pt-BR'), 
@@ -307,21 +310,32 @@
         };
 
         async function finalizarVideo() {
+            const proximoVideoCount = videosAssistidos + 1;
             let dadosUpdate = { 
                 saldo: increment(300), 
                 videosAssistidos: increment(1), 
                 totalVideosHoje: increment(1) 
             };
 
-            if (videosAssistidos + 1 >= 3) { 
+            // Se for o terceiro vídeo, resetamos o ciclo para voltar ao quiz imediatamente
+            if (proximoVideoCount >= 3) { 
                 dadosUpdate.acertos = 0; 
                 dadosUpdate.videosAssistidos = 0; 
+                document.getElementById('avisoStatusQuiz').innerText = "LIBERANDO QUESTÕES...";
             }
 
-            await updateDoc(userRef, dadosUpdate);
-            document.getElementById('btnVideo').innerText = "📺 ASSISTIR ANÚNCIO (+300 Moedas)";
-            openModal("RECOMPENSA", "Você recebeu 300 moedas!");
-            carregarQuestao();
+            try {
+                await updateDoc(userRef, dadosUpdate);
+                document.getElementById('btnVideo').innerText = "📺 ASSISTIR ANÚNCIO (+300 Moedas)";
+                
+                // Pequeno delay para o Firestore propagar e carregar a questão limpa
+                setTimeout(() => {
+                    openModal("RECOMPENSA", "Você recebeu 300 moedas!");
+                    carregarQuestao();
+                }, 600);
+            } catch (e) { 
+                openModal("ERRO", "Falha ao salvar recompensa."); 
+            }
         }
 
         function carregarQuestao() {
@@ -332,6 +346,7 @@
                 c.innerHTML = "";
                 return;
             }
+            // Se acertos >= 10, exibe tela de bloqueio do vídeo
             if (acertosNoCiclo >= 10) { 
                 t.innerText = "META DE ACERTOS ATINGIDA!"; 
                 t.style.color = "var(--gold)"; 
