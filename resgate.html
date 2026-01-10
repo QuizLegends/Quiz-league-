@@ -188,11 +188,12 @@
         const mContent = document.getElementById('modal-body-content');
         const mFooter = document.getElementById('m-footer');
 
-        // --- TRAVA DE ANÚNCIOS ---
+        // --- TRAVA DE ANÚNCIOS (LÓGICA REFEITA) ---
         let tempoRestanteAnuncio = 10;
         let intervaloAnuncio = null;
         let anuncioEmAndamento = false;
         let tipoRecompensaMoeda = true;
+        let idCicloAtual = 0; // Token para invalidar processos antigos
         const linkAnuncioAdsterra = "https://www.effectivegatecpm.com/jt82yz19rk?key=427afd02462871777b7bf2742e74b44f";
 
         let metaAtual = 195000, valorReaisMeta = "0,50";
@@ -260,21 +261,16 @@
                 await updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje }); 
                 return; 
             }
-            const acAnterior = acertosNoCiclo;
-            goldDB = data.saldo || 0;
             acertosNoCiclo = data.acertos || 0;
+            goldDB = data.saldo || 0;
             videosAssistidos = data.videosAssistidos || 0;
             totalVideosHoje = data.totalVideosHoje || 0;
             nomeUsuario = data.nome || "Usuário";
-            
-            const novoPdl = data.xp || 0;
-            const infoNovoElo = getEloInfo(novoPdl);
-            if (ultimoEloNome && ultimoEloNome !== infoNovoElo.nome) exibirAnimacaoElo(infoNovoElo, novoPdl > pdlInterno);
-            pdlInterno = novoPdl;
+            pdlInterno = data.xp || 0;
+            const infoNovoElo = getEloInfo(pdlInterno);
+            if (ultimoEloNome && ultimoEloNome !== infoNovoElo.nome) exibirAnimacaoElo(infoNovoElo, true);
             ultimoEloNome = infoNovoElo.nome;
-
             atualizarInterface();
-            if (jogoInicializado && acertosNoCiclo === 0 && acAnterior >= 10) carregarQuestao();
             jogoInicializado = true;
         }
 
@@ -301,7 +297,7 @@
                 const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'VOLTAR'; bX.onclick = () => modal.style.display = 'none';
                 mFooter.appendChild(bC); mFooter.appendChild(bX);
             } else {
-                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => modal.style.display = 'none';
+                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => { if(!anuncioEmAndamento) modal.style.display = 'none'; };
                 mFooter.appendChild(bO);
             }
             modal.style.display = 'flex';
@@ -325,23 +321,18 @@
             document.getElementById('limitDiario').innerText = `${totalVideosHoje}/35`;
             document.getElementById('progressBar').style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
             document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
-            
             const info = getEloInfo(pdlInterno);
             const eloBadge = document.getElementById('txtElo');
             eloBadge.innerText = info.nome;
             eloBadge.style.backgroundColor = info.bg; eloBadge.style.color = info.color; eloBadge.style.borderColor = info.bar;
-
             const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
             document.getElementById('xpMiniFill').style.width = Math.min(percXP, 100) + "%";
             document.getElementById('xpMiniFill').style.backgroundColor = info.bar;
-
-            let metaTexto = metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k";
-            document.getElementById('txtMeta').innerText = `Meta: ${metaTexto}`;
+            document.getElementById('txtMeta').innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k"}`;
             
             const btnV = document.getElementById('btnVideo');
             const btnVXP = document.getElementById('btnVideoXP');
             const aviso = document.getElementById('avisoStatusQuiz');
-            
             btnV.disabled = true; btnV.classList.remove('active');
             btnVXP.disabled = true; btnVXP.classList.remove('active');
 
@@ -355,61 +346,77 @@
             }
         }
 
-        // --- TRAVA DE VÍDEO CORRIGIDA ---
+        // --- SISTEMA DE VÍDEO COM TRAVA REAL ---
         document.getElementById('btnVideo').onclick = () => processarVideo(true);
         document.getElementById('btnVideoXP').onclick = () => processarVideo(false);
 
-        async function processarVideo(isMoeda) {
-            const btn = isMoeda ? document.getElementById('btnVideo') : document.getElementById('btnVideoXP');
-            if(btn.disabled || !btn.classList.contains('active')) return;
+        function processarVideo(isMoeda) {
             tipoRecompensaMoeda = isMoeda;
             anuncioEmAndamento = true;
             tempoRestanteAnuncio = 10;
+            idCicloAtual++; // Novo ID para este clique
+            
             window.open(linkAnuncioAdsterra, '_blank');
-            openModal("VALIDANDO RECOMPENSA", `Permaneça na página do anúncio.<br><div class="contador-video" id="modalContador">10</div>`, 'alert');
-            mFooter.innerHTML = '<span style="font-size:0.7rem; color:var(--gold-dark); font-weight:900;">AGUARDANDO VALIDAÇÃO...</span>';
-            iniciarContadorAnuncio();
+            
+            openModal("VALIDANDO ANÚNCIO", `Aguarde na página do anúncio.<br><div class="contador-video" id="modalContador">10</div>`, 'alert');
+            mFooter.innerHTML = '<span style="font-size:0.7rem; color:var(--gold-dark); font-weight:900;">AGUARDANDO...</span>';
+            
+            iniciarContador(idCicloAtual);
         }
 
-        function iniciarContadorAnuncio() {
+        function iniciarContador(idEsperado) {
             if(intervaloAnuncio) clearInterval(intervaloAnuncio);
             intervaloAnuncio = setInterval(() => {
+                // Se o ID mudou (usuario voltou e resetou), encerra este intervalo antigo
+                if(idEsperado !== idCicloAtual) {
+                    clearInterval(intervaloAnuncio);
+                    return;
+                }
+
                 tempoRestanteAnuncio--;
                 const display = document.getElementById('modalContador');
                 if(display) display.innerText = tempoRestanteAnuncio;
-                if (tempoRestanteAnuncio <= 0) { clearInterval(intervaloAnuncio); validarRecompensaFinal(); }
+
+                if (tempoRestanteAnuncio <= 0) {
+                    clearInterval(intervaloAnuncio);
+                    if(idEsperado === idCicloAtual) finalizarRecompensa();
+                }
             }, 1000);
         }
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && anuncioEmAndamento && tempoRestanteAnuncio > 0) {
+                // RESET TOTAL DA LÓGICA
                 tempoRestanteAnuncio = 10;
+                idCicloAtual++; // Invalida o contador anterior
+                
                 const display = document.getElementById('modalContador');
-                if(display) { display.innerText = "10"; display.style.color = "var(--wrong)"; setTimeout(()=>display.style.color="var(--gold)",500); }
+                if(display) { display.innerText = "10"; display.style.color = "var(--wrong)"; }
+                
                 mTitle.innerText = "TEMPO RESETADO!";
-                mFooter.innerHTML = '<span style="font-size:0.7rem; color:var(--wrong); font-weight:900;">VOCÊ VOLTOU MUITO CEDO!</span>';
+                mFooter.innerHTML = '<span style="font-size:0.7rem; color:var(--wrong); font-weight:900;">VOCÊ VOLTOU ANTES DA HORA!</span>';
+                
+                // Reinicia o contador com o novo ID
+                iniciarContador(idCicloAtual);
             }
         });
 
-        async function validarRecompensaFinal() {
-            anuncioEmAndamento = false; modal.style.display = 'none';
-            tipoRecompensaMoeda ? await finalizarVideoMoeda() : await finalizarVideoPDL();
-        }
-
-        async function finalizarVideoMoeda() {
-            const prox = videosAssistidos + 1;
-            let up = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-            if (prox >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
-            await updateDoc(userRef, up);
-            openModal("RECOMPENSA", "Você recebeu 300 moedas!");
-        }
-
-        async function finalizarVideoPDL() {
-            const prox = videosAssistidos + 1;
-            let up = { xp: increment(300), videosAssistidos: increment(1) };
-            if (prox >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
-            await updateDoc(userRef, up);
-            openModal("RECOMPENSA", "Você recebeu 300 PDL!");
+        async function finalizarRecompensa() {
+            anuncioEmAndamento = false;
+            modal.style.display = 'none';
+            if (tipoRecompensaMoeda) {
+                const prox = videosAssistidos + 1;
+                let up = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
+                if (prox >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
+                await updateDoc(userRef, up);
+                openModal("SUCESSO", "Você recebeu 300 moedas!");
+            } else {
+                const prox = videosAssistidos + 1;
+                let up = { xp: increment(300), videosAssistidos: increment(1) };
+                if (prox >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
+                await updateDoc(userRef, up);
+                openModal("SUCESSO", "Você recebeu 300 PDL!");
+            }
         }
 
         function carregarQuestao() {
@@ -474,3 +481,4 @@
     </script>
 </body>
 </html>
+                                
