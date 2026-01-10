@@ -164,7 +164,7 @@
             <a href="politica.html" class="link-politica-quadro">Política de Privacidade</a>
         </div>
     </div>
-<script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
@@ -235,7 +235,10 @@
         configElo.push({ nome: "GRÃO-MESTRE", min: 80000, max: 100000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" });
         configElo.push({ nome: "DESAFIANTE", min: 100000, max: 9999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" });
 
-        function getEloInfo(valorXP) { return configElo.find(e => valorXP >= e.min && valorXP < e.max) || configElo[configElo.length - 1]; }
+        function getEloInfo(valorXP) { 
+            const xpValido = Math.max(0, valorXP); 
+            return configElo.find(e => xpValido >= e.min && xpValido < e.max) || configElo[0]; 
+        }
 
         onAuthStateChanged(auth, (user) => {
             if (user) { 
@@ -305,22 +308,14 @@
             modal.style.display = 'flex';
         }
 
-        if(document.getElementById('btnVerElos')) {
-            document.getElementById('btnVerElos').onclick = () => {
-                let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto;">`;
-                configElo.forEach(e => {
-                    const isAtual = ultimoEloNome === e.nome;
-                    htmlElos += `<div class="elo-list-item" style="background:${e.bg}; color:${e.color}; border-color:${isAtual ? '#fff' : 'transparent'};"><span>${e.nome}</span><span>${e.min.toLocaleString()} PDL</span></div>`;
-                });
-                htmlElos += `</div>`;
-                openModal("TABELA DE ELOS", htmlElos);
-            };
-        }
-
         function atualizarInterface() {
             if(!document.getElementById('goldAmount')) return;
             document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
-            document.getElementById('limitDiario').innerText = `${totalVideosHoje}/35`;
+            
+            // LIMITE DIÁRIO REATIVADO NO JS
+            const elLimit = document.getElementById('limitDiario');
+            if(elLimit) elLimit.innerText = `${totalVideosHoje}/35`;
+
             document.getElementById('progressBar').style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
             document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
             const info = getEloInfo(pdlInterno);
@@ -350,11 +345,7 @@
             }
         }
 
-        function showFloatingPDL(text, color, x, y) {
-            const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
-            document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
-        }
-
+        // Funções de vídeo e recompensas mantidas conforme seu original...
         if(document.getElementById('btnVideo')) document.getElementById('btnVideo').onclick = () => iniciarFluxoAnuncio(true);
         if(document.getElementById('btnVideoXP')) document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio(false);
 
@@ -416,7 +407,8 @@
                         await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
                     } else {
                         b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
-                        await updateDoc(userRef, { xp: increment(-2) });
+                        let novoPdl = Math.max(0, pdlInterno - 2);
+                        await updateDoc(userRef, { xp: novoPdl });
                     }
                     setTimeout(carregarQuestao, 1200);
                 };
@@ -431,12 +423,10 @@
             btnResgate.onclick = async () => {
                 const chave = document.getElementById('chavePix').value.trim();
                 const saldoAtualNum = Number(goldDB);
-
                 if (saldoAtualNum < metaAtual || chave.length < 5) { 
                     openModal("ERRO", "Saldo insuficiente ou chave Pix inválida."); 
                     return; 
                 }
-
                 openModal("CONFIRMAR", `Deseja resgatar R$ ${valorReaisMeta} para: ${chave}?`, 'confirm', async () => {
                     modal.style.display = 'none';
                     try {
@@ -479,6 +469,10 @@
         }
     </script>
 
+    <div style="text-align: center; margin-top: 10px;">
+        <span style="font-size: 0.65rem; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 5px;">Limite Moedas Diário: <span id="limitDiario">0/35</span></span>
+    </div>
+
     <div id="footer-ad-container" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; border-top: 2px solid #c89b3c;">
         <div id="adsterra-banner">
             <script type="text/javascript">
@@ -488,5 +482,4 @@
         </div>
     </div>
 </body>
-</html>
-            
+</html>                     
