@@ -195,7 +195,7 @@
         const linkAnuncioAdsterra = "https://www.effectivegatecpm.com/jt82yz19rk?key=427afd02462871777b7bf2742e74b44f";
 
         let metaAtual = 195000, valorReaisMeta = "0,50";
-        let goldDB, acertosNoCiclo, videosAssistidos, totalVideosHoje, jogoInicializado = false;
+        let goldDB = 0, acertosNoCiclo, videosAssistidos, totalVideosHoje, jogoInicializado = false;
         let pdlInterno = 0, userRef = null, nomeUsuario = "Usuário", carregadoPelaPrimeiraVez = false, ultimoEloNome = null, ultimoPdl = 0;
 
         async function carregarBanco() {
@@ -259,7 +259,7 @@
                 await updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje }); 
                 return; 
             }
-            goldDB = data.saldo || 0;
+            goldDB = Number(data.saldo) || 0;
             acertosNoCiclo = data.acertos || 0;
             videosAssistidos = data.videosAssistidos || 0;
             totalVideosHoje = data.totalVideosHoje || 0;
@@ -415,10 +415,18 @@
 
         window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
 
-        // --- FUNÇÃO DE RESGATE ATUALIZADA (SEM UNDEFINED E SEM FALSO ALERTA) ---
+        // --- FUNÇÃO DE RESGATE ULTRA-CORRIGIDA ---
         document.getElementById('btnResgate').onclick = async () => {
             const chave = document.getElementById('chavePix').value.trim();
-            if (goldDB < metaAtual || chave.length < 5) { openModal("ERRO", "Saldo insuficiente ou chave Pix inválida."); return; }
+            
+            // Lemos o valor direto do contador visual para garantir que não vá 0
+            const saldoAtualNaTela = Number(document.getElementById('goldAmount').innerText.replace(/\./g, '').replace(',', '.'));
+
+            if (saldoAtualNaTela < metaAtual || chave.length < 5) { 
+                openModal("ERRO", "Saldo insuficiente ou chave Pix inválida."); 
+                return; 
+            }
+
             openModal("CONFIRMAR", `Deseja resgatar R$ ${valorReaisMeta} para: ${chave}?`, 'confirm', async () => {
                 modal.style.display = 'none';
                 try {
@@ -427,12 +435,13 @@
                         nome: nomeUsuario,
                         chavePix: chave,
                         valorGold: Number(metaAtual),
-                        saldoNoMomento: Number(goldDB),
+                        saldoNoMomento: saldoAtualNaTela, // Aqui resolve o "Saldo Inicial 0"
                         valorReais: valorReaisMeta, 
                         status: "Pendente",
                         data: new Date().toLocaleString('pt-BR'),
                         timestamp: Date.now()
                     });
+                    
                     await updateDoc(userRef, { saldo: increment(-Number(metaAtual)) });
                     openModal("ENVIADO", "Solicitação feita com sucesso!");
                 } catch (e) { openModal("ERRO", "Falha ao processar."); }
@@ -467,5 +476,3 @@
     </div>
 </body>
 </html>
-
-        
