@@ -103,7 +103,7 @@
 </head>
 <body>
 
-    <div id="elo-transition-overlay">
+    < div  id = "elo-transition-overlay" >
         <div class="elo-ani-title" id="elo-status-label">PROMOÇÃO DE ELO</div>
         <div class="elo-ani-name" id="elo-ani-text">PLATINA IV</div>
     </div>
@@ -458,14 +458,14 @@
                         });
                         await updateDoc(userRef, { saldo: increment(-custoNum) });
                         
-                        // NOVO AVISO ESTILIZADO (AZUL E DOURADO)
+                        // AVISO ESTILIZADO UNIFICADO (SEM TÍTULO REDUNDANTE)
                         const avisoEstilizado = `
                             <div style="background: #091428; border: 2px solid #c89b3c; padding: 20px; border-radius: 5px; text-align: center; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
                                 <h2 style="color: #c89b3c; margin: 0 0 10px 0; font-family: sans-serif; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Solicitação feita</h2>
                                 <p style="color: #f0e6d2; margin: 0; font-size: 0.95rem; line-height: 1.5;">O envio do Pix pode demorar até 24hr devido a alta demanda de solicitações dos usuários!</p>
                             </div>
                         `;
-                        openModal("ENVIADO", avisoEstilizado);
+                        openModal("", avisoEstilizado);
 
                     } catch (e) { openModal("ERRO", "Falha ao processar."); }
                 });
@@ -502,4 +502,4 @@
     </div>
 </body>
 </html>
-                        
+            
