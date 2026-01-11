@@ -452,26 +452,59 @@
             if (novoTotalVideos >= 3) setTimeout(() => carregarQuestao(), 500);
         }
 
+        // Variável de controle para o baralho (coloque fora da função carregarQuestao)
+        let indicesDisponiveis = [];
+
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
             if(!c || !t) return;
+
+            // Mantendo suas validações originais
             if (videosAssistidos < 3 && acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
             if (bancoPerguntas.length === 0) { t.innerText = "Sincronizando..."; return; }
             if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
             if (acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
-            const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
+
+            // --- LÓGICA DE NÃO REPETIÇÃO ---
+            if (indicesDisponiveis.length === 0) {
+                // Se a lista acabar ou for a primeira vez, cria uma nova lista de índices (0 a 999)
+                indicesDisponiveis = bancoPerguntas.map((_, i) => i);
+                
+                // Algoritmo Fisher-Yates para embaralhar a lista
+                for (let i = indicesDisponiveis.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indicesDisponiveis[i], indicesDisponiveis[j]] = [indicesDisponiveis[j], indicesDisponiveis[i]];
+                }
+                console.log("Baralho reabastecido e embaralhado!");
+            }
+
+            // Retira o último índice da lista (isso garante que a pergunta não se repita)
+            const indexSorteado = indicesDisponiveis.pop();
+            const q = bancoPerguntas[indexSorteado];
+            // --------------------------------
+
+            // Embaralha as opções da pergunta atual
             let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
-            t.innerText = q.pergunta; c.innerHTML = "";
+            
+            t.innerText = q.pergunta; 
+            c.innerHTML = "";
+
             opts.forEach(o => {
-                const b = document.createElement('button'); b.className = "option-btn"; b.innerText = o.texto;
+                const b = document.createElement('button'); 
+                b.className = "option-btn"; 
+                b.innerText = o.texto;
                 b.onclick = async () => {
-                    const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
+                    const all = c.querySelectorAll('button'); 
+                    all.forEach(x => x.disabled = true);
                     const rect = b.getBoundingClientRect();
+                    
                     if (o.correta) {
-                        b.classList.add('btn-correct'); showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
+                        b.classList.add('btn-correct'); 
+                        showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
                         await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
                     } else {
-                        b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
+                        b.classList.add('btn-wrong'); 
+                        showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
                         let novoXP = Math.max(0, pdlInterno - 2); 
                         await updateDoc(userRef, { xp: novoXP });
                     }
