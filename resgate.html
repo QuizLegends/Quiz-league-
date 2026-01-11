@@ -235,7 +235,6 @@
         configElo.push({ nome: "GRÃO-MESTRE", min: 80000, max: 100000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" });
         configElo.push({ nome: "DESAFIANTE", min: 100000, max: 9999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" });
 
-        // TRAVA 1: Se o PDL for 0 ou menor, ele trava no primeiro elo da lista (FERRO V)
         function getEloInfo(valorXP) { 
             if (valorXP <= 0) return configElo[0];
             return configElo.find(e => valorXP >= e.min && valorXP < e.max) || configElo[configElo.length - 1]; 
@@ -295,7 +294,7 @@
 
         function openModal(title, text, type = 'alert', onConfirm = null) {
             if(!modal) return;
-            mTitle.innerText = title; 
+            mTitle.innerHTML = title; // Alterado para innerHTML para aceitar spans de cor
             mContent.innerHTML = `<div class="modal-text">${text}</div>`;
             mFooter.innerHTML = '';
             if (type === 'confirm') {
@@ -420,8 +419,6 @@
                         await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
                     } else {
                         b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
-                        
-                        // TRAVA 2: Impede que o PDL no banco de dados fique menor que zero
                         let novoXP = Math.max(0, pdlInterno - 2); 
                         await updateDoc(userRef, { xp: novoXP });
                     }
@@ -444,6 +441,7 @@
                     return; 
                 }
 
+                // PRIMEIRO AVISO: CONFIRMAÇÃO
                 openModal("CONFIRMAR", `Deseja resgatar R$ ${valorReaisMeta} para: ${chave}?`, 'confirm', async () => {
                     modal.style.display = 'none';
                     try {
@@ -460,8 +458,16 @@
                             timestamp: Date.now()
                         });
                         await updateDoc(userRef, { saldo: increment(-custoNum) });
-                        openModal("ENVIADO", "Solicitação feita com sucesso!");
-                    } catch (e) { openModal("ERRO", "Falha ao processar."); }
+                        
+                        // SEGUNDO AVISO: SUCESSO COM DESIGN SOLICITADO
+                        openModal(
+                            `<span style="color:var(--gold)">SOLICITAÇÃO FEITA!</span>`, 
+                            `O envio do Pix pode demorar até <span style="color:var(--gold); font-weight:bold;">24hr</span> devido a Alta demanda de solicitações dos usuários!`, 
+                            'alert'
+                        );
+                    } catch (e) { 
+                        openModal("ERRO", "Falha ao processar."); 
+                    }
                 });
             };
         }
@@ -485,14 +491,11 @@
             });
         }
     </script>
-
-    <div id="footer-ad-container" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; border-top: 2px solid #c89b3c;">
-        <div id="adsterra-banner">
-            <script type="text/javascript">
-                atOptions = { 'key' : '48065e37c41fa1904ce5bbacf7c25eb4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-            </script>
-            <script type="text/javascript" src="https://www.highperformanceformat.com/48065e37c41fa1904ce5bbacf7c25eb4/invoke.js"></script>
-        </div>
-    </div>
 </body>
 </html>
+        
+
+           
+        
+
+        
