@@ -478,6 +478,10 @@
             let up = {}; let msg = "";
             const eloAntes = getEloInfo(pdlInterno).nome;
 
+            // Incrementa as variáveis locais para o código reagir na hora
+            videosAssistidos++; 
+            totalVideosHoje++;
+
             if (tipoRecompensa === "moeda") {
                 up = { saldo: increment(500), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
                 msg = "Você recebeu 500 moedas!";
@@ -493,6 +497,16 @@
 
             try {
                 await updateDoc(userRef, up);
+                
+                // --- AJUSTE: VOLTA AO QUIZ SE TERMINOU OS 3 VÍDEOS ---
+                if (videosAssistidos >= 3) {
+                    acertosNoCiclo = 0; // Libera as próximas 10 perguntas
+                    modal.style.display = 'none'; // Fecha a tela de anúncio
+                    carregarQuestao(); // Renderiza o quiz novamente
+                    return; // Interrompe para não abrir o modal de aviso por cima
+                }
+                // ----------------------------------------------------
+
                 const infoNovo = getEloInfo(pdlInterno);
 
                 if (infoNovo.nome !== eloAntes) {
@@ -506,7 +520,7 @@
                 console.error(error);
                 openModal("ERRO", "Falha ao salvar pontos.");
             }
-        } // <--- A chave de fechamento da finalizarRecompensa estava faltando aqui!
+        }
 
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
