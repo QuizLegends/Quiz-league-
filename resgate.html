@@ -478,7 +478,7 @@
             let up = {}; let msg = "";
             const eloAntes = getEloInfo(pdlInterno).nome;
 
-            // Incrementa as variáveis locais para o código reagir na hora
+            // Atualiza as variáveis locais para o código saber o progresso
             videosAssistidos++; 
             totalVideosHoje++;
 
@@ -498,27 +498,30 @@
             try {
                 await updateDoc(userRef, up);
                 
-                // --- AJUSTE: VOLTA AO QUIZ SE TERMINOU OS 3 VÍDEOS ---
+                // --- NOVA LÓGICA DE FLUXO ---
                 if (videosAssistidos >= 3) {
-                    acertosNoCiclo = 0; // Libera as próximas 10 perguntas
-                    modal.style.display = 'none'; // Fecha a tela de anúncio
-                    carregarQuestao(); // Renderiza o quiz novamente
-                    return; // Interrompe para não abrir o modal de aviso por cima
-                }
-                // ----------------------------------------------------
-
-                const infoNovo = getEloInfo(pdlInterno);
-
-                if (infoNovo.nome !== eloAntes) {
-                    openModal("RECOMPENSA LIBERADA", msg, 'alert', () => {
-                        exibirAnimacaoElo(infoNovo, true);
-                    });
+                    // CASO: Completou os 3 anúncios
+                    acertosNoCiclo = 0; 
+                    modal.style.display = 'none';
+                    openModal("SISTEMA", "Quiz Liberado! Bom jogo."); // Aviso rápido antes de voltar
+                    carregarQuestao();
                 } else {
-                    openModal("RECOMPENSA LIBERADA", msg);
+                    // CASO: Ainda faltam anúncios (1 ou 2)
+                    const faltam = 3 - videosAssistidos;
+                    openModal("PROGRESSO", `Anúncio contabilizado! Assista mais ${faltam} para liberar o Quiz.`, 'alert', () => {
+                        // Opcional: Você pode chamar uma função aqui para reabrir a tela de anúncios
+                    });
                 }
+                
+                // Verifica se houve mudança de Elo (Promoção)
+                const infoNovo = getEloInfo(pdlInterno);
+                if (infoNovo.nome !== eloAntes) {
+                    exibirAnimacaoElo(infoNovo, true);
+                }
+
             } catch (error) {
                 console.error(error);
-                openModal("ERRO", "Falha ao salvar pontos.");
+                openModal("ERRO", "Falha ao salvar progresso.");
             }
         }
 
