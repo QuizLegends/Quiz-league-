@@ -450,9 +450,12 @@
                 openModal("SISTEMA DE SEGURANÇA", "Tentativa de fraude detectada. Assista o anúncio até o fim.");
                 return;
             }
-            chaveSeguranca = false;
+
+            chaveSeguranca = false; 
             modal.style.display = 'none';
             let up = {}; let msg = "";
+            
+            // 1. Guarda o elo atual ANTES de ganhar os pontos
             const eloAntes = getEloInfo(pdlInterno).nome;
 
             if (tipoRecompensa === "moeda") {
@@ -461,9 +464,12 @@
             } else if (tipoRecompensa === "pdl") {
                 up = { xp: increment(500), videosAssistidos: increment(1) };
                 msg = "Ganhou 500 PDL!";
+                // ATUALIZAÇÃO LOCAL IMEDIATA PARA A ANIMAÇÃO NÃO FALHAR
+                pdlInterno += 500; 
             } else if (tipoRecompensa === "livre") {
                 up = { saldo: increment(10), xp: increment(100) };
-                msg = "Bônus Livre: +10 Moedas e +100 PDL!";
+                msg = "Bónus Livre: +10 Moedas e +100 PDL!";
+                pdlInterno += 100;
             }
 
             if (tipoRecompensa !== "livre") {
@@ -471,15 +477,21 @@
                 if (proxVideo >= 3) { up.acertos = 0; up.videosAssistidos = 0; setTimeout(() => carregarQuestao(), 500); }
             }
             
+            // Envia para o Firebase
             await updateDoc(userRef, up);
+            
+            // Mostra o modal de sucesso
             openModal("SUCESSO", msg);
 
+            // 2. Verifica se mudou de elo após 1 segundo (tempo do modal de sucesso aparecer)
             setTimeout(() => {
                 const infoNovo = getEloInfo(pdlInterno);
                 if (infoNovo.nome !== eloAntes) {
-                    setTimeout(() => { modal.style.display = 'none'; exibirAnimacaoElo(infoNovo, true); }, 2000);
+                    // Se mudou o elo, fecha o modal de "Sucesso" e abre a "Promoção"
+                    modal.style.display = 'none';
+                    exibirAnimacaoElo(infoNovo, true);
                 }
-            }, 500);
+            }, 1500);
         }
 
         function carregarQuestao() {
