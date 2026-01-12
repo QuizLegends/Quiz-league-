@@ -524,17 +524,22 @@
         console.error("Erro ao salvar:", e);
     }
 }
-        
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
             if(!c || !t) return;
 
-            // Verificações de limites
-            if (videosAssistidos < 3 && acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
+            // --- TRAVAS DE SEGURANÇA E CICLO DE ANÚNCIOS ---
+            // Se ainda não viu os 3 vídeos e já acertou 10, bloqueia
+            if (videosAssistidos < 3 && acertosNoCiclo >= 10) { 
+                t.innerText = "ASSISTA 3 ANÚNCIOS PARA LIBERAR MAIS QUESTÕES!"; 
+                c.innerHTML = ""; 
+                return; 
+            }
             if (bancoPerguntas.length === 0) { t.innerText = "A sincronizar questões..."; return; }
             if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
-            if (acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
+            if (acertosNoCiclo >= 10) { t.innerText = "CICLO CONCLUÍDO! LIBERE O PRÓXIMO."; c.innerHTML = ""; return; }
 
+            // Seleção de pergunta aleatória
             const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
             let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
             
@@ -547,6 +552,7 @@
                 b.innerText = o.texto;
 
                 b.onclick = async () => {
+                    // Desabilita botões para evitar cliques duplos
                     const all = c.querySelectorAll('button'); 
                     all.forEach(x => x.disabled = true);
                     const rect = b.getBoundingClientRect();
@@ -555,24 +561,30 @@
                         b.classList.add('btn-correct'); 
                         showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
                         try {
-                            await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
+                            // IMPORTANTE: 'acertosNoCiclo' deve ser o mesmo nome usado no reset do anúncio
+                            await updateDoc(userRef, { 
+                                saldo: increment(10), 
+                                acertosNoCiclo: increment(1), 
+                                xp: increment(10) 
+                            });
                         } catch (e) { console.error("Erro no acerto:", e); }
                     } else {
                         b.classList.add('btn-wrong'); 
                         showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
                         try {
-                            // Proteção para não ficar negativo e travar
+                            // PROTEÇÃO ELO FERRO V: Garante que o XP não fique negativo
                             let novoXP = Math.max(0, pdlInterno - 2); 
                             await updateDoc(userRef, { xp: novoXP });
                         } catch (e) { console.error("Erro no erro:", e); }
                     }
-                    // Chama a próxima questão após 1.2 segundos
+
+                    // Aguarda 1.2s para o usuário ver o feedback e carrega a próxima
                     setTimeout(carregarQuestao, 1200);
                 };
                 c.appendChild(b);
             });
-        } // <--- Certifique-se de que esta chave fecha a função corretamente
-
+        }
+        
         window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
 
         const btnResgate = document.getElementById('btnResgate');
