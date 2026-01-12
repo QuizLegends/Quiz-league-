@@ -172,7 +172,7 @@
             <div style="text-align: center;">
                 <span style="font-size: 0.65rem; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 5px;">Limite Diário Moedas: <span id="limitDiario">0/35</span></span>
                 <div class="video-buttons-container">
-                    <button id="btnVideo" class="video-btn">📺 +300 MOEDAS <span>META 10</span></button>
+                    <button id="btnVideo" class="video-btn">📺 +500 MOEDAS <span>META 10</span></button>
                     
                     <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
                         📺 +10 MOEDAS <span>+100 PDL</span>
@@ -396,7 +396,7 @@
             }
         }
 
-   function showFloatingPDL(text, color, x, y) {
+  function showFloatingPDL(text, color, x, y) {
             const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
             document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
         }
@@ -437,12 +437,12 @@
             modal.style.display = 'none';
             let up = {}; let msg = "";
             
-            // --- DETECÇÃO DE ELO PRÉ-PRÉMIO ---
             const eloAntes = getEloInfo(pdlInterno).nome;
 
             if (tipoRecompensa === "moeda") {
-                up = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-                msg = "Ganhou 300 moedas!";
+                // ATUALIZADO PARA +500 MOEDAS
+                up = { saldo: increment(500), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
+                msg = "Ganhou 500 moedas!";
             } else if (tipoRecompensa === "pdl") {
                 up = { xp: increment(500), videosAssistidos: increment(1) };
                 msg = "Ganhou 500 PDL!";
@@ -457,18 +457,13 @@
             }
             
             await updateDoc(userRef, up);
-            
-            // Exibe o modal de sucesso
             openModal("SUCESSO", msg);
 
-            // --- VERIFICAÇÃO PÓS-PRÉMIO PARA PROMOÇÃO ---
-            // Pequeno atraso para garantir que o banco atualizou o pdlInterno local
             setTimeout(() => {
                 const infoNovo = getEloInfo(pdlInterno);
                 if (infoNovo.nome !== eloAntes) {
-                    // Espera 2 segundos (tempo do usuário ler o sucesso) e mostra a promoção
                     setTimeout(() => {
-                        modal.style.display = 'none'; // Fecha o modal de sucesso para mostrar o elo
+                        modal.style.display = 'none';
                         exibirAnimacaoElo(infoNovo, true);
                     }, 2000);
                 }
