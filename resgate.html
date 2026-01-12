@@ -176,7 +176,7 @@
                     <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
                         📺 +10 MOEDAS <span>+50 PDL</span>
                     </button>
-                    <button id="btnVideoXP" class="video-btn">📺 +300 PDL <span>META 10</span></button>
+                    <button id="btnVideoXP" class="video-btn">📺 +500 PDL <span>META 10</span></button>
                 </div>
             </div>
         </div>
@@ -346,7 +346,6 @@
             modal.style.display = 'flex';
         }
 
-        // --- REINSERIDO: LÓGICA DO CLIQUE PARA VER A TABELA ---
         if(document.getElementById('btnVerElos')) {
             document.getElementById('btnVerElos').onclick = () => {
                 let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto; padding:5px;">`;
@@ -395,7 +394,7 @@
             }
         }
 
-      function showFloatingPDL(text, color, x, y) {
+     function showFloatingPDL(text, color, x, y) {
             const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
             document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
         }
@@ -440,10 +439,10 @@
                 up = { saldo: increment(300), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
                 msg = "Ganhou 300 moedas!";
             } else if (tipoRecompensa === "pdl") {
-                up = { xp: increment(300), videosAssistidos: increment(1) };
-                msg = "Ganhou 300 PDL!";
+                // ATUALIZADO PARA +500 PDL
+                up = { xp: increment(500), videosAssistidos: increment(1) };
+                msg = "Ganhou 500 PDL!";
             } else if (tipoRecompensa === "livre") {
-                // ALTERADO PARA +50 PDL
                 up = { saldo: increment(10), xp: increment(50) };
                 msg = "Bónus Livre: +10 Moedas e +50 PDL!";
             }
