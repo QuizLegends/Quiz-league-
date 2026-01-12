@@ -325,13 +325,18 @@
         }
 
         function exibirAnimacaoElo(infoElo, subiu) {
-            const overlay = document.getElementById('elo-transition-overlay'); if(!overlay) return;
+            const overlay = document.getElementById('elo-transition-overlay'); 
+            if(!overlay) return;
             const label = document.getElementById('elo-status-label');
             const text = document.getElementById('elo-ani-text');
+            
             label.innerText = subiu ? "PROMOÇÃO DE ELO" : "REBAIXAMENTO DE ELO";
             label.style.color = subiu ? "#c89b3c" : "#dc3545";
-            text.innerText = infoElo.nome; text.style.color = infoElo.color;
-            overlay.style.display = 'flex'; setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+            text.innerText = infoElo.nome; 
+            text.style.color = infoElo.color;
+            
+            overlay.style.display = 'flex'; // Certifique-se que isso está aqui!
+            setTimeout(() => { overlay.style.display = 'none'; }, 3500);
         }
 
         function openModal(title, text, type = 'alert', onConfirm = null) {
