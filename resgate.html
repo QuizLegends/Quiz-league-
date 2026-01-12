@@ -20,59 +20,129 @@
             overscroll-behavior-y: contain;
         }
 
+        /* --- NOVO: CSS DO BOTÃO DE RANKING (ESTILO GRANDE ACIMA DAS MOEDAS) --- */
         .btn-ranking-top {
-            display: block; width: 90%; max-width: 300px; margin: 10px auto;
-            background: linear-gradient(135deg, #091428 0%, #0a324c 100%);
-            color: var(--gold); border: 2px solid var(--gold); border-radius: 4px;
-            padding: 12px; text-decoration: none; font-weight: bold; font-size: 0.9rem;
-            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(9, 20, 40, 0.9);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+            letter-spacing: 2px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .btn-ranking-top:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
         }
 
-        .app-container { width: 95%; max-width: 450px; padding: 20px 10px; margin-bottom: 80px; transition: transform 0.2s ease-out; }
-        .header-section { text-align: center; margin-bottom: 20px; }
-        .title-legends h1 { color: var(--gold-bright); font-size: 1.8rem; text-shadow: 0 0 10px var(--gold-dark); margin: 5px 0; font-family: 'Beaufort for LoL', serif; }
+        /* --- ANIMAÇÕES --- */
+        #elo-transition-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 9999; flex-direction: column;
+            align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            animation: fadeInElo 0.5s ease forwards;
+        }
+        .elo-ani-title { color: var(--gold); font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; }
+        .elo-ani-name { font-size: 2.8rem; font-weight: 900; text-transform: uppercase; text-align: center; text-shadow: 0 0 20px currentColor; animation: scaleUpElo 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        .coin-badge { background: var(--lol-blue); border: 1px solid var(--gold); padding: 8px 15px; border-radius: 20px; color: var(--gold-bright); font-weight: bold; display: inline-block; margin-top: 10px; box-shadow: 0 0 10px rgba(200, 155, 60, 0.3); }
+        @keyframes fadeInElo { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUpElo { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .floating-pdl { position: fixed; pointer-events: none; font-weight: 900; font-size: 1.2rem; z-index: 5000; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+
+        /* --- MODAL E COMPONENTES --- */
+        #custom-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 3000; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            width: 85%; max-width: 350px; background: var(--lol-blue); border: 2px solid var(--gold);
+            padding: 25px; text-align: center; position: relative;
+            clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%);
+            box-shadow: 0 0 30px rgba(200, 155, 60, 0.4); animation: modalPop 0.3s ease-out;
+            max-height: 80vh; overflow-y: auto;
+        }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        .hex-frame { background: rgba(9, 20, 40, 0.9); border: 2px solid var(--gold-dark); padding: 20px; margin-bottom: 15px; position: relative; border-radius: 8px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
+        .modal-title { color: var(--gold); font-weight: 900; text-transform: uppercase; margin-bottom: 12px; font-size: 1.1rem; }
+        .modal-text { font-size: 0.9rem; line-height: 1.4; color: var(--gold-bright); margin-bottom: 20px; }
+        .modal-footer { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+        .elo-list-item {
+            display: flex; justify-content: space-between; padding: 8px 12px;
+            border: 1px solid rgba(200, 155, 60, 0.2); margin-bottom: 4px;
+            font-size: 0.75rem; font-weight: bold; border-radius: 4px;
+        }
+
+        .contador-video { font-size: 2.5rem; font-weight: 900; color: var(--gold); margin: 15px 0; text-shadow: 0 0 15px rgba(200, 155, 60, 0.6); }
+
+        .modal-btn-confirm { 
+            background: linear-gradient(to bottom, var(--gold), var(--gold-dark)); border: 1px solid var(--gold-bright);
+            color: #000; padding: 12px 20px; font-weight: 900; text-transform: uppercase; cursor: pointer; width: 100%;
+            clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
+        }
+
+        .header-section { display: flex; flex-direction: column; align-items: center; padding: 0 10px; width: 100%; box-sizing: border-box; gap: 10px;}
+        .title-legends h1 { font-size: 1.6rem; margin: 0; color: var(--gold); text-transform: uppercase; background: linear-gradient(to bottom, var(--gold-bright), var(--gold), var(--gold-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        .option-btn { width: 100%; background: var(--lol-blue); border: 1px solid var(--gold-dark); color: var(--text); padding: 12px; margin: 8px 0; border-radius: 4px; cursor: pointer; font-size: 0.95rem; transition: 0.3s; text-transform: uppercase; font-weight: bold; }
-        .option-btn:active { background: var(--gold-dark); transform: scale(0.98); }
+        /* --- ELO GRANDE NOVAMENTE --- */
+        .elo-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 250px; cursor: pointer; margin-bottom: 5px; }
+        .elo-badge { border: 2px solid var(--gold); padding: 8px 15px; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; border-radius: 4px; width: 100%; text-align: center; box-sizing: border-box; transition: 0.2s; background: rgba(1, 10, 19, 0.5); }
+        .xp-mini-bar-bg { width: 100%; height: 6px; background: rgba(0,0,0,0.5); border: 1px solid rgba(200, 155, 60, 0.3); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .xp-mini-bar-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        .video-btn { width: 100%; padding: 12px; margin-top: 10px; background: #051421; border: 2px solid #333; color: #666; border-radius: 4px; font-weight: bold; cursor: not-allowed; transition: 0.3s; position: relative; overflow: hidden; }
-        .video-btn.active { border-color: var(--gold); color: var(--gold-bright); cursor: pointer; background: var(--lol-blue); }
-        .video-btn span { display: block; font-size: 0.6rem; color: var(--gold-dark); }
-
-        #pull-to-refresh { width: 100%; height: 60px; display: flex; justify-content: center; align-items: center; color: var(--gold); font-weight: bold; position: absolute; top: -60px; left: 0; }
+        .coin-badge { border: 2px solid var(--gold); padding: 8px 20px; background: rgba(1, 10, 19, 0.9); color: var(--gold); font-weight: 900; font-size: 1.1rem; width: 100%; text-align: center; box-sizing: border-box; }
         
-        /* Modal Style */
-        #custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .modal-content { background: var(--lol-blue); border: 2px solid var(--gold); width: 85%; max-width: 350px; padding: 25px; text-align: center; border-radius: 10px; box-shadow: 0 0 30px rgba(200, 155, 60, 0.4); }
-        .modal-btn-confirm { background: var(--gold); color: #000; border: none; padding: 12px 25px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 20px; width: 100%; }
+        .hex-frame { background: var(--lol-blue); border: 2px solid var(--gold); position: relative; padding: 12px; display: flex; flex-direction: column; box-sizing: border-box; clip-path: polygon(4% 0, 96% 0, 100% 8%, 100% 92%, 96% 100%, 4% 100%, 0 92%, 0 8%); margin-bottom: 5px; width: 100%;}
+        .option-btn { background: #1e2328; border: 1px solid var(--gold-dark); color: var(--gold-bright); padding: 12px; margin: 5px 0; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; position: relative; }
+        .btn-correct { background-color: var(--correct) !important; border-color: #fff !important; }
+        .btn-wrong { background-color: var(--wrong) !important; border-color: #fff !important; }
+        
+        .video-buttons-container { display: flex; gap: 8px; margin-top: 8px; }
+        .video-btn { flex: 1; background: #1e2328; border: 1px solid #333; color: #666; padding: 12px 5px; font-weight: bold; text-transform: uppercase; cursor: not-allowed; font-size: 0.55rem; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .video-btn.active { background: linear-gradient(to bottom, #c8a355, #785a28); border: 1px solid var(--gold-bright); color: #f0e6d2; cursor: pointer; box-shadow: 0 0 10px rgba(200, 155, 60, 0.4); }
 
-        .elo-badge { display: block; padding: 6px 15px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-        .xp-mini-bar-bg { background: #000; height: 8px; border-radius: 4px; border: 1px solid #333; overflow: hidden; }
-        .xp-mini-bar-fill { height: 100%; width: 0%; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        .resgate-selector { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; justify-content: center; }
-        .resgate-opt { border: 1px solid var(--gold-dark); padding: 10px 15px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; background: rgba(0,0,0,0.5); transition: 0.3s; }
-        .resgate-opt.active { background: var(--gold); color: #000; font-weight: bold; border-color: var(--gold-bright); }
+        .resgate-selector { display: flex; justify-content: flex-start; gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .resgate-opt { flex: 0 0 auto; min-width: 85px; background: #010a13; border: 1px solid var(--gold-dark); color: var(--gold); padding: 12px 5px; font-size: 0.8rem; font-weight: 900; cursor: pointer; text-align: center; }
+        .resgate-opt.active { background: var(--gold); color: #000; border-color: var(--gold-bright); }
+        input { width: 100%; padding: 12px; background: #010a13; color: white; border: 1px solid var(--gold-dark); margin: 8px 0; box-sizing: border-box; }
+        
+        .footer-ad-space { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--ad-space); background: #000; border-top: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .link-politica-quadro { display: block; text-align: center; color: var(--gold); font-size: 9px; text-decoration: none; margin-top: 10px; opacity: 0.5; text-transform: uppercase; }
+        
+        #pull-to-refresh { position: fixed; top: -60px; left: 0; width: 100%; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 2000; transition: transform 0.2s ease; }
+        .refresh-badge { border: 2px solid var(--gold); padding: 8px 20px; background: rgba(9, 20, 40, 0.95); color: var(--gold); font-weight: 900; font-size: 0.8rem; text-transform: uppercase; clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%); }
+        .app-container { flex: 1; display: flex; flex-direction: column; padding: 15px 0; gap: 10px; width: 94%; max-width: 400px; box-sizing: border-box; margin-bottom: var(--ad-space); justify-content: center; transition: transform 0.2s ease; }
     </style>
 </head>
 <body>
 
-    <div id="elo-transition-overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:20000; display:none; flex-direction:column; justify-content:center; align-items:center;">
-        <div id="elo-status-label" style="font-size:1.2rem; margin-bottom:10px;">PROMOÇÃO DE ELO</div>
-        <div id="elo-ani-text" style="font-size:2.5rem; font-weight:bold; text-shadow: 0 0 20px currentColor;">PLATINA IV</div>
+    <div id="elo-transition-overlay">
+        <div class="elo-ani-title" id="elo-status-label">PROMOÇÃO DE ELO</div>
+        <div class="elo-ani-name" id="elo-ani-text">PLATINA IV</div>
     </div>
 
-    <div id="pull-to-refresh"><div class="refresh-badge">Puxe para Recarregar</div></div>
+    <div id="pull-to-refresh"><div class="refresh-badge">Solte para Recarregar</div></div>
 
     <div id="custom-modal">
         <div class="modal-content">
-            <div class="modal-title" id="m-title" style="color:var(--gold); font-size:1.2rem; font-weight:bold; margin-bottom:15px;">AVISO</div>
-            <div id="modal-body-content" style="color:#fff; font-size:0.95rem;"></div>
-            <div id="m-footer"></div>
+            <div class="modal-title" id="m-title">AVISO</div>
+            <div id="modal-body-content"><div class="modal-text" id="m-text">Sua mensagem aqui.</div></div>
+            <div class="modal-footer" id="m-footer"></div>
         </div>
     </div>
 
@@ -82,8 +152,8 @@
             <a href="ranking.html" class="btn-ranking-top">🏆 VER RANKING GLOBAL</a>
             <div class="coin-badge">🟡 <span id="goldAmount">...</span></div>
 
-            <div class="elo-container" id="btnVerElos" style="cursor:pointer; margin-top:15px;">
-                <span class="elo-badge" id="txtElo">CARREGANDO...</span>
+            <div class="elo-container" id="btnVerElos">
+                <span class="elo-badge" id="txtElo">...</span>
                 <div class="xp-mini-bar-bg">
                     <div id="xpMiniFill" class="xp-mini-bar-fill"></div>
                 </div>
@@ -92,39 +162,33 @@
 
         <div class="hex-frame">
             <div id="quizContent">
-                <p id="perguntaTexto" style="text-align: center; font-size: 1.1rem; min-height: 50px;">Sincronizando com o servidor...</p>
+                <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin-bottom: 10px;">Autenticando...</p>
                 <div id="opcoes"></div>
-                <p id="avisoStatusQuiz" style="text-align: center; font-size: 0.75rem; color: var(--gold); font-weight: bold; margin-top: 15px; text-transform: uppercase;"></p>
+                <p id="avisoStatusQuiz" style="text-align: center; font-size: 0.75rem; color: var(--gold); font-weight: bold; margin-top: 15px; text-transform: uppercase; line-height: 1.4;"></p>
             </div>
-            
-            <div style="text-align: center; margin-top:20px;">
-                <span style="font-size: 0.65rem; color: var(--gold);">LIMITE DIÁRIO: <span id="limitDiario">0/35</span></span>
+            <div style="text-align: center;">
+                <span style="font-size: 0.65rem; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 5px;">Limite Diário Moedas: <span id="limitDiario">0/35</span></span>
                 <div class="video-buttons-container">
-                    <button id="btnVideo" class="video-btn">📺 +500 MOEDAS <span>META 10 ACERTOS</span></button>
-                    <button id="btnVideoXP" class="video-btn">📺 +500 PDL <span>META 10 ACERTOS</span></button>
-                    <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">📺 +10 MOEDAS <span>BÔNUS RÁPIDO</span></button>
+                    <button id="btnVideo" class="video-btn">📺 +500 MOEDAS</button>
+                    <button id="btnVideoXP" class="video-btn">📺 +500 PDL</button>
+                    <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">📺 +10 MOEDAS</button>
                 </div>
             </div>
         </div>
 
         <div class="hex-frame">
-            <div class="progress-bg" style="background: #000; height: 12px; border: 1px solid var(--gold-dark); border-radius:6px; overflow:hidden;">
-                <div id="progressBar" style="background: linear-gradient(90deg, var(--gold-dark), var(--gold)); height: 100%; width: 0%; transition: 0.5s;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--gold); margin: 8px 0; font-weight: bold;">
-                <span id="txtMeta">Meta: 195k</span><span id="txtPorcentagem">0%</span>
-            </div>
-            
+            <div class="progress-bg" style="background: #000; height: 10px; border: 1px solid var(--gold-dark);"><div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 5px 0; font-weight: bold;"><span id="txtMeta">Meta: 195k</span><span id="txtPorcentagem">0%</span></div>
             <div class="resgate-selector">
                 <div class="resgate-opt active" onclick="setResgate(this, 195000, '0,50')">R$ 0,50</div>
                 <div class="resgate-opt" onclick="setResgate(this, 390000, '1,00')">R$ 1,00</div>
                 <div class="resgate-opt" onclick="setResgate(this, 1950000, '5,00')">R$ 5,00</div>
                 <div class="resgate-opt" onclick="setResgate(this, 39000000, '100,00')">R$ 100,00</div>
             </div>
-
-            <input type="text" id="chavePix" placeholder="DIGITE SUA CHAVE PIX AQUI">
-            <button class="option-btn" id="btnResgate" style="background: var(--gold); color:#000; margin-top:10px;">SOLICITAR RESGATE PIX</button>
+            <input type="text" id="chavePix" placeholder="SUA CHAVE PIX">
+            <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); padding: 15px;">SOLICITAR RESGATE PIX</button>
         </div>
+        <a href="politica.html" class="link-politica-quadro">POLÍTICA DE PRIVACIDADE & TERMOS</a>
     </div>
 
     <script type="module">
@@ -136,8 +200,6 @@
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E", 
             authDomain: "quizlegends-f58fc.firebaseapp.com", 
             projectId: "quizlegends-f58fc", 
-            storageBucket: "quizlegends-f58fc.firebasestorage.app", 
-            messagingSenderId: "1050463164018", 
             appId: "1:1050463164018:web:91de002b8afc8e678f54eb" 
         };
 
@@ -153,7 +215,7 @@
         const linkAnuncioAdsterra = "https://www.effectivegatecpm.com/jt82yz19rk?key=427afd02462871777b7bf2742e74b44f";
 
         const modal = document.getElementById('custom-modal'), mTitle = document.getElementById('m-title'), mContent = document.getElementById('modal-body-content'), mFooter = document.getElementById('m-footer');
-// --- SISTEMA DE ELOS COMPLETO (600 LINHAS DE LÓGICA PRESERVADAS) ---
+// --- SISTEMA DE ELOS (PRESERVANDO TODA A SUA LÓGICA) ---
         const configElo = [];
         const divisoes = ["V", "IV", "III", "II", "I"];
         const coresElos = {
@@ -186,7 +248,7 @@
             return configElo.find(e => valorXP >= e.min && valorXP < e.max) || configElo[configElo.length - 1]; 
         }
 
-        // --- INTERFACE E ATUALIZAÇÃO ---
+        // --- ATUALIZAÇÃO DA INTERFACE ---
         function atualizarInterface() {
             if (!document.getElementById('goldAmount')) return;
             document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
@@ -205,78 +267,109 @@
             const progressoMoedas = (goldDB / metaAtual) * 100;
             document.getElementById('progressBar').style.width = Math.min(100, progressoMoedas) + "%";
             document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min(100, progressoMoedas)) + "%";
-            document.getElementById('txtMeta').innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1)+'M' : (metaAtual/1000).toFixed(0)+'k'}`;
 
             const aviso = document.getElementById('avisoStatusQuiz');
             const btnV = document.getElementById('btnVideo');
             const btnVXP = document.getElementById('btnVideoXP');
 
-            btnV.disabled = (acertosNoCiclo < 10);
+            btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
             btnVXP.disabled = (acertosNoCiclo < 10);
-            btnV.classList.toggle('active', acertosNoCiclo >= 10);
-            btnVXP.classList.toggle('active', acertosNoCiclo >= 10);
+            btnV.classList.toggle('active', !btnV.disabled);
+            btnVXP.classList.toggle('active', !btnVXP.disabled);
 
             if (acertosNoCiclo < 10) {
-                aviso.innerHTML = `FALTAM <span style="color:#28a745; font-size:1.1rem;">${10 - acertosNoCiclo}</span> ACERTOS PARA RECOMPENSA`;
+                aviso.innerHTML = `ACERTE <span style="color:#28a745;">${10 - acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
             } else if (videosAssistidos < 3) {
-                aviso.innerHTML = `ASSISTA <span style="color:#28a745; font-size:1.1rem;">${3 - videosAssistidos}</span> ANÚNCIOS PARA LIBERAR O QUIZ`;
+                aviso.innerHTML = `ASSISTA <span style="color:#28a745;">${3 - videosAssistidos}</span> VÍDEOS PARA VOLTAR AO QUIZ`;
             } else {
-                aviso.innerHTML = `<span style="color:#28a745;">ANÚNCIOS LIBERADOS!</span>`;
+                aviso.innerHTML = `<span style="color:#28a745;">VÍDEOS CONCLUÍDOS!</span>`;
             }
         }
 
-        // --- LÓGICA DO QUIZ ---
+        // --- LÓGICA DAS QUESTÕES ---
         async function carregarBanco() {
             try {
                 const modulo = await import(`./pergunta.js?t=${Date.now()}`);
                 bancoPerguntas = modulo.bancoPerguntas;
                 if (carregadoPelaPrimeiraVez && bancoPerguntas.length > 0) carregarQuestao();
-            } catch (e) { setTimeout(carregarBanco, 2000); }
+            } catch (e) { setTimeout(carregarBanco, 2500); }
         }
         carregarBanco();
 
         function carregarQuestao() {
             const container = document.getElementById('opcoes'), texto = document.getElementById('perguntaTexto');
             if (!container || !texto || bancoPerguntas.length === 0) return;
+            
             if (videosAssistidos < 3 && acertosNoCiclo >= 10) { 
-                texto.innerText = "META ATINGIDA! ASSISTA OS ANÚNCIOS ABAIXO."; 
+                texto.innerText = "META DE QUESTÕES ATINGIDA!"; 
                 container.innerHTML = ""; return; 
             }
+            
             const q = bancoPerguntas[Math.floor(Math.random() * bancoPerguntas.length)];
             texto.innerText = q.pergunta; container.innerHTML = "";
-            q.opcoes.forEach((opt, i) => {
-                const btn = document.createElement('button'); btn.className = "option-btn"; btn.innerText = opt;
+            
+            let opçõesEmbaralhadas = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
+
+            opçõesEmbaralhadas.forEach(opt => {
+                const btn = document.createElement('button'); 
+                btn.className = "option-btn"; 
+                btn.innerText = opt.texto;
                 btn.onclick = async () => {
-                    if (i === q.correta) await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
-                    else await updateDoc(userRef, { xp: increment(-5) });
-                    carregarQuestao();
+                    if (opt.correta) {
+                        btn.classList.add('btn-correct');
+                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
+                    } else {
+                        btn.classList.add('btn-wrong');
+                        await updateDoc(userRef, { xp: increment(-5) });
+                    }
+                    setTimeout(carregarQuestao, 600);
                 };
                 container.appendChild(btn);
             });
         }
 
-        // --- ANÚNCIOS E RECOMPENSAS ---
+        // --- FLUXO DE VÍDEOS ---
+        window.openModal = (title, text, type = 'alert', onConfirm = null) => {
+            mTitle.innerText = title; 
+            mContent.innerHTML = `<div class="modal-text">${text}</div>`;
+            mFooter.innerHTML = '';
+            if (type === 'confirm') {
+                const bC = document.createElement('button'); bC.className = 'modal-btn-confirm'; bC.innerText = 'CONFIRMAR'; bC.onclick = onConfirm;
+                const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'CANCELAR'; bX.onclick = () => modal.style.display = 'none';
+                mFooter.appendChild(bC); mFooter.appendChild(bX);
+            } else {
+                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => { if(!anuncioEmAndamento) modal.style.display = 'none'; };
+                mFooter.appendChild(bO);
+            }
+            modal.style.display = 'flex';
+        };
+
         function iniciarFluxoAnuncio(tipo) {
+            if (anuncioEmAndamento) return;
             tipoRecompensa = tipo; anuncioEmAndamento = true; tempoRestanteAnuncio = 15;
             window.open(linkAnuncioAdsterra, '_blank');
-            openModal("VALIDANDO...", `Aguarde 15 segundos na página do anúncio.<br><br><b id='cont'>15</b>s`, "alert");
-            const contador = setInterval(() => {
+            
+            openModal("VALIDANDO...", `Aguarde os 15 segundos obrigatórios:<br><div class='contador-video' id='cont'>15</div>`, "alert");
+            
+            intervaloAnuncio = setInterval(() => {
                 tempoRestanteAnuncio--;
                 if(document.getElementById('cont')) document.getElementById('cont').innerText = tempoRestanteAnuncio;
                 if(tempoRestanteAnuncio <= 0) {
-                    clearInterval(contador); anuncioEmAndamento = false; finalizarRecompensa();
+                    clearInterval(intervaloAnuncio);
+                    anuncioEmAndamento = false;
+                    concluirAnuncio();
                 }
             }, 1000);
         }
 
-        async function finalizarRecompensa() {
-            let up = {};
-            if(tipoRecompensa === 'moeda') up = { saldo: increment(500), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-            else if(tipoRecompensa === 'pdl') up = { xp: increment(500), videosAssistidos: increment(1) };
-            else up = { saldo: increment(10), xp: increment(100) };
+        async function concluirAnuncio() {
+            let dados = {};
+            if(tipoRecompensa === 'moeda') dados = { saldo: increment(500), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
+            else if(tipoRecompensa === 'pdl') dados = { xp: increment(500), videosAssistidos: increment(1) };
+            else dados = { saldo: increment(10), xp: increment(100) };
 
-            if(videosAssistidos + 1 >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
-            await updateDoc(userRef, up);
+            if(videosAssistidos + 1 >= 3) { dados.acertos = 0; dados.videosAssistidos = 0; }
+            await updateDoc(userRef, dados);
             modal.style.display = 'none';
         }
 
@@ -284,21 +377,24 @@
         document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio('pdl');
         document.getElementById('btnVideoLivre').onclick = () => iniciarFluxoAnuncio('livre');
 
-        // --- PULL TO REFRESH ---
-        let touchStartY = 0;
-        window.addEventListener('touchstart', e => { touchStartY = e.touches[0].pageY; }, {passive: true});
-        window.addEventListener('touchmove', e => {
-            const pull = e.touches[0].pageY - touchStartY;
-            if (window.scrollY === 0 && pull > 0) {
-                const move = Math.min(pull * 0.4, 60);
-                document.getElementById('pull-to-refresh').style.top = (move - 60) + "px";
-                document.body.style.transform = `translateY(${move}px)`;
-                if(move >= 55) location.reload();
+        // --- PULL TO REFRESH (SISTEMA DE ARRASTAR) ---
+        let sY = 0;
+        const pullDiv = document.getElementById('pull-to-refresh');
+        const mainDiv = document.getElementById('main-content');
+
+        window.addEventListener('touchstart', (e) => { sY = e.touches[0].pageY; }, {passive:true});
+        window.addEventListener('touchmove', (e) => {
+            const p = e.touches[0].pageY - sY;
+            if(window.scrollY === 0 && p > 0) {
+                const move = Math.min(p * 0.4, 70);
+                pullDiv.style.transform = `translateY(${move}px)`; 
+                mainDiv.style.transform = `translateY(${move}px)`;
             }
-        }, {passive: true});
+        }, {passive:true});
         window.addEventListener('touchend', () => {
-            document.getElementById('pull-to-refresh').style.top = "-60px";
-            document.body.style.transform = "translateY(0)";
+            if (p > 60) location.reload();
+            pullDiv.style.transform = 'translateY(0)';
+            mainDiv.style.transform = 'translateY(0)';
         });
 
         // --- AUTH E RESGATE ---
@@ -306,11 +402,14 @@
             if (user) {
                 userRef = doc(db, "usuarios", user.uid);
                 onSnapshot(userRef, (snap) => {
-                    const d = snap.data(); goldDB = d.saldo || 0; pdlInterno = d.xp || 0;
-                    acertosNoCiclo = d.acertos || 0; videosAssistidos = d.videosAssistidos || 0;
-                    totalVideosHoje = d.totalVideosHoje || 0;
-                    atualizarInterface();
-                    if(!carregadoPelaPrimeiraVez) { carregadoPelaPrimeiraVez = true; carregarQuestao(); }
+                    if(snap.exists()){
+                        const d = snap.data();
+                        goldDB = d.saldo || 0; pdlInterno = d.xp || 0;
+                        acertosNoCiclo = d.acertos || 0; videosAssistidos = d.videosAssistidos || 0;
+                        totalVideosHoje = d.totalVideosHoje || 0;
+                        atualizarInterface();
+                        if(!carregadoPelaPrimeiraVez) { carregadoPelaPrimeiraVez = true; carregarQuestao(); }
+                    }
                 });
             }
         });
@@ -321,22 +420,28 @@
             el.classList.add('active'); atualizarInterface();
         };
 
-        function openModal(title, content) {
-            mTitle.innerText = title; mContent.innerHTML = content;
-            mFooter.innerHTML = '<button class="modal-btn-confirm" onclick="document.getElementById(\'custom-modal\').style.display=\'none\'">OK</button>';
-            modal.style.display = 'flex';
-        }
-
         document.getElementById('btnResgate').onclick = async () => {
-            const pix = document.getElementById('chavePix').value;
-            if(goldDB < metaAtual || pix.length < 5) return alert("Saldo insuficiente ou Pix inválido");
-            await addDoc(collection(db, "resgates"), { userId: auth.currentUser.uid, pix, valor: valorReaisMeta, data: new Date().toISOString() });
-            await updateDoc(userRef, { saldo: increment(-metaAtual) });
-            alert("Solicitação enviada!");
+            const chave = document.getElementById('chavePix').value.trim();
+            if (goldDB < metaAtual || chave.length < 5) {
+                openModal("ERRO", "Saldo insuficiente ou chave Pix inválida."); return;
+            }
+            openModal("CONFIRMAR RESGATE", `Deseja resgatar R$ ${valorReaisMeta} para a chave: ${chave}?`, "confirm", async () => {
+                await addDoc(collection(db, "resgates"), { 
+                    usuarioId: auth.currentUser.uid, 
+                    chavePix: chave, 
+                    valorGold: metaAtual, 
+                    valorReais: valorReaisMeta,
+                    status: "Pendente", 
+                    data: new Date().toLocaleString('pt-BR') 
+                });
+                await updateDoc(userRef, { saldo: increment(-metaAtual) });
+                modal.style.display = 'none';
+                openModal("SUCESSO", "Seu pedido de resgate foi enviado para análise!");
+            });
         };
     </script>
 
-    <div id="footer-ad-container" style="position: fixed; bottom: 0; width: 100%; height: 60px; background: #000; border-top: 1px solid var(--gold); display: flex; justify-content: center; align-items: center; z-index: 999;">
+    <div class="footer-ad-space">
         <script type="text/javascript">
             atOptions = { 'key' : '48065e37c41fa1904ce5f10672e82031', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
         </script>
