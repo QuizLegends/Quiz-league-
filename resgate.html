@@ -340,19 +340,38 @@
         }
 
         function openModal(title, text, type = 'alert', onConfirm = null) {
-            if(!modal) return;
-            mTitle.innerHTML = title; mContent.innerHTML = `<div class="modal-text">${text}</div>`;
-            mFooter.innerHTML = '';
-            if (type === 'confirm') {
-                const bC = document.createElement('button'); bC.className = 'modal-btn-confirm'; bC.innerText = 'CONFIRMAR'; bC.onclick = onConfirm;
-                const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'VOLTAR'; bX.onclick = () => modal.style.display = 'none';
-                mFooter.appendChild(bC); mFooter.appendChild(bX);
-            } else {
-                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => { if(!anuncioEmAndamento) modal.style.display = 'none'; };
-                mFooter.appendChild(bO);
-            }
-            modal.style.display = 'flex';
-        }
+    if(!modal) return;
+    mTitle.innerHTML = title; 
+    mContent.innerHTML = `<div class="modal-text">${text}</div>`;
+    mFooter.innerHTML = '';
+
+    if (type === 'confirm') {
+        const bC = document.createElement('button'); 
+        bC.className = 'modal-btn-confirm'; 
+        bC.innerText = 'CONFIRMAR'; 
+        bC.onclick = onConfirm;
+        
+        const bX = document.createElement('button'); 
+        bX.className = 'option-btn'; 
+        bX.innerText = 'VOLTAR'; 
+        bX.onclick = () => modal.style.display = 'none';
+        
+        mFooter.appendChild(bC); 
+        mFooter.appendChild(bX);
+    } else {
+        const bO = document.createElement('button'); 
+        bO.className = 'modal-btn-confirm'; 
+        bO.innerText = 'ENTENDI'; 
+        
+        // Se houver uma função extra (como abrir o elo), ela roda aqui
+        bO.onclick = () => { 
+            modal.style.display = 'none'; 
+            if (onConfirm) onConfirm(); 
+        };
+        mFooter.appendChild(bO);
+    }
+    modal.style.display = 'flex';
+}
 
         // --- TABELA DE ELOS ADICIONADA AQUI ---
         if(document.getElementById('btnVerElos')) {
@@ -488,39 +507,6 @@
                 openModal("ERRO", "Falha ao salvar pontos.");
             }
         } // <--- A chave de fechamento da finalizarRecompensa estava faltando aqui!
-
-        function openModal(title, text, type = 'alert', onConfirm = null) {
-            if(!modal) return;
-            mTitle.innerHTML = title; 
-            mContent.innerHTML = `<div class="modal-text">${text}</div>`;
-            mFooter.innerHTML = '';
-
-            if (type === 'confirm') {
-                const bC = document.createElement('button'); 
-                bC.className = 'modal-btn-confirm'; 
-                bC.innerText = 'CONFIRMAR'; 
-                bC.onclick = onConfirm;
-                
-                const bX = document.createElement('button'); 
-                bX.className = 'option-btn'; 
-                bX.innerText = 'VOLTAR'; 
-                bX.onclick = () => modal.style.display = 'none';
-                
-                mFooter.appendChild(bC); 
-                mFooter.appendChild(bX);
-            } else {
-                const bO = document.createElement('button'); 
-                bO.className = 'modal-btn-confirm'; 
-                bO.innerText = 'ENTENDI'; 
-                
-                bO.onclick = () => { 
-                    modal.style.display = 'none'; 
-                    if (onConfirm) onConfirm(); 
-                };
-                mFooter.appendChild(bO);
-            }
-            modal.style.display = 'flex';
-        }
 
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
