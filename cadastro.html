@@ -91,13 +91,29 @@
 
         .footer-links a { color: var(--ouro) !important; text-decoration: none; font-weight: bold; display: block; margin-top: 20px; font-size: 12px; }
 
+        /* MODAL ESTILO LEAGUE OF LEGENDS */
         #modal-alerta { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 10000; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card-azul); border: 2px solid var(--ouro); padding: 30px; border-radius: 8px; text-align: center; max-width: 300px; width: 85%; box-shadow: 0 0 40px rgba(200, 155, 60, 0.5); animation: surgindo 0.3s ease-out; }
-        .modal-content h3 { margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
-        .modal-content p { color: #fff; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
-        .btn-modal { background: var(--ouro); color: #010a13; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; }
+        .modal-content { 
+            background: radial-gradient(circle at top, #091428 0%, #010a13 100%); 
+            border: 2px solid var(--ouro); 
+            padding: 30px; 
+            border-radius: 4px; 
+            text-align: center; 
+            max-width: 320px; 
+            width: 85%; 
+            box-shadow: 0 0 50px rgba(200, 155, 60, 0.3); 
+            animation: surgindo 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
+        }
+        .modal-content h3 { color: var(--ouro); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 2px; font-size: 19px; border-bottom: 1px solid rgba(200, 155, 60, 0.3); padding-bottom: 10px; }
+        .modal-content p { color: #f0e6d2; font-size: 13px; line-height: 1.6; margin-bottom: 25px; text-align: justify; }
+        .btn-modal { 
+            background: linear-gradient(to bottom, #c89b3c, #855f13); 
+            color: #010a13; border: 1px solid var(--ouro); 
+            padding: 14px; width: 100%; font-weight: bold; cursor: pointer; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
 
-        @keyframes surgindo { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes surgindo { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -122,7 +138,7 @@
         </div>
         
         <div class="input-group">
-            <input type="password" id="pass" placeholder="SENHA">
+            <input type="password" id="pass" placeholder="SENHA (MÍN. 6 DÍGITOS)">
         </div>
 
         <div class="policy-group">
@@ -159,10 +175,12 @@
             const tituloH3 = document.getElementById('modal-titulo');
             const msgP = document.getElementById('modal-msg');
             const btn = document.getElementById('btnAcaoModal');
+            
             tituloH3.innerText = titulo;
             tituloH3.style.color = corTitulo;
-            msgP.innerText = mensagem;
+            msgP.innerHTML = mensagem; // Usando innerHTML para permitir o bônus de boas-vindas formatado
             modal.style.display = 'flex';
+            
             btn.onclick = () => { 
                 modal.style.display = 'none'; 
                 if (acaoFinal) acaoFinal(); 
@@ -179,18 +197,13 @@
 
             msg.innerText = "";
 
-            if (!navigator.onLine) {
-                exibirModal("FALHA DE CONEXÃO", "Você precisa de internet!", "var(--erro)");
-                return;
-            }
-
             if (!usuarioNome || !email || !senha || !policy) {
                 msg.innerText = "Preencha tudo e aceite os termos!";
                 return;
             }
 
             if (senha.length < 6) {
-                msg.innerText = "SENHA DEVE TER NO MÍNIMO 6 DÍGITOS!";
+                msg.innerText = "SENHA MUITO CURTA!";
                 return;
             }
 
@@ -198,38 +211,41 @@
             btn.innerText = "FORJANDO CONTA...";
 
             try {
-                // 1. Criar no Firebase Auth (Gera o UID)
                 const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
                 const user = userCredential.user;
 
-                // 2. Salvar dados iniciais no Firestore usando o UID como chave
+                // Salvar dados no Firestore com o campo de bônus como FALSE
                 await setDoc(doc(db, "usuarios", user.uid), {
                     nome: usuarioNome,
                     email: email,
                     saldo: 0,
+                    xp: 0,
                     acertos: 0,
                     videosAssistidos: 0,
                     totalVideosHoje: 0,
+                    boasVindasResgatado: false, // Define que ainda não ganhou o bônus
                     ultimaDataAcesso: new Date().toLocaleDateString('pt-BR'),
                     dataCriacao: new Date().toISOString(),
                     uid: user.uid
                 });
 
-                exibirModal("CONTA CRIADA", "Sua jornada começa agora!", "var(--ouro)", () => {
+                const avisoInvocador = `
+                    <b>ATENÇÃO INVOCADOR!</b><br><br>
+                    Este aplicativo tem como objetivo principal oferecer entretenimento e competição saudável entre os fãs de League of Legends.<br><br>
+                    O sistema de recompensas é apenas um bônus por suas vitórias e méritos dentro dos desafios.<br><br>
+                    Divirta-se e prove que você é uma verdadeira lenda!
+                `;
+
+                exibirModal("SAUDAÇÕES", avisoInvocador, "var(--ouro)", () => {
                     window.location.href = "index.html";
                 });
 
             } catch (error) {
                 btn.disabled = false;
                 btn.innerText = "Criar Conta";
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    msg.innerText = "ESTE E-MAIL JÁ ESTÁ EM USO!";
-                } else if (error.code === 'auth/invalid-email') {
-                    msg.innerText = "E-MAIL INVÁLIDO!";
-                } else {
-                    exibirModal("ERRO", "Falha ao criar conta. Tente novamente.", "var(--erro)");
-                }
+                if (error.code === 'auth/email-already-in-use') msg.innerText = "E-MAIL JÁ EM USO!";
+                else msg.innerText = "FALHA AO CRIAR CONTA.";
+                console.error(error);
             }
         };
     </script>
