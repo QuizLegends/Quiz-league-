@@ -11,18 +11,18 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 2. Gerenciamento de Notificações
+// 2. Gerenciamento de Notificações (CORRIGIDO: Removido admin.png que não existia)
 messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: 'admin.png' // Usando o ícone do admin que você renomeou
+        icon: 'app-512.png' // Usando o ícone que existe para evitar erro
     };
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 3. LÓGICA PWA - CACHE ESSENCIAL (NOMES ATUALIZADOS)
-const CACHE_NAME = 'quiz-legends-v2'; // Mudamos para v2 para forçar o navegador a limpar o lixo antigo
+// 3. LÓGICA PWA - CACHE ESSENCIAL
+const CACHE_NAME = 'quiz-legends-v3'; // Versão 3 para forçar atualização
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -35,8 +35,10 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            // Tentamos adicionar um por um para evitar que um erro em um ícone trave tudo
-            return cache.addAll(ASSETS_TO_CACHE);
+            // Adiciona os arquivos um por um para não travar se um falhar
+            return Promise.allSettled(
+                ASSETS_TO_CACHE.map(asset => cache.add(asset))
+            );
         })
     );
     self.skipWaiting();
@@ -52,7 +54,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Evento Fetch (Crucial para o link de instalação aparecer)
+// Evento Fetch (Obrigatório para o botão de instalar aparecer)
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         fetch(event.request).catch(() => {
