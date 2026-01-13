@@ -1,32 +1,32 @@
 {
-  "id": "quiz-legends-admin-app",
-  "name": "Admin Quiz Legends",
-  "short_name": "QuizAdmin",
-  "description": "Painel de Controle e Pagamentos Quiz Legends",
-  "start_url": "admin.html",
+  "id": "quiz-legends-jogo-app",
+  "name": "Quiz Legends",
+  "short_name": "QuizLegends",
+  "description": "Desafie seus conhecimentos e ganhe recompensas!",
+  "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#010a13",
-  "theme_color": "#c89b3c",
+  "theme_color": "#010a13",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icone-admin.png",
+      "src": "app-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable" 
     },
     {
-      "src": "icone-admin.png",
+      "src": "app-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "icone-admin.png",
-      "sizes": "512x512",
+      "src": "admin.png",
+      "sizes": "585x1024",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ]
 }
