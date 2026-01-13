@@ -9,6 +9,7 @@
   "background_color": "#010a13",
   "theme_color": "#010a13",
   "orientation": "portrait",
+  "categories": ["games", "education"],
   "icons": [
     {
       "src": "app-192.png",
