@@ -29,7 +29,7 @@ const ASSETS_TO_CACHE = [
     'manifest-jogo.json',
     'app-192.png',
     'app-512.png',
-    'admin.png'
+    'admin-vertical.png'
 ];
 
 self.addEventListener('install', (event) => {
