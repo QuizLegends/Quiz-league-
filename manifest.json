@@ -1,11 +1,10 @@
 {
-  "id": "quiz-legends-jogo-app",
   "name": "Quiz Legends",
   "short_name": "QuizLegends",
-  "description": "Desafie seus conhecimentos e ganhe recompensas!",
+  "description": "Desafie seus conhecimentos!",
   "start_url": "index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "minimal-ui",
   "background_color": "#010a13",
   "theme_color": "#010a13",
   "orientation": "portrait",
@@ -21,12 +20,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "admin-vertical.png",
-      "sizes": "585x1024",
-      "type": "image/png",
-      "purpose": "any"
     }
   ]
 }
