@@ -388,7 +388,7 @@ if (pullDiv && appScroll) {
             atualizarInterface(); jogoInicializado = true;
         }
 
-        function exibirAnimacaoElo(infoElo, subiu) {
+           function exibirAnimacaoElo(infoElo, subiu) {
             const overlay = document.getElementById('elo-transition-overlay'); if(!overlay) return;
             const label = document.getElementById('elo-status-label');
             const text = document.getElementById('elo-ani-text');
@@ -436,79 +436,50 @@ if (pullDiv && appScroll) {
             };
         }
 
-    function atualizarInterface() {
-    // 1. Verifica se os elementos básicos existem antes de continuar
-    const goldEl = document.getElementById('goldAmount');
-    if(!goldEl) return; 
+        function atualizarInterface() {
+            if(!document.getElementById('goldAmount')) return;
+            document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
+            document.getElementById('limitDiario').innerText = `${totalVideosHoje}/35`;
+            document.getElementById('progressBar').style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
+            document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
+            const info = getEloInfo(pdlInterno);
+            const eloBadge = document.getElementById('txtElo');
+            eloBadge.innerText = info.nome; eloBadge.style.backgroundColor = info.bg; eloBadge.style.color = info.color;
+            const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
+            document.getElementById('xpMiniFill').style.width = Math.min(percXP, 100) + "%";
+            document.getElementById('xpMiniFill').style.backgroundColor = info.bar;
+            document.getElementById('txtMeta').innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k"}`;
+            
+            const btnV = document.getElementById('btnVideo');
+            const btnVXP = document.getElementById('btnVideoXP');
+            const btnVLivre = document.getElementById('btnVideoLivre');
+            const aviso = document.getElementById('avisoStatusQuiz');
+            
+            if(btnV) btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
+            if(btnVXP) btnVXP.disabled = (acertosNoCiclo < 10);
+            if(btnVLivre) btnVLivre.disabled = false;
 
-    goldEl.innerText = Math.floor(goldDB).toLocaleString('pt-BR');
-    
-    // 2. Atualiza os contadores internos dos botões (Se eles existirem)
-    const limitMoedasEl = document.getElementById('limitMoedas');
-    const limitLivreEl = document.getElementById('limitLivre');
-    if(limitMoedasEl) limitMoedasEl.innerText = `${totalVideosHoje}/35`;
-    if(limitLivreEl) limitLivreEl.innerText = `${totalVideosHoje}/35`;
-
-    // 3. Atualiza o contador antigo (limitDiario) APENAS SE ele ainda existir em algum lugar
-    const oldLimit = document.getElementById('limitDiario');
-    if(oldLimit) oldLimit.innerText = `${totalVideosHoje}/35`;
-
-    // 4. Barras de progresso e XP
-    const progBar = document.getElementById('progressBar');
-    const txtPerc = document.getElementById('txtPorcentagem');
-    if(progBar) progBar.style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
-    if(txtPerc) txtPerc.innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
-    
-    const info = getEloInfo(pdlInterno);
-    const eloBadge = document.getElementById('txtElo');
-    if(eloBadge) {
-        eloBadge.innerText = info.nome; 
-        eloBadge.style.backgroundColor = info.bg; 
-        eloBadge.style.color = info.color;
-    }
-    
-    const xpFill = document.getElementById('xpMiniFill');
-    if(xpFill) {
-        const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
-        xpFill.style.width = Math.min(percXP, 100) + "%";
-        xpFill.style.backgroundColor = info.bar;
-    }
-
-    const txtMeta = document.getElementById('txtMeta');
-    if(txtMeta) txtMeta.innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k"}`;
-    
-    // 5. Controle dos Botões
-    const btnV = document.getElementById('btnVideo');
-    const btnVXP = document.getElementById('btnVideoXP');
-    const btnVLivre = document.getElementById('btnVideoLivre');
-    const aviso = document.getElementById('avisoStatusQuiz');
-    
-    if(btnV && btnVXP && btnVLivre) {
-        btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
-        btnVXP.disabled = (acertosNoCiclo < 10);
-        btnVLivre.disabled = (totalVideosHoje >= 35); 
-
-        btnV.classList.toggle('active', !btnV.disabled);
-        btnVXP.classList.toggle('active', !btnVXP.disabled);
-        btnVLivre.classList.toggle('active', !btnVLivre.disabled);
-    }
-    
-    if (aviso) {
-        if (acertosNoCiclo < 10) {
-            aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
-        } else if (videosAssistidos < 3) {
-            aviso.innerHTML = `<span style="color:#c89b3c">META ATINGIDA, ASSISTA <span style="color:#28a745; font-weight:bold;">${3-videosAssistidos}</span> ANÚNCIOS PARA LIBERAR O QUIZ</span>`;
-        } else {
-            aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
+            if(btnV) btnV.classList.toggle('active', !btnV.disabled);
+            if(btnVXP) btnVXP.classList.toggle('active', !btnVXP.disabled);
+            if(btnVLivre) btnVLivre.classList.add('active');
+            
+            if(aviso) {
+                if (acertosNoCiclo < 10) {
+                    aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
+                } else if (videosAssistidos < 3) {
+                    aviso.innerHTML = `<span style="color:#c89b3c">META ATINGIDA, ASSISTA <span style="color:#28a745; font-weight:bold;">${3-videosAssistidos}</span> ANÚNCIOS PARA LIBERAR O QUIZ</span>`;
+                } else {
+                    aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
+                }
+            }
         }
-    }
-}
-        
-         function showFloatingPDL(text, color, x, y) {
+
+        function showFloatingPDL(text, color, x, y) {
             const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
             document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
         }
 
+        // Eventos dos botões
         if(document.getElementById('btnVideo')) document.getElementById('btnVideo').onclick = () => iniciarFluxoAnuncio('moeda');
         if(document.getElementById('btnVideoXP')) document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio('pdl');
         if(document.getElementById('btnVideoLivre')) document.getElementById('btnVideoLivre').onclick = () => iniciarFluxoAnuncio('livre');
@@ -547,154 +518,59 @@ if (pullDiv && appScroll) {
             }
         });
 
-          async function finalizarRecompensa() {
-        if (!chaveSeguranca) {
+        async function finalizarRecompensa() {
+            if (!chaveSeguranca) { modal.style.display = 'none'; return; }
+            chaveSeguranca = false;
             modal.style.display = 'none';
-            openModal("SISTEMA DE SEGURANÇA", "Tentativa de fraude detectada. Assista o anúncio até o fim.");
-            return;
-        }
-        chaveSeguranca = false;
-        modal.style.display = 'none';
-        let up = {}; 
-        let msg = "";
-        const eloAntes = getEloInfo(pdlInterno).nome;
-        const centerW = window.innerWidth / 2;
-        const centerH = window.innerHeight / 2;
+            let up = {}; let msg = "";
+            const eloAntes = getEloInfo(pdlInterno).nome;
 
-        if (tipoRecompensa === "moeda") {
-            up = { saldo: increment(100), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-            msg = "Você ganhou 100 moedas!";
-            showFloatingPDL("+100 Gold", "#c89b3c", centerW, centerH);
-        } else if (tipoRecompensa === "pdl") {
-            up = { xp: increment(500), videosAssistidos: increment(1) };
-            msg = "Você ganhou 500 PDL!";
-            showFloatingPDL("+500 PDL", "#28a745", centerW, centerH);
-        } else if (tipoRecompensa === "livre") {
-            up = { saldo: increment(10), xp: increment(100), totalVideosHoje: increment(1) };
-            msg = "Bônus Livre: +10 Moedas e +100 PDL!";
-            showFloatingPDL("+100 PDL", "#28a745", centerW, centerH);
-        }
-
-        if (tipoRecompensa !== "livre") {
-            const proxVideo = (videosAssistidos || 0) + 1;
-            if (proxVideo >= 3) { 
-                up.acertos = 0; 
-                up.videosAssistidos = 0; 
-                setTimeout(() => carregarQuestao(), 500); 
+            if (tipoRecompensa === "moeda") {
+                up = { saldo: increment(500), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
+                msg = "Você ganhou 500 moedas!";
+            } else if (tipoRecompensa === "pdl") {
+                up = { xp: increment(500), videosAssistidos: increment(1) };
+                msg = "Você ganhou 500 PDL!";
+            } else if (tipoRecompensa === "livre") {
+                up = { saldo: increment(10), xp: increment(100) };
+                msg = "Bônus: +10 Moedas e +100 PDL!";
             }
-        }
-        await updateDoc(userRef, up);
-        openModal("RECOMPENSA LIBERADA", msg, 'alert', () => {
-            const infoNovo = getEloInfo(pdlInterno);
-            if (infoNovo.nome !== eloAntes) exibirAnimacaoElo(infoNovo, true);
-        });
-    }
 
-    function carregarQuestao() {
-        const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
-        if(!c || !t) return;
-        if (videosAssistidos < 3 && acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
-        if (bancoPerguntas.length === 0) { t.innerText = "A sincronizar questões..."; return; }
-        if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
-        if (acertosNoCiclo >= 10) { t.innerText = ""; c.innerHTML = ""; return; }
-        const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
-        let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
-        t.innerText = q.pergunta; c.innerHTML = "";
-        opts.forEach(o => {
-            const b = document.createElement('button'); b.className = "option-btn"; b.innerText = o.texto;
-            b.onclick = async () => {
-                const eloAntesDoQuiz = getEloInfo(pdlInterno).nome;
-                const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
-                const rect = b.getBoundingClientRect();
-                try {
-                    if (o.correta) {
-                        b.classList.add('btn-correct'); showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
-                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10) });
-                    } else {
-                        b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
-                        await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 2) });
-                    }
-                } catch (e) { console.log("Erro"); }
-                finally { 
-                    setTimeout(() => {
-                        const infoNovo = getEloInfo(pdlInterno);
-                        if (infoNovo.nome !== eloAntesDoQuiz) exibirAnimacaoElo(infoNovo, (infoNovo.min > getEloInfo(pdlInterno).min));
-                        carregarQuestao();
-                    }, 1200); 
+            if (tipoRecompensa !== "livre") {
+                const proxVideo = (videosAssistidos || 0) + 1;
+                if (proxVideo >= 3) { up.acertos = 0; up.videosAssistidos = 0; }
+            }
+            await updateDoc(userRef, up);
+            openModal("RECOMPENSA LIBERADA", msg);
+        }
+
+        // PULL TO REFRESH USANDO O ID ANTIGO (main-content)
+        let sY = 0;
+        const pullDiv = document.getElementById('pull-to-refresh');
+        const mainDiv = document.getElementById('main-content'); // IMPORTANTE: Voltei para o ID original
+        if(pullDiv && mainDiv) {
+            window.addEventListener('touchstart', (e) => { if(window.scrollY === 0) sY = e.touches[0].pageY; }, {passive:true});
+            window.addEventListener('touchmove', (e) => {
+                const p = e.touches[0].pageY - sY;
+                if(window.scrollY === 0 && p > 0) {
+                    const move = Math.min(p * 0.4, 70);
+                    pullDiv.style.transform = `translateY(${move}px)`; mainDiv.style.transform = `translateY(${move}px)`;
                 }
-            };
-            c.appendChild(b);
-        });
-    }
-
-    window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
-
-    const btnResgate = document.getElementById('btnResgate');
-    if(btnResgate) {
-        btnResgate.onclick = async () => {
-            const chave = document.getElementById('chavePix').value.trim();
-            const saldoAtualNum = Number(goldDB);
-            if (saldoAtualNum < metaAtual || chave.length < 5) { openModal("ERRO", "Saldo insuficiente."); return; }
-            openModal("CONFIRMAR", `Resgatar R$ ${valorReaisMeta}?`, 'confirm', async () => {
-                modal.style.display = 'none';
-                try {
-                    const custoNum = Number(metaAtual);
-                    await addDoc(collection(db, "resgates"), {
-                        usuarioId: auth.currentUser.uid, chavePix: chave, valorGold: custoNum, status: "Pendente",
-                        data: new Date().toLocaleString('pt-BR'), timestamp: Date.now()
-                    });
-                    await updateDoc(userRef, { saldo: increment(-custoNum) });
-                    openModal("SUCESSO", "Solicitação enviada!");
-                } catch (e) { openModal("ERRO", "Falha."); }
+            }, {passive:true});
+            window.addEventListener('touchend', () => {
+                const m = new WebKitCSSMatrix(window.getComputedStyle(pullDiv).transform).m42;
+                if (m >= 60) location.reload();
+                else { pullDiv.style.transform = 'translateY(0)'; mainDiv.style.transform = 'translateY(0)'; }
             });
-        };
-    }
-
-    // PULL TO REFRESH
-    let startY = 0;
-    const pullDiv = document.getElementById('pull-to-refresh');
-    const appScroll = document.getElementById('app-scroll');
-    const badge = pullDiv?.querySelector('.refresh-badge');
-
-    if (pullDiv && appScroll) {
-        appScroll.addEventListener('touchstart', (e) => {
-            if (appScroll.scrollTop === 0) startY = e.touches[0].pageY;
-        }, { passive: true });
-
-        appScroll.addEventListener('touchmove', (e) => {
-            if (appScroll.scrollTop !== 0) return;
-            const distance = e.touches[0].pageY - startY;
-            if (distance > 0) {
-                const move = Math.min(distance * 0.4, 70);
-                pullDiv.style.transform = `translateY(${move}px)`;
-                appScroll.style.transform = `translateY(${move}px)`;
-                if (badge) badge.innerText = move >= 60 ? "Solte para Recarregar" : "Puxe para Recarregar";
-            }
-        }, { passive: true });
-
-        appScroll.addEventListener('touchend', () => {
-            const matrix = new WebKitCSSMatrix(window.getComputedStyle(pullDiv).transform);
-            if (matrix.m42 >= 60) {
-                location.reload();
-            } else {
-                pullDiv.style.transition = appScroll.style.transition = "transform 0.3s ease";
-                pullDiv.style.transform = appScroll.style.transform = 'translateY(0)';
-                setTimeout(() => { pullDiv.style.transition = appScroll.style.transition = ""; }, 300);
-            }
-        });
-    }
-</script>
-
-<div id="footer-ad-container" style="all: initial !important; position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; height: 65px !important; background: #000 !important; display: flex !important; justify-content: center !important; align-items: center !important; z-index: 2147483647 !important; border-top: 2px solid #c89b3c !important;">
-    <div id="adsterra-banner">
-        <script type="text/javascript">
-            atOptions = { 'key' : '48065e37c41fa1904ce5bbacf7c25eb4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-        </script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/48065e37c41fa1904ce5bbacf7c25eb4/invoke.js"></script>
+        }
+    </script>
+    <div id="footer-ad-container" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; border-top: 2px solid #c89b3c;">
+        <div id="adsterra-banner">
+            <script type="text/javascript">
+                atOptions = { 'key' : '48065e37c41fa1904ce5bbacf7c25eb4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/48065e37c41fa1904ce5bbacf7c25eb4/invoke.js"></script>
+        </div>
     </div>
-</div>
 </body>
 </html>
-        
-
-    
