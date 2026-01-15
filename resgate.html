@@ -158,68 +158,70 @@
     <div id="pull-to-refresh"><div class="refresh-badge">Solte para Recarregar</div></div>
 
     <div class="app-container" id="main-content">
-        <div class="header-section">
-            <div class="title-legends"><h1>QUIZ LEGENDS</h1></div>
-            
-            <a href="ranking.html" class="btn-ranking-top">🏆 VER RANKING GLOBAL</a>
-            
-            <div class="coin-badge">🟡 <span id="goldAmount">...</span></div>
+    <div class="header-section">
+        <div class="title-legends"><h1>QUIZ LEGENDS</h1></div>
+        <a href="ranking.html" class="btn-ranking-top">🏆 VER RANKING GLOBAL</a>
+        <div class="coin-badge">🟡 <span id="goldAmount">...</span></div>
 
-            <div class="elo-container" id="btnVerElos" style="cursor:pointer;">
-                <span class="elo-badge" id="txtElo">...</span>
-                <div class="xp-mini-bar-bg">
-                    <div id="xpMiniFill" class="xp-mini-bar-fill"></div>
-                </div>
+        <div class="elo-container" id="btnVerElos" style="cursor:pointer;">
+            <span class="elo-badge" id="txtElo">...</span>
+            <div class="xp-mini-bar-bg">
+                <div id="xpMiniFill" class="xp-mini-bar-fill"></div>
             </div>
-        </div>
- 
-       <div class="hex-frame">
-            <div id="quizContent">
-                <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin-bottom: 10px;">Autenticando...</p>
-                <div id="opcoes"></div>
-                <p id="avisoStatusQuiz" style="text-align: center; font-size: 0.75rem; color: var(--gold); font-weight: bold; margin-top: 15px; text-transform: uppercase; line-height: 1.4;"></p>
-            </div>
-            
-            <div style="text-align: center;">
-    <span style="font-size: 0.65rem; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 5px;">
-        Limite Diário Moedas: <span id="limitDiario">0/35</span>
-    </span>
-
-    <div class="video-buttons-container" style="width: 100%; display: flex; justify-content: center; gap: 10px;">
-    <button id="btnVideo" class="video-btn">
-        📺 +100 MOEDAS <br>
-        <span id="limitDiario" style="font-size: 0.6rem; color: var(--gold-bright);">0/35</span>
-    </button>
-    
-    <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
-        📺 +10 MOEDAS / +100 PDL <br>
-        <span id="contLivreIndividual" style="font-size: 0.6rem; color: #f0e6d2;">0/35</span>
-    </button>
-    
-    <button id="btnVideoXP" class="video-btn">
-        📺 +500 PDL <br>
-        <span style="font-size: 0.6rem; opacity: 0.8;">META 10 ACERTOS</span>
-    </button>
-</div>
-
-        <div class="hex-frame">
-            <div class="progress-bg" style="background: #000; height: 10px; border: 1px solid var(--gold-dark);"><div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div></div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 5px 0; font-weight: bold;"><span id="txtMeta">Meta: 195k</span><span id="txtPorcentagem">0%</span></div>
-            
-            <div class="resgate-selector">
-                <div class="resgate-opt active" onclick="setResgate(this, 195000, '0,50')">R$ 0,50</div>
-                <div class="resgate-opt" onclick="setResgate(this, 390000, '1,00')">R$ 1,00</div>
-                <div class="resgate-opt" onclick="setResgate(this, 1950000, '5,00')">R$ 5,00</div>
-                <div class="resgate-opt" onclick="setResgate(this, 39000000, '100,00')">R$ 100,00</div>
-                <div class="resgate-opt" onclick="setResgate(this, 78000000, '200,00')">R$ 200,00</div>
-                <div class="resgate-opt" onclick="setResgate(this, 117000000, '300,00')">R$ 300,00</div>
-            </div>
-
-            <input type="text" id="chavePix" placeholder="SUA CHAVE PIX">
-            <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); padding: 15px;">SOLICITAR RESGATE PIX</button>
-            <a href="politica.html" class="link-politica-quadro">Política de Privacidade</a>
         </div>
     </div>
+
+    <div class="hex-frame">
+        <div id="quizContent">
+            <p id="perguntaTexto" style="text-align: center; font-size: 1rem; color: var(--gold-bright); font-weight: bold; margin-bottom: 10px;">Autenticando...</p>
+            <div id="opcoes"></div>
+            <p id="avisoStatusQuiz" style="text-align: center; font-size: 0.75rem; color: var(--gold); font-weight: bold; margin-top: 15px; text-transform: uppercase; line-height: 1.4;"></p>
+        </div>
+        
+        <div class="video-buttons-container" style="width: 100%; display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+            <button id="btnVideo" class="video-btn">
+                📺 +100 MOEDAS <br>
+                <span id="limitDiario" style="font-size: 0.6rem; color: var(--gold-bright);">0/35</span>
+            </button>
+            
+            <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
+                📺 +10 MOEDAS / +100 PDL <br>
+                <span id="contLivreIndividual" style="font-size: 0.6rem; color: #f0e6d2;">0/35</span>
+            </button>
+            
+            <button id="btnVideoXP" class="video-btn">
+                📺 +500 PDL <br>
+                <span style="font-size: 0.6rem; opacity: 0.8;">META 10 ACERTOS</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="hex-frame" style="margin-top: 20px;">
+        <div class="progress-bg" style="background: #000; height: 10px; border: 1px solid var(--gold-dark);">
+            <div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 5px 0; font-weight: bold;">
+            <span id="txtMeta">Meta: 195k</span>
+            <span id="txtPorcentagem">0%</span>
+        </div>
+        
+        <div class="resgate-selector">
+            <div class="resgate-opt active" onclick="setResgate(this, 195000, '0,50')">R$ 0,50</div>
+            <div class="resgate-opt" onclick="setResgate(this, 390000, '1,00')">R$ 1,00</div>
+            <div class="resgate-opt" onclick="setResgate(this, 1950000, '5,00')">R$ 5,00</div>
+            <div class="resgate-opt" onclick="setResgate(this, 39000000, '100,00')">R$ 100,00</div>
+            <div class="resgate-opt" onclick="setResgate(this, 78000000, '200,00')">R$ 200,00</div>
+            <div class="resgate-opt" onclick="setResgate(this, 117000000, '300,00')">R$ 300,00</div>
+        </div>
+
+        <input type="text" id="chavePix" placeholder="SUA CHAVE PIX">
+        <button class="option-btn" id="btnResgate" style="margin: 0; background: #091428; border-color: var(--gold); padding: 15px;">SOLICITAR RESGATE PIX</button>
+        <a href="politica.html" class="link-politica-quadro">Política de Privacidade</a>
+    </div>
+</div> <div id="banner-adsterra-fixo" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 55px; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center;">
+    <div id="ad-placeholder" style="color: white; font-size: 10px;">ANÚNCIO AQUI</div>
+</div>
+    
       <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
