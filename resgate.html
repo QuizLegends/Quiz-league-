@@ -180,21 +180,25 @@
                 <p id="avisoStatusQuiz" style="text-align: center; font-size: 0.75rem; color: var(--gold); font-weight: bold; margin-top: 15px; text-transform: uppercase; line-height: 1.4;"></p>
             </div>
             
-            <div style="text-align: center;">
-                <span style="font-size: 0.65rem; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 5px;">Limite Diário Moedas: <span id="limitDiario">0/35</span></span>
-                <div class="video-buttons-container">
-                    <button id="btnVideo" class="video-btn">📺 +500 MOEDAS <span>META 10 ACERTOS</span></button>
-                    
-                    <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
-                        📺 +10 MOEDAS <span>+100 PDL</span>
-                    </button>
-                    
-                    <button id="btnVideoXP" class="video-btn">📺 +500 PDL <span>META 10 ACERTOS</span></button>
-                </div>
-            </div>
-        </div>
+          <div style="text-align: center;">
+    <div class="video-buttons-container">
+        <button id="btnVideo" class="video-btn">
+            📺 +100 MOEDAS <span id="limitMoedas">0/35</span>
+            <span style="display: block; font-size: 0.6rem;">META 10 ACERTOS</span>
+        </button>
+        
+        <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
+            📺 +10 MOEDAS <span id="limitLivre">0/35</span>
+            <span style="display: block; font-size: 0.6rem;">+100 PDL</span>
+        </button>
+        
+        <button id="btnVideoXP" class="video-btn">
+            📺 +500 PDL <span>META 10 ACERTOS</span>
+        </button>
+    </div>
+</div>
 
-        <div class="hex-frame">
+                    <div class="hex-frame">
             <div class="progress-bg" style="background: #000; height: 10px; border: 1px solid var(--gold-dark);"><div id="progressBar" style="background: var(--gold); height: 100%; width: 0%;"></div></div>
             <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gold); margin: 5px 0; font-weight: bold;"><span id="txtMeta">Meta: 195k</span><span id="txtPorcentagem">0%</span></div>
             
@@ -383,42 +387,55 @@
             };
         }
 
-        function atualizarInterface() {
-            if(!document.getElementById('goldAmount')) return;
-            document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
-            document.getElementById('limitDiario').innerText = `${totalVideosHoje}/35`;
-            document.getElementById('progressBar').style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
-            document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
-            const info = getEloInfo(pdlInterno);
-            const eloBadge = document.getElementById('txtElo');
-            eloBadge.innerText = info.nome; eloBadge.style.backgroundColor = info.bg; eloBadge.style.color = info.color;
-            const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
-            document.getElementById('xpMiniFill').style.width = Math.min(percXP, 100) + "%";
-            document.getElementById('xpMiniFill').style.backgroundColor = info.bar;
-            document.getElementById('txtMeta').innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k"}`;
-            
-            const btnV = document.getElementById('btnVideo');
-            const btnVXP = document.getElementById('btnVideoXP');
-            const btnVLivre = document.getElementById('btnVideoLivre');
-            const aviso = document.getElementById('avisoStatusQuiz');
-            
-            btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
-            btnVXP.disabled = (acertosNoCiclo < 10);
-            btnVLivre.disabled = false;
+function atualizarInterface() {
+    if(!document.getElementById('goldAmount')) return;
+    document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
+    
+    // --- ALTERAÇÃO AQUI: Atualizando os dois novos contadores nos botões ---
+    const limitMoedasEl = document.getElementById('limitMoedas');
+    const limitLivreEl = document.getElementById('limitLivre');
+    if(limitMoedasEl) limitMoedasEl.innerText = `${totalVideosHoje}/35`;
+    if(limitLivreEl) limitLivreEl.innerText = `${totalVideosHoje}/35`;
+    // ----------------------------------------------------------------------
 
-            btnV.classList.toggle('active', !btnV.disabled);
-            btnVXP.classList.toggle('active', !btnVXP.disabled);
-            btnVLivre.classList.add('active');
-            
-            if (acertosNoCiclo < 10) {
-                aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
-            } else if (videosAssistidos < 3) {
-                aviso.innerHTML = `<span style="color:#c89b3c">META ATINGIDA, ASSISTA <span style="color:#28a745; font-weight:bold;">${3-videosAssistidos}</span> ANÚNCIOS PARA LIBERAR O QUIZ</span>`;
-            } else {
-                aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
-            }
-        }
-        function showFloatingPDL(text, color, x, y) {
+    document.getElementById('progressBar').style.width = Math.min((goldDB/metaAtual)*100, 100) + "%";
+    document.getElementById('txtPorcentagem').innerText = Math.floor(Math.min((goldDB/metaAtual)*100, 100)) + "%";
+    
+    const info = getEloInfo(pdlInterno);
+    const eloBadge = document.getElementById('txtElo');
+    eloBadge.innerText = info.nome; eloBadge.style.backgroundColor = info.bg; eloBadge.style.color = info.color;
+    
+    const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
+    document.getElementById('xpMiniFill').style.width = Math.min(percXP, 100) + "%";
+    document.getElementById('xpMiniFill').style.backgroundColor = info.bar;
+    document.getElementById('txtMeta').innerText = `Meta: ${metaAtual >= 1000000 ? (metaAtual/1000000).toFixed(1) + "M" : (metaAtual/1000).toFixed(0) + "k"}`;
+    
+    const btnV = document.getElementById('btnVideo');
+    const btnVXP = document.getElementById('btnVideoXP');
+    const btnVLivre = document.getElementById('btnVideoLivre');
+    const aviso = document.getElementById('avisoStatusQuiz');
+    
+    // --- ALTERAÇÃO AQUI: Aplicando o limite diário nos botões ---
+    btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
+    btnVXP.disabled = (acertosNoCiclo < 10);
+    // Agora o botão Livre também bloqueia se atingir 35
+    btnVLivre.disabled = (totalVideosHoje >= 35); 
+
+    btnV.classList.toggle('active', !btnV.disabled);
+    btnVXP.classList.toggle('active', !btnVXP.disabled);
+    btnVLivre.classList.toggle('active', !btnVLivre.disabled);
+    // ------------------------------------------------------------
+    
+    if (acertosNoCiclo < 10) {
+        aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
+    } else if (videosAssistidos < 3) {
+        aviso.innerHTML = `<span style="color:#c89b3c">META ATINGIDA, ASSISTA <span style="color:#28a745; font-weight:bold;">${3-videosAssistidos}</span> ANÚNCIOS PARA LIBERAR O QUIZ</span>`;
+    } else {
+        aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
+    }
+}
+        
+         function showFloatingPDL(text, color, x, y) {
             const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
             document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
         }
@@ -462,46 +479,63 @@
         });
 
         async function finalizarRecompensa() {
-            if (!chaveSeguranca) {
-                modal.style.display = 'none';
-                openModal("SISTEMA DE SEGURANÇA", "Tentativa de fraude detectada. Assista o anúncio até o fim.");
-                return;
-            }
-            chaveSeguranca = false;
-            modal.style.display = 'none';
-            let up = {}; let msg = "";
-            const eloAntes = getEloInfo(pdlInterno).nome;
-            const centerW = window.innerWidth / 2;
-            const centerH = window.innerHeight / 2;
+    if (!chaveSeguranca) {
+        modal.style.display = 'none';
+        openModal("SISTEMA DE SEGURANÇA", "Tentativa de fraude detectada. Assista o anúncio até o fim.");
+        return;
+    }
+    chaveSeguranca = false;
+    modal.style.display = 'none';
+    let up = {}; 
+    let msg = "";
+    const eloAntes = getEloInfo(pdlInterno).nome;
+    const centerW = window.innerWidth / 2;
+    const centerH = window.innerHeight / 2;
 
-            if (tipoRecompensa === "moeda") {
-                up = { saldo: increment(500), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-                msg = "Você ganhou 500 moedas!";
-                showFloatingPDL("+500 Gold", "#c89b3c", centerW, centerH);
-            } else if (tipoRecompensa === "pdl") {
-                up = { xp: increment(500), videosAssistidos: increment(1) };
-                msg = "Você ganhou 500 PDL!";
-                showFloatingPDL("+500 PDL", "#28a745", centerW, centerH);
-            } else if (tipoRecompensa === "livre") {
-                up = { saldo: increment(10), xp: increment(100) };
-                msg = "Bônus Livre: +10 Moedas e +100 PDL!";
-                showFloatingPDL("+100 PDL", "#28a745", centerW, centerH);
-            }
+    if (tipoRecompensa === "moeda") {
+        // Valor alterado para 100 moedas
+        up = { 
+            saldo: increment(100), 
+            videosAssistidos: increment(1), 
+            totalVideosHoje: increment(1) 
+        };
+        msg = "Você ganhou 100 moedas!";
+        showFloatingPDL("+100 Gold", "#c89b3c", centerW, centerH);
 
-            if (tipoRecompensa !== "livre") {
-                const proxVideo = (videosAssistidos || 0) + 1;
-                if (proxVideo >= 3) { up.acertos = 0; up.videosAssistidos = 0; setTimeout(() => carregarQuestao(), 500); }
-            }
-            
-            await updateDoc(userRef, up);
-            
-            openModal("RECOMPENSA LIBERADA", msg, 'alert', () => {
-                const infoNovo = getEloInfo(pdlInterno);
-                if (infoNovo.nome !== eloAntes) {
-                    exibirAnimacaoElo(infoNovo, true);
-                }
-            });
+    } else if (tipoRecompensa === "pdl") {
+        up = { xp: increment(500), videosAssistidos: increment(1) };
+        msg = "Você ganhou 500 PDL!";
+        showFloatingPDL("+500 PDL", "#28a745", centerW, centerH);
+
+    } else if (tipoRecompensa === "livre") {
+        // Agora o 'livre' também incrementa totalVideosHoje para o limite 0/35
+        up = { 
+            saldo: increment(10), 
+            xp: increment(100), 
+            totalVideosHoje: increment(1) 
+        };
+        msg = "Bônus Livre: +10 Moedas e +100 PDL!";
+        showFloatingPDL("+100 PDL", "#28a745", centerW, centerH);
+    }
+
+    if (tipoRecompensa !== "livre") {
+        const proxVideo = (videosAssistidos || 0) + 1;
+        if (proxVideo >= 3) { 
+            up.acertos = 0; 
+            up.videosAssistidos = 0; 
+            setTimeout(() => carregarQuestao(), 500); 
         }
+    }
+    
+    await updateDoc(userRef, up);
+    
+    openModal("RECOMPENSA LIBERADA", msg, 'alert', () => {
+        const infoNovo = getEloInfo(pdlInterno);
+        if (infoNovo.nome !== eloAntes) {
+            exibirAnimacaoElo(infoNovo, true);
+        }
+    });
+}
 
         function carregarQuestao() {
             const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
