@@ -391,8 +391,8 @@
             };
         }
 
-        // Variável de controle local para o cronômetro
-        let tempoCooldownLivre = 0;
+        let tempoCooldownLivre = 0; 
+        const LIMITE_DIARIO = 35;
 
         function atualizarInterface() {
             if(!document.getElementById('goldAmount')) return;
