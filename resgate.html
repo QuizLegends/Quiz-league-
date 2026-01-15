@@ -185,22 +185,21 @@
         Limite Diário Moedas: <span id="limitDiario">0/35</span>
     </span>
 
-    <div class="video-buttons-container">
-        <button id="btnVideo" class="video-btn">
-            📺 +100 MOEDAS <span>META 10 ACERTOS</span>
-        </button>
-        
-        <div style="display: flex; flex-direction: column; align-items: center;">
-            <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important; margin-bottom: 2px;">
-                📺 +10 MOEDAS <span>+100 PDL</span>
-            </button>
-            <span id="contLivreIndividual" style="font-size: 0.55rem; color: #28a745; text-transform: uppercase;">0/35</span>
-        </div>
-        
-        <button id="btnVideoXP" class="video-btn">
-            📺 +500 PDL <span>META 10 ACERTOS</span>
-        </button>
-    </div>
+    <div class="video-buttons-container" style="width: 100%; display: flex; justify-content: center; gap: 10px;">
+    <button id="btnVideo" class="video-btn">
+        📺 +100 MOEDAS <br>
+        <span id="limitDiario" style="font-size: 0.6rem; color: var(--gold-bright);">0/35</span>
+    </button>
+    
+    <button id="btnVideoLivre" class="video-btn active" style="border-color: #28a745 !important;">
+        📺 +10 MOEDAS / +100 PDL <br>
+        <span id="contLivreIndividual" style="font-size: 0.6rem; color: #f0e6d2;">0/35</span>
+    </button>
+    
+    <button id="btnVideoXP" class="video-btn">
+        📺 +500 PDL <br>
+        <span style="font-size: 0.6rem; opacity: 0.8;">META 10 ACERTOS</span>
+    </button>
 </div>
 
         <div class="hex-frame">
