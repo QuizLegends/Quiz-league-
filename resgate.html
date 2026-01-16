@@ -568,36 +568,7 @@ function executarCronometroVisual(segundos) {
             c.appendChild(b);
         });
     }
-
-    // --- 6. SINCRONIZAÇÃO FIREBASE E INTERFACE ---
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) { 
-            userRef = doc(db, "usuarios", user.uid); 
-            onSnapshot(userRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const hoje = new Date().toLocaleDateString('pt-BR');
-                    if (data.ultimaDataAcesso !== hoje) {
-                        updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje });
-                    } else {
-                        goldDB = Number(data.saldo) || 0;
-                        acertosNoCiclo = data.acertos || 0;
-                        videosAssistidos = data.videosAssistidos || 0;
-                        totalVideosHoje = data.totalVideosHoje || 0;
-                        pdlInterno = data.xp || 0;
-                        atualizarInterface();
-                        if (!carregadoPelaPrimeiraVez) {
-                            carregadoPelaPrimeiraVez = true;
-                            carregarBanco();
-                            atualizarPodioSemanal();
-                        }
-                    }
-                }
-            });
-        } else { if (!window.location.href.includes("index.html")) window.location.href = "index.html"; }
-    });
-
+    
     function atualizarInterface() {
         if(!document.getElementById('goldAmount')) return;
         document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
