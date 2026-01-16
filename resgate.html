@@ -247,13 +247,13 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
     import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    let cooldownLivreAtivo = false;
-    const cooldownSalvo = localStorage.getItem('proximoVideoLivre');
+        let cooldownLivreAtivo = false;
+        const cooldownSalvo = localStorage.getItem('proximoVideoLivre');
     
-    if (cooldownSalvo) {
+        if (cooldownSalvo) {
         const agora = Date.now();
         const tempoRestante = Math.floor((cooldownSalvo - agora) / 1000);
         if (tempoRestante > 0) {
@@ -263,7 +263,7 @@
         }
     }
 
-    async function atualizarPodioSemanal() {
+        async function atualizarPodioSemanal() {
         try {
             const q = query(
                 collection(db, "usuarios"), 
@@ -286,7 +286,7 @@
         }
     }
 
-    function atualizarVisualPodio(posicao, nome, foto) {
+        function atualizarVisualPodio(posicao, nome, foto) {
         const selector = posicao === 1 ? "Lenda Atual" : (posicao === 2 ? "Player B" : "Player C");
         const containers = document.querySelectorAll("#containerRankingResumo small");
         
@@ -303,8 +303,16 @@
         });
     }
 
+    window.abrirLoja = () => openModal("LOJA HEXTECH", "Itens e Buffs em desenvolvimento.");
+    window.abrirInventario = () => openModal("INVENTÁRIO", "Você não possui itens.");
+    window.abrirStatus = () => openModal("STATUS", "Nenhum buff ativo.");
+    window.abrirRanking = () => openModal("RANKING", "O ranking semanal reseta em breve.");
+    window.abrirPerfil = () => openModal("PERFIL", "Configurações de perfil em breve.");
+    window.abrirConquistas = () => openModal("BAÚS", "Ganhe baús vencendo desafios!");
+
     atualizarPodioSemanal();
-          
+
+              
         let bancoPerguntas = [];
         const firebaseConfig = { 
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E", 
