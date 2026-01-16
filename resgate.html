@@ -477,43 +477,89 @@ function executarCronometroVisual(segundos) {
     }, 1000);
 }
         
-        function openModal(title, text, type = 'alert', onConfirm = null) {
-            if(!modal) return;
-            mTitle.innerHTML = title; mContent.innerHTML = `<div class="modal-text">${text}</div>`;
-            mFooter.innerHTML = '';
-            if (type === 'confirm') {
-                const bC = document.createElement('button'); bC.className = 'modal-btn-confirm'; bC.innerText = 'CONFIRMAR'; bC.onclick = onConfirm;
-                const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'VOLTAR'; bX.onclick = () => modal.style.display = 'none';
-                mFooter.appendChild(bC); mFooter.appendChild(bX);
-            } else {
-                const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; 
-                bO.onclick = () => { 
-                    if(!anuncioEmAndamento) {
-                        modal.style.display = 'none';
-                        if(onConfirm) onConfirm(); 
-                    } 
-                };
-                mFooter.appendChild(bO);
-            }
-            modal.style.display = 'flex';
-        }
+        // 1. Definição dos elementos do Modal
+const modal = document.getElementById('custom-modal');
+const mTitle = document.getElementById('m-title');
+const mContent = document.getElementById('modal-body-content');
+const mFooter = document.getElementById('m-footer');
 
-        if(document.getElementById('btnVerElos')) {
-            document.getElementById('btnVerElos').onclick = () => {
-                let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto; padding:5px;">`;
-                configElo.forEach(e => {
-                    const isAtual = ultimoEloNome === e.nome;
-                    htmlElos += `
-                        <div class="elo-list-item" style="background:${e.bg}; color:${e.color}; border: 2px solid ${isAtual ? '#fff' : 'transparent'}; margin-bottom:5px; padding:10px; border-radius:5px; display:flex; justify-content:space-between; font-weight:bold; font-size:0.8rem;">
-                            <span>${e.nome}</span>
-                            <span>${e.min.toLocaleString()} PDL</span>
-                        </div>`;
-                });
-                htmlElos += `</div>`;
-                openModal("TABELA DE ELOS", htmlElos);
-            };
-        }
+// 2. Função openModal Corrigida
+function openModal(title, text, type = 'alert', onConfirm = null) {
+    if (!modal) return;
+    mTitle.innerHTML = title; 
+    mContent.innerHTML = `<div class="modal-text">${text}</div>`;
+    mFooter.innerHTML = '';
 
+    if (type === 'confirm') {
+        const bC = document.createElement('button'); 
+        bC.className = 'modal-btn-confirm'; 
+        bC.innerText = 'CONFIRMAR'; 
+        bC.onclick = onConfirm;
+        
+        const bX = document.createElement('button'); 
+        bX.className = 'option-btn'; 
+        bX.innerText = 'VOLTAR'; 
+        bX.onclick = () => modal.style.display = 'none';
+        
+        mFooter.appendChild(bC); 
+        mFooter.appendChild(bX);
+    } else {
+        const bO = document.createElement('button'); 
+        bO.className = 'modal-btn-confirm'; 
+        bO.innerText = 'ENTENDI'; 
+        bO.onclick = () => { 
+            modal.style.display = 'none';
+            if (onConfirm) onConfirm(); 
+        };
+        mFooter.appendChild(bO);
+    }
+    modal.style.display = 'flex';
+}
+
+// 3. Expor funções para os botões do HTML (onclick)
+window.openModal = openModal;
+
+window.abrirLoja = () => {
+    openModal("LOJA HEXTECH", "Bem-vindo à Loja! Em breve você poderá trocar suas moedas por Ícones e Buffs exclusivos.");
+};
+
+window.abrirInventario = () => {
+    openModal("INVENTÁRIO", "Seu inventário está vazio. Adquira itens na Loja Hextech.");
+};
+
+window.abrirStatus = () => {
+    openModal("STATUS ATIVO", "Nenhum buff ativo no momento. Vá até a loja para acelerar seu ganho de PDL!");
+};
+
+window.abrirRanking = () => {
+    openModal("RANKING SEMANAL", "O Ranking Semanal premia os melhores invocadores com baús e ícones raros.");
+};
+
+window.abrirPerfil = () => {
+    openModal("PERFIL", "Personalize seu nome, título e ícone de invocador (Em breve).");
+};
+
+window.abrirConquistas = () => {
+    openModal("BAÚS HEXTECH", "Complete metas de acertos para desbloquear recompensas aleatórias.");
+};
+
+// 4. Lógica do Botão Ver Elos
+if (document.getElementById('btnVerElos')) {
+    document.getElementById('btnVerElos').onclick = () => {
+        let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto; padding:5px;">`;
+        configElo.forEach(e => {
+            const isAtual = typeof ultimoEloNome !== 'undefined' && ultimoEloNome === e.nome;
+            htmlElos += `
+                <div class="elo-list-item" style="background:${e.bg}; color:${e.color}; border: 2px solid ${isAtual ? '#fff' : 'transparent'}; margin-bottom:5px; padding:10px; border-radius:5px; display:flex; justify-content:space-between; font-weight:bold; font-size:0.8rem;">
+                    <span>${e.nome}</span>
+                    <span>${e.min.toLocaleString()} PDL</span>
+                </div>`;
+        });
+        htmlElos += `</div>`;
+        openModal("TABELA DE ELOS", htmlElos);
+    };
+}
+          
         function atualizarInterface() {
             if(!document.getElementById('goldAmount')) return;
             document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
