@@ -442,6 +442,33 @@ function executarCronometroVisual(segundos) {
         }, 1000);
     }
 
+     document.addEventListener('visibilitychange', () => {
+    // Se o usuário voltar para a página, o anúncio estava rolando e o tempo não acabou
+    if (document.visibilityState === 'visible' && anuncioEmAndamento && tempoRestanteAnuncio > 0) {
+        clearInterval(intervaloAnuncio);
+        anuncioEmAndamento = false;
+        
+        mTitle.innerText = "VALIDAÇÃO FALHOU!";
+        mContent.innerHTML = `
+            <div class="modal-text" style="color:#dc3545; font-weight:bold;">
+                Você voltou muito cedo!<br>
+                Aguarde os 15 segundos no anúncio para receber sua recompensa.
+            </div>`;
+        mFooter.innerHTML = '';
+
+        const btnRetry = document.createElement('button');
+        btnRetry.className = 'modal-btn-confirm';
+        btnRetry.style.width = "100%";
+        btnRetry.innerText = 'VER ANÚNCIO NOVAMENTE';
+        btnRetry.onclick = () => { 
+            modal.style.display = 'none'; 
+            iniciarFluxoAnuncio(tipoRecompensa); 
+        };
+        
+        mFooter.appendChild(btnRetry);
+    }
+});
+    
     async function finalizarRecompensa() {
         if (!chaveSeguranca) {
             modal.style.display = 'none';
