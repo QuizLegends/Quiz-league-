@@ -243,21 +243,68 @@
 </div>
     
       <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        let cooldownLivreAtivo = false;
-        const cooldownSalvo = localStorage.getItem('proximoVideoLivre');
-        if (cooldownSalvo) {
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let cooldownLivreAtivo = false;
+    const cooldownSalvo = localStorage.getItem('proximoVideoLivre');
+    
+    if (cooldownSalvo) {
         const agora = Date.now();
         const tempoRestante = Math.floor((cooldownSalvo - agora) / 1000);
-
         if (tempoRestante > 0) {
-        setTimeout(() => executarCronometroVisual(tempoRestante), 500);
-      } else {
-        localStorage.removeItem('proximoVideoLivre');
+            setTimeout(() => executarCronometroVisual(tempoRestante), 500);
+        } else {
+            localStorage.removeItem('proximoVideoLivre');
+        }
     }
-}
+
+    async function atualizarPodioSemanal() {
+        try {
+            const q = query(
+                collection(db, "usuarios"), 
+                orderBy("pdlSemanal", "desc"), 
+                limit(3)
+            );
+
+            const querySnapshot = await getDocs(q);
+            const vencedores = [];
+            querySnapshot.forEach((doc) => {
+                vencedores.push(doc.data());
+            });        
+
+            if(vencedores[0]) atualizarVisualPodio(1, vencedores[0].nome, vencedores[0].fotoUrl);
+            if(vencedores[1]) atualizarVisualPodio(2, vencedores[1].nome, vencedores[1].fotoUrl);
+            if(vencedores[2]) atualizarVisualPodio(3, vencedores[2].nome, vencedores[2].fotoUrl);
+
+        } catch (error) {
+            console.error("Erro ao carregar pódio:", error);
+        }
+    }
+
+    function atualizarVisualPodio(posicao, nome, foto) {
+        const selector = posicao === 1 ? "Lenda Atual" : (posicao === 2 ? "Player B" : "Player C");
+        const containers = document.querySelectorAll("#containerRankingResumo small");
+        
+        containers.forEach(el => {
+            if(el.innerText === selector) {
+                el.innerText = nome.split(' ')[0]; 
+                if(foto) {
+                    const circulo = el.previousElementSibling;
+                    circulo.style.backgroundImage = `url('${foto}')`;
+                    circulo.style.backgroundSize = "cover";
+                    circulo.style.backgroundPosition = "center";
+                }
+            }
+        });
+    }
+
+    atualizarPodioSemanal();
+          
         let bancoPerguntas = [];
         const firebaseConfig = { 
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E", 
