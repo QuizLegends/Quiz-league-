@@ -706,6 +706,43 @@ function executarCronometroVisual(segundos) {
             else pullDiv.style.transform = 'translateY(0)';
         });
     }
+
+    onAuthStateChanged(auth, (user) => {
+    if (user) { 
+        userRef = doc(db, "usuarios", user.uid); 
+        onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const hoje = new Date().toLocaleDateString('pt-BR');
+
+                // Reseta os limites diários se for um novo dia
+                if (data.ultimaDataAcesso !== hoje) {
+                    updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje });
+                } else {
+                    // Carrega os dados do banco para as variáveis do script
+                    goldDB = Number(data.saldo) || 0;
+                    acertosNoCiclo = data.acertos || 0;
+                    videosAssistidos = data.videosAssistidos || 0;
+                    totalVideosHoje = data.totalVideosHoje || 0;
+                    pdlInterno = data.xp || 0;
+
+                    atualizarInterface();
+
+                    if (!carregadoPelaPrimeiraVez) {
+                        carregadoPelaPrimeiraVez = true;
+                        carregarBanco(); // Carrega as perguntas
+                        atualizarPodioSemanal(); // Carrega o ranking
+                        
+                        // --- AQUI ESTÁ A CHAMADA QUE VOCÊ PRECISAVA ---
+                        verificarCooldownLivre(); 
+                    }
+                }
+            }
+        });
+    } else { 
+        if (!window.location.href.includes("index.html")) window.location.href = "index.html"; 
+    }
+});
 </script>
 
           <div id="footer-ad-container" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; border-top: 2px solid #c89b3c;">
