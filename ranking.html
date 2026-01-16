@@ -61,11 +61,6 @@
             transition: 0.3s;
         }
 
-        .ranking-item:hover {
-            border-color: var(--ouro);
-            background: rgba(10, 200, 185, 0.05);
-        }
-
         .posicao {
             font-weight: 900;
             color: var(--ouro-brilhante);
@@ -113,24 +108,25 @@
             flex-grow: 1;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            min-width: 150px; /* Impede o nome de sumir */
+            min-width: 150px; /* Garante que o nome tenha espaço */
         }
 
         .info-pdl {
-            width: 120px;
+            width: 140px; /* Espaço suficiente para "1.000.000 PDL" */
             text-align: right;
             flex-shrink: 0;
         }
 
         .pdl-valor {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--hextech-blue);
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .btn-voltar {
@@ -143,12 +139,6 @@
             text-decoration: none;
             font-weight: bold;
             text-transform: uppercase;
-            transition: 0.3s;
-        }
-
-        .btn-voltar:hover {
-            background: var(--ouro);
-            color: #000;
         }
 
         .loading { text-align: center; color: var(--ouro); padding: 50px; font-weight: bold; }
@@ -282,16 +272,10 @@
                     container.appendChild(item);
                     posicao++;
                 });
-
-                if (querySnapshot.empty) {
-                    container.innerHTML = "<div class='loading'>Ranking vazio.</div>";
-                }
             } catch (error) {
-                console.error("Erro Firebase:", error);
-                document.getElementById('lista-ranking').innerHTML = "<div class='loading'>Erro ao carregar ranking.</div>";
+                console.error(error);
             }
         }
-
         carregarRanking();
     </script>
 </body>
