@@ -182,7 +182,7 @@
     function getEloInfo(xp) {
         let elo = { nome: "", arquivo: "" };
         
-        // Lógica de PDL sincronizada com seus arquivos locais
+        // Mantendo sua lógica de faixas de PDL
         if (xp < 2500) {
             elo.nome = xp < 500 ? "Ferro V" : xp < 1000 ? "Ferro IV" : xp < 1500 ? "Ferro III" : xp < 2000 ? "Ferro II" : "Ferro I";
             elo.arquivo = "ferro.png";
@@ -208,7 +208,6 @@
         } else {
             elo.nome = "Desafiante"; elo.arquivo = "desafiante.png";
         }
-        
         return elo;
     }
 
@@ -230,7 +229,11 @@
                 item.className = 'ranking-item';
                 item.innerHTML = `
                     <div class="posicao">${posicao}°</div>
-                    <img src="img/${elo.arquivo}" class="elo-emblema" alt="${elo.nome}" style="width:50px; height:50px; object-fit:contain;">
+                    <img src="${elo.arquivo}" 
+                         class="elo-emblema" 
+                         alt="${elo.nome}" 
+                         onerror="this.src='${ICONE_PADRAO}'; this.style.borderRadius='50%';"
+                         style="width:50px; height:50px; object-fit:contain;">
                     <img src="${foto}" class="user-avatar" onerror="this.src='${ICONE_PADRAO}'">
                     <div class="nome">${usuario.nome || "Invocador"}</div>
                     <div class="info-pdl">
