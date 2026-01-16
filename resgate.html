@@ -216,7 +216,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
+        let cooldownLivreAtivo = false;
         let bancoPerguntas = [];
         const firebaseConfig = { 
             apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E", 
@@ -428,6 +428,7 @@
         if(document.getElementById('btnVideoLivre')) document.getElementById('btnVideoLivre').onclick = () => iniciarFluxoAnuncio('livre');
 
         function iniciarFluxoAnuncio(tipo) {
+            if (tipo === 'livre' && cooldownLivreAtivo) return;
             chaveSeguranca = false;
             tipoRecompensa = tipo; anuncioEmAndamento = true; tempoRestanteAnuncio = 15;
             if(intervaloAnuncio) clearInterval(intervaloAnuncio);
@@ -486,6 +487,7 @@
                 up = { saldo: increment(10), xp: increment(100) };
                 msg = "Bônus Livre: +10 Moedas e +100 PDL!";
                 showFloatingPDL("+100 PDL", "#28a745", centerW, centerH);
+                iniciarCooldownLivre(120);
             }
 
             if (tipoRecompensa !== "livre") {
