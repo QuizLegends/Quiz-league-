@@ -325,20 +325,30 @@
     }
 
     function atualizarVisualPodio(posicao, nome, foto) {
-        const selector = posicao === 1 ? "Lenda Atual" : (posicao === 2 ? "Player B" : "Player C");
-        const containers = document.querySelectorAll("#containerRankingResumo small");
-        containers.forEach(el => {
-            if(el.innerText === selector) {
-                el.innerText = nome.split(' ')[0]; 
-                if(foto) {
-                    const circulo = el.previousElementSibling;
-                    circulo.style.backgroundImage = `url('${foto}')`;
-                    circulo.style.backgroundSize = "cover";
-                    circulo.style.backgroundPosition = "center";
-                }
-            }
-        });
+    const container = document.getElementById("containerRankingResumo");
+    if (!container) return;
+
+    const itens = container.querySelectorAll("div[style*='flex-direction: column']");
+    
+    let index;
+    if (posicao === 1) index = 1; 
+    else if (posicao === 2) index = 0; 
+    else index = 2; 
+
+    const target = itens[index];
+    if (!target) return;
+
+    const nomeEl = target.querySelector("small");
+    if (nomeEl) nomeEl.innerText = nome.split(' ')[0];
+
+    const circulo = target.querySelector("div[style*='border-radius: 50%']");
+    const fotoPadrao = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/0.jpg';
+    
+    if (circulo) {
+        const urlFinal = foto ? foto : fotoPadrao;
+        circulo.style.backgroundImage = `url('${urlFinal}')`;
     }
+}
 
     // --- 3. CONFIGURAÇÃO DE ELOS E CORES ---
 
