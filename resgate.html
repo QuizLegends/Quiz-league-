@@ -332,29 +332,69 @@
     let goldDB = 0, acertosNoCiclo = 0, videosAssistidos = 0, totalVideosHoje = 0;
     let pdlInterno = 0, userRef = null, carregadoPelaPrimeiraVez = false, ultimoEloNome = null;
 
-    // --- 2. FUNÇÕES DE INTERFACE (MODAIS E PÓDIO) ---
+    // --- 2. CONFIGURAÇÃO DE ELOS (CORRIGIDO) ---
+    const configElo = []; // AGORA DECLARADO
+    const divisoes = ["V", "IV", "III", "II", "I"]; // AGORA DECLARADO
+
+    const coresElos = {
+        "FERRO": { bg: "#2a2a2a", color: "#8a8a8a", bar: "#555", img: "ferro.png" },
+        "BRONZE": { bg: "#4e3629", color: "#cd7f32", bar: "#8b4513", img: "bronze.png" },
+        "PRATA": { bg: "#4a5d6e", color: "#e2e2e2", bar: "#a9b9c9", img: "prata.png" },
+        "OURO": { bg: "#7a5c12", color: "#f1d37e", bar: "#c89b3c", img: "ouro.png" },
+        "PLATINA": { bg: "#1d5c5c", color: "#a3e7e7", bar: "#46abb0", img: "platina.png" },
+        "ESMERALDA": { bg: "#0d5c2e", color: "#a3e7bc", bar: "#28a745", img: "esmeralda.png" },
+        "DIAMANTE": { bg: "#1f3a7a", color: "#b3c7f7", bar: "#5c85d6", img: "diamante.png" },
+        "MESTRE": { bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6", img: "mestre.png" },
+        "GRÃO-MESTRE": { bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c", img: "graomestre.png" },
+        "DESAFIANTE": { bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db", img: "desafiante.png" }
+    };
+
+    function gerarEloComDivisoes(nome, min, max) {
+        let passo = (max - min) / 5;
+        divisoes.forEach((div, i) => {
+            configElo.push({ 
+                nome: `${nome} ${div}`, 
+                min: min + (passo * i), 
+                max: min + (passo * (i + 1)), 
+                img: coresElos[nome].img,
+                ...coresElos[nome] 
+            });
+        });
+    }
+
+    // Gera as faixas
+    gerarEloComDivisoes("FERRO", 0, 5000);
+    gerarEloComDivisoes("BRONZE", 5000, 10000);
+    gerarEloComDivisoes("PRATA", 10000, 30000);
+    gerarEloComDivisoes("OURO", 30000, 60000);
+    gerarEloComDivisoes("PLATINA", 60000, 100000);
+    gerarEloComDivisoes("ESMERALDA", 100000, 150000);
+    gerarEloComDivisoes("DIAMANTE", 150000, 300000);
+    
+    // ELITE
+    configElo.push({ nome: "MESTRE", min: 300000, max: 600000, bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6", img: "mestre.png" });
+    configElo.push({ nome: "GRÃO-MESTRE", min: 600000, max: 1000000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c", img: "graomestre.png" });
+    configElo.push({ nome: "DESAFIANTE", min: 1000000, max: 99999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db", img: "desafiante.png" });
+
+    function getEloInfo(valorXP) { 
+        if (valorXP <= 0) return configElo[0];
+        const eloEncontrado = configElo.find(e => valorXP >= e.min && valorXP < e.max);
+        return eloEncontrado || configElo[configElo.length - 1]; 
+    }
+
+    // --- 3. FUNÇÕES DE INTERFACE ---
 
     function openModal(title, text, type = 'alert', onConfirm = null) {
         if (!modal) return;
         mTitle.innerHTML = title; 
         mContent.innerHTML = `<div class="modal-text">${text}</div>`;
         mFooter.innerHTML = '';
-
         if (type === 'confirm') {
-            const bC = document.createElement('button'); 
-            bC.className = 'modal-btn-confirm'; 
-            bC.innerText = 'CONFIRMAR'; 
-            bC.onclick = onConfirm;
-            const bX = document.createElement('button'); 
-            bX.className = 'option-btn'; 
-            bX.innerText = 'VOLTAR'; 
-            bX.onclick = () => modal.style.display = 'none';
+            const bC = document.createElement('button'); bC.className = 'modal-btn-confirm'; bC.innerText = 'CONFIRMAR'; bC.onclick = onConfirm;
+            const bX = document.createElement('button'); bX.className = 'option-btn'; bX.innerText = 'VOLTAR'; bX.onclick = () => modal.style.display = 'none';
             mFooter.appendChild(bC); mFooter.appendChild(bX);
         } else {
-            const bO = document.createElement('button'); 
-            bO.className = 'modal-btn-confirm'; 
-            bO.innerText = 'ENTENDI'; 
-            bO.onclick = () => { modal.style.display = 'none'; if (onConfirm) onConfirm(); };
+            const bO = document.createElement('button'); bO.className = 'modal-btn-confirm'; bO.innerText = 'ENTENDI'; bO.onclick = () => { modal.style.display = 'none'; if (onConfirm) onConfirm(); };
             mFooter.appendChild(bO);
         }
         modal.style.display = 'flex';
@@ -362,473 +402,188 @@
     window.openModal = openModal;
 
     async function atualizarPodioSemanal() {
-    try {
-        const q = query(collection(db, "usuarios"), orderBy("pdlSemanal", "desc"), limit(3));
-        const querySnapshot = await getDocs(q);
-        const vencedores = [];
-        querySnapshot.forEach((doc) => { vencedores.push(doc.data()); });        
-
-        if(vencedores[0]) {
-            const foto0 = vencedores[0].photoURL || vencedores[0].fotoUrl;
-            atualizarVisualPodio(1, vencedores[0].nome, foto0);
-        }
-        if(vencedores[1]) {
-            const foto1 = vencedores[1].photoURL || vencedores[1].fotoUrl;
-            atualizarVisualPodio(2, vencedores[1].nome, foto1);
-        }
-        if(vencedores[2]) {
-            const foto2 = vencedores[2].photoURL || vencedores[2].fotoUrl;
-            atualizarVisualPodio(3, vencedores[2].nome, foto2);
-        }
-    } catch (error) {
-        console.error("Erro ao carregar pódio:", error);
+        try {
+            const q = query(collection(db, "usuarios"), orderBy("pdlSemanal", "desc"), limit(3));
+            const querySnapshot = await getDocs(q);
+            const vencedores = [];
+            querySnapshot.forEach((doc) => { vencedores.push(doc.data()); });        
+            if(vencedores[0]) atualizarVisualPodio(1, vencedores[0].nome, vencedores[0].photoURL || vencedores[0].fotoUrl);
+            if(vencedores[1]) atualizarVisualPodio(2, vencedores[1].nome, vencedores[1].photoURL || vencedores[1].fotoUrl);
+            if(vencedores[2]) atualizarVisualPodio(3, vencedores[2].nome, vencedores[2].photoURL || vencedores[2].fotoUrl);
+        } catch (error) { console.error("Erro ao carregar pódio:", error); }
     }
-}
     
-function atualizarVisualPodio(posicao, nome, foto) {
-    const containers = document.querySelectorAll("#containerRankingResumo div[style*='flex-direction: column']");
-    const fotoPadrao = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/0.jpg';
-    const urlFinal = foto ? foto : fotoPadrao;
-
-    containers.forEach(box => {
-        const small = box.querySelector("small");
-        if (!small) return;
-
-        // Verifica qual player deve ser substituído
-        const textoAtual = small.innerText;
-        const ePrimeiro = (posicao === 1 && (textoAtual === "Lenda Atual" || textoAtual === nome.split(' ')[0]));
-        const eSegundo = (posicao === 2 && textoAtual === "Player B");
-        const eTerceiro = (posicao === 3 && textoAtual === "Player C");
-
-        if (ePrimeiro || eSegundo || eTerceiro) {
-            // Atualiza Nome
-            small.innerText = nome.split(' ')[0];
-            
-            // Atualiza Foto
-            const circulo = box.querySelector("div[style*='border-radius: 50%']");
-            if (circulo) {
-                circulo.style.backgroundImage = `url('${urlFinal}')`;
-                circulo.style.backgroundSize = "cover";
-                circulo.style.backgroundPosition = "center";
+    function atualizarVisualPodio(posicao, nome, foto) {
+        const containers = document.querySelectorAll("#containerRankingResumo div[style*='flex-direction: column']");
+        const fotoPadrao = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/0.jpg';
+        containers.forEach(box => {
+            const small = box.querySelector("small");
+            if (!small) return;
+            const textoAtual = small.innerText;
+            if ((posicao === 1 && (textoAtual === "Lenda Atual" || textoAtual === nome.split(' ')[0])) || (posicao === 2 && textoAtual === "Player B") || (posicao === 3 && textoAtual === "Player C")) {
+                small.innerText = nome.split(' ')[0];
+                const circulo = box.querySelector("div[style*='border-radius: 50%']");
+                if (circulo) { circulo.style.backgroundImage = `url('${foto || fotoPadrao}')`; circulo.style.backgroundSize = "cover"; }
             }
-        }
-    });
-}
-
-    // --- 3. CONFIGURAÇÃO DE ELOS E CORES —
-const coresElos = {
-    "FERRO": { bg: "#2a2a2a", color: "#8a8a8a", bar: "#555", img: "ferro.png" },
-    "BRONZE": { bg: "#4e3629", color: "#cd7f32", bar: "#8b4513", img: "bronze.png" },
-    "PRATA": { bg: "#4a5d6e", color: "#e2e2e2", bar: "#a9b9c9", img: "prata.png" },
-    "OURO": { bg: "#7a5c12", color: "#f1d37e", bar: "#c89b3c", img: "ouro.png" },
-    "PLATINA": { bg: "#1d5c5c", color: "#a3e7e7", bar: "#46abb0", img: "platina.png" },
-    "ESMERALDA": { bg: "#0d5c2e", color: "#a3e7bc", bar: "#28a745", img: "esmeralda.png" },
-    "DIAMANTE": { bg: "#1f3a7a", color: "#b3c7f7", bar: "#5c85d6", img: "diamante.png" },
-    "MESTRE": { bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6", img: "mestre.png" },
-    "GRÃO-MESTRE": { bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c", img: "graomestre.png" },
-    "DESAFIANTE": { bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db", img: "desafiante.png" }
-};
-
-function gerarEloComDivisoes(nome, min, max) {
-    let passo = (max - min) / 5;
-    divisoes.forEach((div, i) => {
-        configElo.push({ 
-            nome: `${nome} ${div}`, 
-            min: min + (passo * i), 
-            max: min + (passo * (i + 1)), 
-            img: coresElos[nome].img, // Adiciona a imagem aqui
-            ...coresElos[nome] 
         });
-    });
-}
-// Limpa e Gera as faixas
-gerarEloComDivisoes("FERRO", 0, 5000);
-gerarEloComDivisoes("BRONZE", 5000, 10000);
-gerarEloComDivisoes("PRATA", 10000, 30000);
-gerarEloComDivisoes("OURO", 30000, 60000);
-gerarEloComDivisoes("PLATINA", 60000, 100000);
-gerarEloComDivisoes("ESMERALDA", 100000, 150000);
-gerarEloComDivisoes("DIAMANTE", 150000, 300000);
-// ELOS DE ELITE (Agora com a imagem configurada para cada um)
-configElo.push({ nome: "MESTRE", min: 300000, max: 600000, bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6", img: "mestre.png" });
-configElo.push({ nome: "GRÃO-MESTRE", min: 600000, max: 1000000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c", img: "graomestre.png" });
-configElo.push({ nome: "DESAFIANTE", min: 1000000, max: 99999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db", img: "desafiante.png" });
-
-function getEloInfo(valorXP) { 
-    if (valorXP <= 0) return configElo[0];
-    const eloEncontrado = configElo.find(e => valorXP >= e.min && valorXP < e.max);
-    return eloEncontrado || configElo[configElo.length - 1]; 
-}
-
-function verificarCooldownLivre() {
-    const salvo = localStorage.getItem('proximoVideoLivre');
-    if (salvo) {
-        const agora = Date.now();
-        const tempoDesbloqueio = parseInt(salvo);
-        
-        if (tempoDesbloqueio > agora) {
-            const restante = Math.floor((tempoDesbloqueio - agora) / 1000);
-            executarCronometroVisual(restante);
-        } else {
-            localStorage.removeItem('proximoVideoLivre');
-        }
     }
-}
 
-// Inicia o cooldown e salva o momento exato do desbloqueio
-function iniciarCooldownLivre(segundos) {
-    const tempoDesbloqueio = Date.now() + (segundos * 1000);
-    localStorage.setItem('proximoVideoLivre', tempoDesbloqueio);
-    executarCronometroVisual(segundos);
-}
-
-function executarCronometroVisual(segundos) {
-    const btn = document.getElementById('btnVideoLivre');
-    if (!btn) return;
-
-    cooldownLivreAtivo = true;
-    btn.disabled = true;
-    let restante = segundos;
-
-    const intervalo = setInterval(() => {
-        restante--;
-        btn.innerHTML = `AGUARDE <span style="color:#28a745">${restante}s</span>`;
-
-        if (restante <= 0) {
-            clearInterval(intervalo);
-            cooldownLivreAtivo = false;
-            localStorage.removeItem('proximoVideoLivre');
-            btn.disabled = false;
-            btn.innerHTML = `📺 +10 MOEDAS <span>+100 PDL</span>`;
-            if(typeof atualizarInterface === 'function') atualizarInterface();
+    function atualizarInterface() {
+        if(!document.getElementById('goldAmount')) return;
+        document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
+        const elementoLimite = document.getElementById('txtLimiteBotao');
+        if (elementoLimite) {
+            elementoLimite.innerText = `LIMITE DIÁRIO: ${totalVideosHoje}/35`;
+            elementoLimite.style.color = (totalVideosHoje >= 35) ? "#dc3545" : "inherit";
         }
-    }, 1000);
-}
+
+        const info = getEloInfo(pdlInterno);
+        const eloBadge = document.getElementById('txtElo');
+        const eloImg = document.getElementById('imgElo');
+        const bar = document.getElementById('xpMiniFill');
+
+        if(eloBadge) { eloBadge.innerText = info.nome; eloBadge.style.color = info.color; }
+        if(eloImg && info.img) { if(!eloImg.src.includes(info.img)) eloImg.src = info.img; }
+        if(bar) {
+            const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
+            bar.style.width = Math.min(percXP, 100) + "%";
+        }
+        
+        const btnV = document.getElementById('btnVideo');
+        const btnVXP = document.getElementById('btnVideoXP');
+        const aviso = document.getElementById('avisoStatusQuiz');
+        if(btnV) btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
+        if(btnVXP) btnVXP.disabled = (acertosNoCiclo < 10);
+        if (acertosNoCiclo < 10) aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES`;
+        else if (videosAssistidos < 3) aviso.innerHTML = `META ATINGIDA, ASSISTA <span style="color:#28a745">${3-videosAssistidos}</span> ANÚNCIOS`;
+        else aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
+    }
+
+    // --- 4. RECOMPENSAS E ANÚNCIOS ---
+
+    async function finalizarRecompensa() {
+        if (!chaveSeguranca) return;
+        chaveSeguranca = false; modal.style.display = 'none';
+        let up = {}; let msg = "";
+        const eloAntes = getEloInfo(pdlInterno).nome;
+
+        if (tipoRecompensa === "moeda") { up = { saldo: increment(100), videosAssistidos: increment(1), totalVideosHoje: increment(1) }; msg = "Ganhou 100 moedas!"; }
+        else if (tipoRecompensa === "pdl") { up = { xp: increment(500), pdlSemanal: increment(500), videosAssistidos: increment(1) }; msg = "Ganhou 500 PDL!"; }
+        else if (tipoRecompensa === "livre") { up = { saldo: increment(10), xp: increment(100), pdlSemanal: increment(100) }; msg = "+10 Moedas e +100 PDL!"; iniciarCooldownLivre(120); }
+
+        if (tipoRecompensa !== "livre" && (videosAssistidos + 1) >= 3) { up.acertos = 0; up.videosAssistidos = 0; setTimeout(() => carregarQuestao(), 500); }
+        await updateDoc(userRef, up);
+        openModal("SUCESSO", msg, 'alert', () => {
+            const infoNovo = getEloInfo(pdlInterno);
+            if (infoNovo.nome !== eloAntes) exibirAnimacaoElo(infoNovo, true);
+        });
+    }
 
     function iniciarFluxoAnuncio(tipo) {
         if (tipo === 'livre' && cooldownLivreAtivo) return;
-        chaveSeguranca = false;
         tipoRecompensa = tipo; anuncioEmAndamento = true; tempoRestanteAnuncio = 15;
-        if(intervaloAnuncio) clearInterval(intervaloAnuncio);
         window.open(linkAnuncioAdsterra, '_blank');
-        openModal("VALIDANDO RECOMPENSA", `Permaneça na página do anúncio.<br><div class="contador-video" id="modalContador">15</div>`, 'alert');
-        mFooter.innerHTML = '<span style="font-size:0.7rem; color:var(--gold-dark); font-weight:900;">CONTANDO...</span>';
+        openModal("VALIDANDO", `Aguarde no anúncio: <div id="modalContador">15</div>`, 'alert');
         intervaloAnuncio = setInterval(() => {
-            if (document.visibilityState === 'hidden') {
-                tempoRestanteAnuncio--;
-                const display = document.getElementById('modalContador');
-                if(display) display.innerText = tempoRestanteAnuncio;
-            }
-            if (tempoRestanteAnuncio <= 0) { 
-                clearInterval(intervaloAnuncio); 
-                anuncioEmAndamento = false; 
-                chaveSeguranca = true; 
-                finalizarRecompensa(); 
-            }
+            if (document.visibilityState === 'hidden') tempoRestanteAnuncio--;
+            const display = document.getElementById('modalContador');
+            if(display) display.innerText = tempoRestanteAnuncio;
+            if (tempoRestanteAnuncio <= 0) { clearInterval(intervaloAnuncio); anuncioEmAndamento = false; chaveSeguranca = true; finalizarRecompensa(); }
         }, 1000);
     }
 
-     document.addEventListener('visibilitychange', () => {
-    // Se o usuário voltar para a página, o anúncio estava rolando e o tempo não acabou
-    if (document.visibilityState === 'visible' && anuncioEmAndamento && tempoRestanteAnuncio > 0) {
-        clearInterval(intervaloAnuncio);
-        anuncioEmAndamento = false;
-        
-        mTitle.innerText = "VALIDAÇÃO FALHOU!";
-        mContent.innerHTML = `
-            <div class="modal-text" style="color:#dc3545; font-weight:bold;">
-                Você voltou muito cedo!<br>
-                Aguarde os 15 segundos no anúncio para receber sua recompensa.
-            </div>`;
-        mFooter.innerHTML = '';
-
-        const btnRetry = document.createElement('button');
-        btnRetry.className = 'modal-btn-confirm';
-        btnRetry.style.width = "100%";
-        btnRetry.innerText = 'VER ANÚNCIO NOVAMENTE';
-        btnRetry.onclick = () => { 
-            modal.style.display = 'none'; 
-            iniciarFluxoAnuncio(tipoRecompensa); 
-        };
-        
-        mFooter.appendChild(btnRetry);
-    }
-});
-    
-    async function finalizarRecompensa() {
-    if (!chaveSeguranca) {
-        modal.style.display = 'none';
-        openModal("SISTEMA DE SEGURANÇA", "Tentativa de fraude detectada.");
-        return;
-    }
-    chaveSeguranca = false;
-    modal.style.display = 'none';
-    let up = {}; let msg = "";
-    const eloAntes = getEloInfo(pdlInterno).nome;
-
-    if (tipoRecompensa === "moeda") {
-        up = { saldo: increment(100), videosAssistidos: increment(1), totalVideosHoje: increment(1) };
-        msg = "Você ganhou 100 moedas!";
-    } else if (tipoRecompensa === "pdl") {
-        // AQUI: Adicionamos o pdlSemanal acompanhando o XP
-        up = { xp: increment(500), pdlSemanal: increment(500), videosAssistidos: increment(1) };
-        msg = "Você ganhou 500 PDL!";
-    } else if (tipoRecompensa === "livre") {
-        // AQUI TAMBÉM: Bônus livre agora conta para o semanal
-        up = { saldo: increment(10), xp: increment(100), pdlSemanal: increment(100) };
-        msg = "Bônus Livre: +10 Moedas e +100 PDL!";
-        iniciarCooldownLivre(120);
+    function iniciarCooldownLivre(segundos) {
+        const tempoDesbloqueio = Date.now() + (segundos * 1000);
+        localStorage.setItem('proximoVideoLivre', tempoDesbloqueio);
+        executarCronometroVisual(segundos);
     }
 
-    if (tipoRecompensa !== "livre") {
-        const proxVideo = (videosAssistidos || 0) + 1;
-        if (proxVideo >= 3) { up.acertos = 0; up.videosAssistidos = 0; setTimeout(() => carregarQuestao(), 500); }
+    function executarCronometroVisual(segundos) {
+        const btn = document.getElementById('btnVideoLivre');
+        if (!btn) return;
+        cooldownLivreAtivo = true; btn.disabled = true;
+        let restante = segundos;
+        const intervalo = setInterval(() => {
+            restante--; btn.innerHTML = `AGUARDE ${restante}s`;
+            if (restante <= 0) { clearInterval(intervalo); cooldownLivreAtivo = false; localStorage.removeItem('proximoVideoLivre'); btn.disabled = false; btn.innerHTML = `📺 +10 MOEDAS <span>+100 PDL</span>`; }
+        }, 1000);
     }
-    
-    await updateDoc(userRef, up);
-    openModal("RECOMPENSA LIBERADA", msg, 'alert', () => {
-        const infoNovo = getEloInfo(pdlInterno);
-        if (infoNovo.nome !== eloAntes) exibirAnimacaoElo(infoNovo, true);
-    });
-}
 
-    // --- 5. LÓGICA DO QUIZ E QUESTÕES ---
+    function verificarCooldownLivre() {
+        const salvo = localStorage.getItem('proximoVideoLivre');
+        if (salvo) {
+            const restante = Math.floor((parseInt(salvo) - Date.now()) / 1000);
+            if (restante > 0) executarCronometroVisual(restante);
+            else localStorage.removeItem('proximoVideoLivre');
+        }
+    }
+
+    // --- 5. QUIZ ---
 
     async function carregarBanco() {
-        const statusText = document.getElementById('perguntaTexto');
-        let tentativas = 0;
-        async function tentarImportar() {
-            try {
-                const modulo = await import(`./pergunta.js?t=${Date.now()}`);
-                bancoPerguntas = modulo.bancoPerguntas;
-                if (carregadoPelaPrimeiraVez && bancoPerguntas.length > 0) carregarQuestao();
-            } catch (e) {
-                tentativas++;
-                if (tentativas < 8) setTimeout(tentarImportar, 2500); 
-                else if(statusText) statusText.innerText = "Erro ao carregar banco.";
-            }
-        }
-        tentarImportar();
+        try {
+            const modulo = await import(`./pergunta.js?t=${Date.now()}`);
+            bancoPerguntas = modulo.bancoPerguntas;
+            if (carregadoPelaPrimeiraVez) carregarQuestao();
+        } catch (e) { setTimeout(carregarBanco, 2500); }
     }
 
     function carregarQuestao() {
         const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
         if(!c || !t) return;
-        
-        // LOGICA DE TRAVA DE 10 QUESTÕES
-        if (acertosNoCiclo >= 10 && videosAssistidos < 3) { 
-            t.innerText = "META DE ACERTOS ATINGIDA!"; 
-            c.innerHTML = "<p style='color:var(--gold); font-weight:bold; text-align:center;'>Assista aos anúncios para liberar o quiz novamente!</p>"; 
-            return; 
-        }
-
-        if (bancoPerguntas.length === 0) { t.innerText = "A sincronizar questões..."; return; }
-        if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
-
+        if (acertosNoCiclo >= 10 && videosAssistidos < 3) { t.innerText = "META ATINGIDA!"; c.innerHTML = "Assista aos anúncios!"; return; }
+        if (bancoPerguntas.length === 0) { t.innerText = "Carregando..."; return; }
         const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
         let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
         t.innerText = q.pergunta; c.innerHTML = "";
-        
         opts.forEach(o => {
             const b = document.createElement('button'); b.className = "option-btn"; b.innerText = o.texto;
             b.onclick = async () => {
-                const eloAntesDoQuiz = getEloInfo(pdlInterno).nome;
-                const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
+                const eloAntesQuiz = getEloInfo(pdlInterno).nome;
                 const rect = b.getBoundingClientRect();
-                try {
-                    if (o.correta) {
-                        b.classList.add('btn-correct');
-                        showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
-                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10), pdlSemanal: increment(10) });
-                    } else {
-                        b.classList.add('btn-wrong');
-                        showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
-                        await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 2) });
-                    }
-                } finally { 
-                    setTimeout(() => {
-                        const infoNovo = getEloInfo(pdlInterno);
-                        if (infoNovo.nome !== eloAntesDoQuiz) exibirAnimacaoElo(infoNovo, true);
-                        carregarQuestao();
-                    }, 1200); 
-                }
+                if (o.correta) { b.classList.add('btn-correct'); showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top); await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10), pdlSemanal: increment(10) }); }
+                else { b.classList.add('btn-wrong'); showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top); await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 2) }); }
+                setTimeout(() => { if (getEloInfo(pdlInterno).nome !== eloAntesQuiz) exibirAnimacaoElo(getEloInfo(pdlInterno), true); carregarQuestao(); }, 1200);
             };
             c.appendChild(b);
         });
     }
-    
-    function atualizarInterface() {
-    if(!document.getElementById('goldAmount')) return;
-    
-    // Atualiza Moedas
-    document.getElementById('goldAmount').innerText = Math.floor(goldDB).toLocaleString('pt-BR');
-    
-    // Atualiza Limite de Vídeos
-    const elementoLimite = document.getElementById('txtLimiteBotao');
-    if (elementoLimite) {
-        elementoLimite.innerText = `LIMITE DIÁRIO: ${totalVideosHoje}/35`;
-        elementoLimite.style.color = (totalVideosHoje >= 35) ? "#dc3545" : "inherit";
-    }
 
-    // --- LÓGICA DO NOVO ELO ---
-    const info = getEloInfo(pdlInterno);
-    const eloBadge = document.getElementById('txtElo');
-    const eloImg = document.getElementById('imgElo'); // A nova imagem
-    const bar = document.getElementById('xpMiniFill');
-
-    if(eloBadge) {
-        eloBadge.innerText = info.nome;
-        // Removi o fundo colorido do texto para o visual ficar mais limpo
-        eloBadge.style.color = info.color; 
-    }
-
-    if(eloImg && info.img) {
-        // Atualiza a imagem do escudo
-        if(!eloImg.src.includes(info.img)) {
-            eloImg.src = info.img; 
-        }
-    }
-
-    if(bar) {
-        const percXP = ((pdlInterno - info.min) / (info.max - info.min)) * 100;
-        bar.style.width = Math.min(percXP, 100) + "%";
-        // A cor da barra agora usa o gradiente do CSS, mas você pode forçar a cor do elo se quiser:
-        // bar.style.backgroundColor = info.bar; 
-    }
-    
-    // Atualiza botões e avisos
-    const btnV = document.getElementById('btnVideo');
-    const btnVXP = document.getElementById('btnVideoXP');
-    const aviso = document.getElementById('avisoStatusQuiz');
-    
-    if(btnV) btnV.disabled = (acertosNoCiclo < 10 || totalVideosHoje >= 35);
-    if(btnVXP) btnVXP.disabled = (acertosNoCiclo < 10);
-    
-    if (acertosNoCiclo < 10) aviso.innerHTML = `ACERTE <span style="color:#28a745">${10-acertosNoCiclo}</span> QUESTÕES PARA LIBERAR ANÚNCIOS`;
-    else if (videosAssistidos < 3) aviso.innerHTML = `<span style="color:#c89b3c">META ATINGIDA, ASSISTA <span style="color:#28a745; font-weight:bold;">${3-videosAssistidos}</span> ANÚNCIOS</span>`;
-    else aviso.innerHTML = `<span style="color:#28a745">ANÚNCIOS LIBERADOS!</span>`;
-
-    const btnLivre = document.getElementById('btnVideoLivre');
-    const salvoLivre = localStorage.getItem('proximoVideoLivre');
-    const agoraLivre = Date.now();
-    if (btnLivre) {
-        if (salvoLivre && parseInt(salvoLivre) > agoraLivre) {
-            btnLivre.disabled = true;
-            cooldownLivreAtivo = true; 
-        } else if (!cooldownLivreAtivo) {
-            btnLivre.disabled = false;
-        }
-    }
-}
-   
     function showFloatingPDL(text, color, x, y) {
         const el = document.createElement('div'); el.className = 'floating-pdl'; el.innerText = text; el.style.color = color; el.style.left = `${x}px`; el.style.top = `${y}px`;
         document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
     }
 
     function exibirAnimacaoElo(infoElo, subiu) {
-        const overlay = document.getElementById('elo-transition-overlay'); if(!overlay) return;
+        const overlay = document.getElementById('elo-transition-overlay');
         const label = document.getElementById('elo-status-label');
         const text = document.getElementById('elo-ani-text');
-        label.innerText = subiu ? "PROMOÇÃO DE ELO" : "REBAIXAMENTO DE ELO";
-        label.style.color = subiu ? "#c89b3c" : "#dc3545";
-        text.innerText = infoElo.nome; text.style.color = infoElo.color;
-        overlay.style.display = 'flex'; 
-        setTimeout(() => { overlay.style.display = 'none'; }, 5000); 
+        if(overlay) { label.innerText = subiu ? "PROMOÇÃO" : "REBAIXAMENTO"; text.innerText = infoElo.nome; text.style.color = infoElo.color; overlay.style.display = 'flex'; setTimeout(() => overlay.style.display = 'none', 5000); }
     }
 
-    // --- 7. EVENTOS E EXPOSIÇÃO GLOBAL ---
+    // --- EVENTOS FINAIS ---
 
     if(document.getElementById('btnVideo')) document.getElementById('btnVideo').onclick = () => iniciarFluxoAnuncio('moeda');
     if(document.getElementById('btnVideoXP')) document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio('pdl');
     if(document.getElementById('btnVideoLivre')) document.getElementById('btnVideoLivre').onclick = () => iniciarFluxoAnuncio('livre');
 
-    window.abrirLoja = () => openModal("LOJA HEXTECH", "Em breve itens aqui.");
-    window.abrirInventario = () => openModal("INVENTÁRIO", "Seu inventário está vazio.");
-    window.abrirStatus = () => openModal("STATUS ATIVO", "Nenhum buff ativo.");
-    window.abrirRanking = () => openModal("RANKING SEMANAL", "O ranking reseta em 7 dias.");
-    window.abrirPerfil = () => openModal("PERFIL", "Edite seu perfil em breve.");
-    window.abrirConquistas = () => openModal("MISSÕES", "Complete desafios para ganhar moedas!");
-
-    if (document.getElementById('btnVerElos')) {
-        document.getElementById('btnVerElos').onclick = () => {
-            let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto; padding:5px;">`;
-            configElo.forEach(e => {
-                htmlElos += `<div style="background:${e.bg}; color:${e.color}; margin-bottom:5px; padding:10px; border-radius:5px; font-weight:bold; font-size:0.8rem;">${e.nome} - ${e.min.toLocaleString()} PDL</div>`;
-            });
-            openModal("TABELA DE ELOS", htmlElos + "</div>");
-        };
-    }
-
-    // Resgate Pix
-    window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
-    const btnResgate = document.getElementById('btnResgate');
-    if(btnResgate) {
-        btnResgate.onclick = async () => {
-            const chave = document.getElementById('chavePix').value.trim();
-            if (goldDB < metaAtual || chave.length < 5) { openModal("ERRO", "Saldo insuficiente ou chave inválida."); return; }
-            openModal("CONFIRMAR", `Resgatar R$ ${valorReaisMeta} para: ${chave}?`, 'confirm', async () => {
-                modal.style.display = 'none';
-                await addDoc(collection(db, "resgates"), { usuarioId: auth.currentUser.uid, chavePix: chave, valorGold: metaAtual, status: "Pendente", data: new Date().toLocaleString('pt-BR') });
-                await updateDoc(userRef, { saldo: increment(-metaAtual) });
-                openModal("SUCESSO", "Solicitação enviada!");
-            });
-        };
-    }
-
-    // Pull to Refresh
-    let sY = 0;
-    const pullDiv = document.getElementById('pull-to-refresh');
-    if(pullDiv) {
-        window.addEventListener('touchstart', (e) => { if(window.scrollY === 0) sY = e.touches[0].pageY; }, {passive:true});
-        window.addEventListener('touchmove', (e) => {
-            const p = e.touches[0].pageY - sY;
-            if(window.scrollY === 0 && p > 0) {
-                const move = Math.min(p * 0.4, 70);
-                pullDiv.style.transform = `translateY(${move}px)`;
-                if(move >= 60) pullDiv.querySelector('.refresh-badge').innerText = "Solte para Recarregar";
-            }
-        }, {passive:true});
-        window.addEventListener('touchend', () => {
-            if (new WebKitCSSMatrix(window.getComputedStyle(pullDiv).transform).m42 >= 60) location.reload();
-            else pullDiv.style.transform = 'translateY(0)';
-        });
-    }
-
     onAuthStateChanged(auth, (user) => {
-    if (user) { 
-        userRef = doc(db, "usuarios", user.uid); 
-        onSnapshot(userRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const hoje = new Date().toLocaleDateString('pt-BR');
-
-                // Reseta os limites diários se for um novo dia
-                if (data.ultimaDataAcesso !== hoje) {
-                    updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje });
-                } else {
-                    // Carrega os dados do banco para as variáveis do script
-                    goldDB = Number(data.saldo) || 0;
-                    acertosNoCiclo = data.acertos || 0;
-                    videosAssistidos = data.videosAssistidos || 0;
-                    totalVideosHoje = data.totalVideosHoje || 0;
-                    pdlInterno = data.xp || 0;
-
-                    atualizarInterface();
-
-                    if (!carregadoPelaPrimeiraVez) {
-                        carregadoPelaPrimeiraVez = true;
-                        carregarBanco(); 
-                        atualizarPodioSemanal(); 
-                        verificarCooldownLivre(); 
+        if (user) {
+            userRef = doc(db, "usuarios", user.uid);
+            onSnapshot(userRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const hoje = new Date().toLocaleDateString('pt-BR');
+                    if (data.ultimaDataAcesso !== hoje) { updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje }); }
+                    else {
+                        goldDB = data.saldo || 0; acertosNoCiclo = data.acertos || 0; videosAssistidos = data.videosAssistidos || 0; totalVideosHoje = data.totalVideosHoje || 0; pdlInterno = data.xp || 0;
+                        atualizarInterface();
+                        if (!carregadoPelaPrimeiraVez) { carregadoPelaPrimeiraVez = true; carregarBanco(); atualizarPodioSemanal(); verificarCooldownLivre(); }
                     }
                 }
-            }
-        });
-    } else { 
-        if (!window.location.href.includes("index.html")) window.location.href = "index.html"; 
-    }
-});
+            });
+        } else { if (!window.location.href.includes("index.html")) window.location.href = "index.html"; }
+    });
 </script>
 
           <div id="footer-ad-container" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; border-top: 2px solid #c89b3c;">
