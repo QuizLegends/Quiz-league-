@@ -340,53 +340,51 @@
         });
     }
 
-    const coresElos = {
+    // --- 3. CONFIGURAÇÃO DE ELOS E CORES ---
+
+const configElo = [];
+const divisoes = ["V", "IV", "III", "II", "I"];
+const coresElos = {
     "FERRO": { bg: "#2a2a2a", color: "#8a8a8a", bar: "#555" },
     "BRONZE": { bg: "#4e3629", color: "#cd7f32", bar: "#8b4513" },
     "PRATA": { bg: "#4a5d6e", color: "#e2e2e2", bar: "#a9b9c9" },
     "OURO": { bg: "#7a5c12", color: "#f1d37e", bar: "#c89b3c" },
     "PLATINA": { bg: "#1d5c5c", color: "#a3e7e7", bar: "#46abb0" },
     "ESMERALDA": { bg: "#0d5c2e", color: "#a3e7bc", bar: "#28a745" },
-    "DIAMANTE": { bg: "#1f3a7a", color: "#b3c7f7", bar: "#5c85d6" },
-    "MESTRE": { bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6" },
-    "GRÃO-MESTRE": { bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" },
-    "DESAFIANTE": { bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" }
+    "DIAMANTE": { bg: "#1f3a7a", color: "#b3c7f7", bar: "#5c85d6" }
 };
-    // Atualização dos valores conforme a nova regra de 1.000.000 PDL
-    function gerarEloComDivisoes(nome, min, max) {
-        let passo = (max - min) / 5;
-        let divisoesInvertidas = ["V", "IV", "III", "II", "I"]; // Ordem correta de progressão
-        divisoesInvertidas.forEach((div, i) => {
-            configElo.push({ 
-                nome: `${nome} ${div}`, 
-                min: min + (passo * i), 
-                max: min + (passo * (i + 1)), 
-                ...coresElos[nome] 
-            });
+
+function gerarEloComDivisoes(nome, min, max) {
+    let passo = (max - min) / 5;
+    divisoes.forEach((div, i) => {
+        configElo.push({ 
+            nome: `${nome} ${div}`, 
+            min: min + (passo * i), 
+            max: min + (passo * (i + 1)), 
+            ...coresElos[nome] 
         });
-    }
+    });
+}
 
-    // NOVAS FAIXAS DE PDL (Sincronizadas com o Ranking)
-    configElo = []; // Limpa para garantir que não haja duplicatas
-    
-    gerarEloComDivisoes("FERRO", 0, 5000);
-    gerarEloComDivisoes("BRONZE", 5000, 10000);
-    gerarEloComDivisoes("PRATA", 10000, 30000);
-    gerarEloComDivisoes("OURO", 30000, 60000);
-    gerarEloComDivisoes("PLATINA", 60000, 100000);
-    gerarEloComDivisoes("ESMERALDA", 100000, 150000);
-    gerarEloComDivisoes("DIAMANTE", 150000, 300000);
+// Limpa e Gera as faixas
+gerarEloComDivisoes("FERRO", 0, 5000);
+gerarEloComDivisoes("BRONZE", 5000, 10000);
+gerarEloComDivisoes("PRATA", 10000, 30000);
+gerarEloComDivisoes("OURO", 30000, 60000);
+gerarEloComDivisoes("PLATINA", 60000, 100000);
+gerarEloComDivisoes("ESMERALDA", 100000, 150000);
+gerarEloComDivisoes("DIAMANTE", 150000, 300000);
 
-    // ELOS SEM DIVISÕES
-    configElo.push({ nome: "MESTRE", min: 300000, max: 600000, bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6" });
-    configElo.push({ nome: "GRÃO-MESTRE", min: 600000, max: 1000000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" });
-    configElo.push({ nome: "DESAFIANTE", min: 1000000, max: 99999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" });
+// ELOS DE ELITE (Definidos um a um para evitar erro de autenticação)
+configElo.push({ nome: "MESTRE", min: 300000, max: 600000, bg: "#5a1f7a", color: "#dfb3f7", bar: "#9b59b6" });
+configElo.push({ nome: "GRÃO-MESTRE", min: 600000, max: 1000000, bg: "#7a1f1f", color: "#f7b3b3", bar: "#e74c3c" });
+configElo.push({ nome: "DESAFIANTE", min: 1000000, max: 99999999, bg: "#1a4a5a", color: "#b3e7f7", bar: "#3498db" });
 
-    function getEloInfo(valorXP) { 
-        if (valorXP <= 0) return configElo[0];
-        // Busca o elo onde o XP está entre o min e o max
-        return configElo.find(e => valorXP >= e.min && valorXP < e.max) || configElo[configElo.length - 1]; 
-    }
+function getEloInfo(valorXP) { 
+    if (valorXP <= 0) return configElo[0];
+    const eloEncontrado = configElo.find(e => valorXP >= e.min && valorXP < e.max);
+    return eloEncontrado || configElo[configElo.length - 1]; 
+}
 
 function verificarCooldownLivre() {
     const salvo = localStorage.getItem('proximoVideoLivre');
