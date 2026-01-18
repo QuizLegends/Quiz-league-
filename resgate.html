@@ -706,6 +706,80 @@ function executarCronometroVisual(segundos) {
     if(document.getElementById('btnVideoXP')) document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio('pdl');
     if(document.getElementById('btnVideoLivre')) document.getElementById('btnVideoLivre').onclick = () => iniciarFluxoAnuncio('livre');
 
+        window.abrirStatus = () => openModal("STATUS ATIVO", "Nenhum buff ativo.");
+    window.abrirRanking = () => { window.location.href = 'ranking.html'; };
+    window.abrirPerfil = () => openModal("PERFIL", "Página de perfil em desenvolvimento.");
+    window.abrirConquistas = () => openModal("BAÚS HEXTECH", "Ganhe chaves acertando 50 questões seguidas!");
+
+    if (document.getElementById('btnVerElos')) {
+        document.getElementById('btnVerElos').onclick = () => {
+            let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto; padding:5px;">`;
+            configElo.forEach(e => {
+                htmlElos += `<div style="background:${e.bg}; color:${e.color}; margin-bottom:5px; padding:10px; border-radius:5px; font-weight:bold; font-size:0.8rem;">${e.nome} - ${e.min.toLocaleString()} PDL</div>`;
+            });
+            openModal("TABELA DE ELOS", htmlElos + "</div>");
+        };
+    }
+
+    // Resgate Pix
+    window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
+    
+    // Variável de controle para o snapshot
+    let dadosUserLocais = {};
+
+    onAuthStateChanged(auth, (user) => {
+    if (user) { 
+        userRef = doc(db, "usuarios", user.uid); 
+        onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                dadosUserLocais = data; // Armazena para o inventário
+                const hoje = new Date().toLocaleDateString('pt-BR');
+
+                if (data.ultimaDataAcesso !== hoje) {
+                    updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje });
+                } else {
+                    goldDB = Number(data.saldo) || 0;
+                    acertosNoCiclo = data.acertos || 0;
+                    videosAssistidos = data.videosAssistidos || 0;
+                    totalVideosHoje = data.totalVideosHoje || 0;
+                    pdlInterno = data.xp || 0;
+
+                    atualizarInterface();
+
+                    if (!carregadoPelaPrimeiraVez) {
+                        carregadoPelaPrimeiraVez = true;
+                        carregarBanco(); 
+                        atualizarPodioSemanal(); 
+                        verificarCooldownLivre(); 
+                    }
+                }
+            }
+        });
+    } else { 
+        if (!window.location.href.includes("index.html")) window.location.href = "index.html"; 
+    }
+});
+
+    // Pull to Refresh
+    let sY = 0;
+    const pullDiv = document.getElementById('pull-to-refresh');
+    if(pullDiv) {
+        window.addEventListener('touchstart', (e) => { if(window.scrollY === 0) sY = e.touches[0].pageY; }, {passive:true});
+        window.addEventListener('touchmove', (e) => {
+            const p = e.touches[0].pageY - sY;
+            if(window.scrollY === 0 && p > 0) {
+                const move = Math.min(p * 0.4, 70);
+                pullDiv.style.transform = `translateY(${move}px)`;
+                if(move >= 60) pullDiv.querySelector('.refresh-badge').innerText = "Solte para Recarregar";
+            }
+        }, {passive:true});
+        window.addEventListener('touchend', () => {
+            if (new WebKitCSSMatrix(window.getComputedStyle(pullDiv).transform).m42 >= 60) location.reload();
+            else pullDiv.style.transform = 'translateY(0)';
+        });
+    }
+
 // --- LÓGICA DO INVENTÁRIO (PROTEGIDA PARA NÃO TRAVAR O LOGIN) ---
 
 const URL_BASE_ICON = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/";
@@ -786,80 +860,6 @@ window.equiparIcone = async (nomeImg) => {
         alert("Erro ao equipar: Verifique sua conexão.");
     }
 };
-
-        window.abrirStatus = () => openModal("STATUS ATIVO", "Nenhum buff ativo.");
-    window.abrirRanking = () => { window.location.href = 'ranking.html'; };
-    window.abrirPerfil = () => openModal("PERFIL", "Página de perfil em desenvolvimento.");
-    window.abrirConquistas = () => openModal("BAÚS HEXTECH", "Ganhe chaves acertando 50 questões seguidas!");
-
-    if (document.getElementById('btnVerElos')) {
-        document.getElementById('btnVerElos').onclick = () => {
-            let htmlElos = `<div style="text-align:left; max-height:300px; overflow-y:auto; padding:5px;">`;
-            configElo.forEach(e => {
-                htmlElos += `<div style="background:${e.bg}; color:${e.color}; margin-bottom:5px; padding:10px; border-radius:5px; font-weight:bold; font-size:0.8rem;">${e.nome} - ${e.min.toLocaleString()} PDL</div>`;
-            });
-            openModal("TABELA DE ELOS", htmlElos + "</div>");
-        };
-    }
-
-    // Resgate Pix
-    window.setResgate = (el, v, r) => { metaAtual = v; valorReaisMeta = r; document.querySelectorAll('.resgate-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); atualizarInterface(); }
-    
-    // Variável de controle para o snapshot
-    let dadosUserLocais = {};
-
-    onAuthStateChanged(auth, (user) => {
-    if (user) { 
-        userRef = doc(db, "usuarios", user.uid); 
-        onSnapshot(userRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                dadosUserLocais = data; // Armazena para o inventário
-                const hoje = new Date().toLocaleDateString('pt-BR');
-
-                if (data.ultimaDataAcesso !== hoje) {
-                    updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje });
-                } else {
-                    goldDB = Number(data.saldo) || 0;
-                    acertosNoCiclo = data.acertos || 0;
-                    videosAssistidos = data.videosAssistidos || 0;
-                    totalVideosHoje = data.totalVideosHoje || 0;
-                    pdlInterno = data.xp || 0;
-
-                    atualizarInterface();
-
-                    if (!carregadoPelaPrimeiraVez) {
-                        carregadoPelaPrimeiraVez = true;
-                        carregarBanco(); 
-                        atualizarPodioSemanal(); 
-                        verificarCooldownLivre(); 
-                    }
-                }
-            }
-        });
-    } else { 
-        if (!window.location.href.includes("index.html")) window.location.href = "index.html"; 
-    }
-});
-
-    // Pull to Refresh
-    let sY = 0;
-    const pullDiv = document.getElementById('pull-to-refresh');
-    if(pullDiv) {
-        window.addEventListener('touchstart', (e) => { if(window.scrollY === 0) sY = e.touches[0].pageY; }, {passive:true});
-        window.addEventListener('touchmove', (e) => {
-            const p = e.touches[0].pageY - sY;
-            if(window.scrollY === 0 && p > 0) {
-                const move = Math.min(p * 0.4, 70);
-                pullDiv.style.transform = `translateY(${move}px)`;
-                if(move >= 60) pullDiv.querySelector('.refresh-badge').innerText = "Solte para Recarregar";
-            }
-        }, {passive:true});
-        window.addEventListener('touchend', () => {
-            if (new WebKitCSSMatrix(window.getComputedStyle(pullDiv).transform).m42 >= 60) location.reload();
-            else pullDiv.style.transform = 'translateY(0)';
-        });
-    }
 
 </script>
 
