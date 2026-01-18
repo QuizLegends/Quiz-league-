@@ -100,6 +100,10 @@
             text-transform: uppercase;
             font-size: 0.85rem;
             margin-bottom: 5px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .raridade-label {
@@ -133,7 +137,6 @@
             cursor: not-allowed;
         }
 
-        /* MODAL HEXTECH */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -229,10 +232,16 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // Caminho atualizado com acento em "ícones"
+        const BASE_URL_IMG = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/";
+
         const itens = [
-            { id: "aatrox_comum", nome: "Aatrox", preco: 5000, raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/aatrox-comum.png" },
-            { id: "aatrox_raro", nome: "Aatrox Lua Sangrenta", preco: 25000, raridade: "raro", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/aatrox-epico.png" },
-            { id: "aatrox_epico", nome: "Aatrox Vitorioso", preco: 50000, raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/aatrox-raro.png" }
+            { id: "aatrox_comum", nome: "Aatrox", preco: 5000, raridade: "comum", img: "aatrox-comum.png" },
+            { id: "aatrox_raro", nome: "Aatrox Lua Sangrenta", preco: 25000, raridade: "raro", img: "aatrox-raro.png" },
+            { id: "aatrox_epico", nome: "Aatrox Vitorioso", preco: 50000, raridade: "epico", img: "aatrox-epico.png" },
+            { id: "ahri_comum", nome: "Ahri", preco: 5000, raridade: "comum", img: "ahri-comum.png" },
+            { id: "ahri_raro", nome: "Ahri Raposa Flamejante", preco: 25000, raridade: "raro", img: "ahri-raro.png" },
+            { id: "ahri_epico", nome: "Ahri K/DA", preco: 50000, raridade: "epico", img: "ahri-epico.png" }
         ];
 
         let saldoGlobal = 0;
@@ -262,7 +271,9 @@
                 const podeComprar = saldoGlobal >= item.preco;
                 grid.innerHTML += `
                     <div class="item-card ${item.raridade}">
-                        <div class="icon-container"><img src="${item.img}" class="img-campeao"></div>
+                        <div class="icon-container">
+                            <img src="${BASE_URL_IMG + item.img}" class="img-campeao">
+                        </div>
                         <div class="item-nome">${item.nome}</div>
                         <div class="raridade-label">${item.raridade}</div>
                         <button class="btn-comprar" ${(jaPossui || !podeComprar) ? 'disabled' : ''} 
@@ -277,10 +288,8 @@
             const modal = document.getElementById('modal-compra');
             const texto = document.getElementById('modal-texto');
             const btnConfirmar = document.getElementById('confirmar-btn');
-            
             texto.innerText = `Deseja adquirir ${nome} por ${valor.toLocaleString()} moedas?`;
             modal.style.display = 'flex';
-
             btnConfirmar.onclick = () => processarCompra(id, valor);
         };
 
