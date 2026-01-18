@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -88,52 +87,64 @@
             border-bottom: 2px solid var(--ouro);
         }
 
-        /* BARRA DE FERRAMENTAS - APENAS BUSCA DIMINUÍDA */
+        /* --- ALTERAÇÃO APENAS NESTE BLOCO --- */
         .barra-ferramentas {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: nowrap; /* Impede quebrar linha se houver espaço */
-            gap: 10px;
+            flex-wrap: wrap; /* Permite quebrar linha */
+            gap: 15px;
             background: rgba(1, 10, 19, 0.8);
-            padding: 10px 15px;
+            padding: 10px 20px;
             border: 1px solid #1e2328;
         }
 
         .busca-container {
             position: relative;
-            flex: 0 1 150px; /* Define um tamanho pequeno e fixo para a busca */
+            flex: 1;
+            min-width: 150px; /* Tamanho mínimo da lupa */
         }
+
+        /* Ajuste para celular: Lupa em cima, Filtros embaixo */
+        @media (max-width: 600px) {
+            .barra-ferramentas {
+                flex-direction: column; 
+                align-items: flex-start;
+            }
+            .busca-container {
+                width: 100%; /* Lupa ocupa a largura toda no topo */
+                max-width: 100%;
+            }
+        }
+        /* ----------------------------------- */
 
         .busca-container input {
             width: 100%;
             background: #091428;
             border: 1px solid var(--ouro);
-            padding: 6px 30px 6px 10px;
+            padding: 8px 35px 8px 15px;
             color: white;
             outline: none;
-            font-size: 13px;
         }
 
         .busca-container span {
             position: absolute;
-            right: 8px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--ouro);
-            font-size: 12px;
         }
 
         .filtros-raridade {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .filter-rarity-btn {
             background: transparent;
             border: 1px solid #333;
             color: #888;
-            padding: 5px 10px;
+            padding: 5px 12px;
             font-size: 11px;
             cursor: pointer;
             text-transform: uppercase;
@@ -144,7 +155,6 @@
         .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); }
         .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); }
 
-        /* GRID E CARDS MANTIDOS ORIGINAIS */
         .grid-loja {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -192,7 +202,6 @@
 
         .btn-comprar:disabled { background: #1e2328; color: #555; border-color: #333; cursor: not-allowed; }
 
-        /* MODAL MANTIDO */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: var(--azul-hex); border: 2px solid var(--ouro); padding: 30px; max-width: 400px; text-align: center; clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%); }
         .btn-confirm { background: var(--ouro); border: 1px solid var(--ouro-claro); color: black; padding: 10px 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
@@ -218,7 +227,7 @@
 
         <div class="barra-ferramentas" id="barra-filtros">
             <div class="busca-container">
-                <input type="text" id="input-busca" placeholder="Buscar..." oninput="renderLoja()">
+                <input type="text" id="input-busca" placeholder="Pesquisar campeão..." oninput="renderLoja()">
                 <span>🔍</span>
             </div>
             <div class="filtros-raridade">
@@ -327,7 +336,6 @@
             itensFiltrados.forEach(item => {
                 const jaPossui = meusItens.includes(item.id);
                 const podeComprar = saldoGlobal >= item.preco;
-                // COLOCANDO O ACENTO NO ÉPICO
                 const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade;
 
                 grid.innerHTML += `
