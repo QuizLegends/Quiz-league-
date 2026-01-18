@@ -706,57 +706,73 @@ function executarCronometroVisual(segundos) {
     if(document.getElementById('btnVideoXP')) document.getElementById('btnVideoXP').onclick = () => iniciarFluxoAnuncio('pdl');
     if(document.getElementById('btnVideoLivre')) document.getElementById('btnVideoLivre').onclick = () => iniciarFluxoAnuncio('livre');
 
-    // --- LÓGICA DO INVENTÁRIO INTEGRADA AO SELETOR ---
-    window.abrirInventario = async () => {
-        try {
-            const user = auth.currentUser;
-            if(!user) return;
+// --- LÓGICA DO INVENTÁRIO (CATÁLOGO + FUNÇÕES) ---
 
-            // Busca os dados mais recentes do usuário
-            const snap = await getDocs(query(collection(db, "usuarios"))); // Apenas para garantir sincronia se snapshot falhar
-            const meusItensIDs = dadosUserLocais.iconesAdquiridos || [];
-            const fotoAtual = dadosUserLocais.fotoPerfil || "0.jpg";
+// Definição do catálogo (Obrigatório para o inventário saber o que mostrar)
+const URL_BASE_ICON = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/";
+const CATALOGO_ITENS = [
+    { id: "aatrox_comum", nome: "Aatrox", img: "aatrox-comum.png" },
+    { id: "aatrox_raro", nome: "Aatrox Caçador de Almas", img: "aatrox-raro.png" },
+    { id: "aatrox_epico", nome: "Aatrox Vitorioso", img: "aatrox-epico.png" },
+    { id: "ahri_comum", nome: "Ahri", img: "ahri-comum.png" },
+    { id: "ahri_raro", nome: "Ahri Raposa Flamejante", img: "ahri-raro.png" },
+    { id: "ahri_epico", nome: "Ahri K/DA", img: "ahri-epico.png" },
+    { id: "anjo_guardiao", nome: "Anjo Guardião", img: "anjo.png" }
+];
 
-            let html = `<div class="grid-inventario-modal">`;
-            
-            // Filtra os itens que o usuário realmente possui
-            const itensPossuidos = CATALOGO_ITENS.filter(i => meusItensIDs.includes(i.id));
-
-            if(itensPossuidos.length === 0) {
-                html = `<p style="color:var(--gold); font-size:0.8rem;">Sua coleção está vazia. Visite a Loja Hextech!</p>`;
-            } else {
-                itensPossuidos.forEach(item => {
-                    const estaEquipado = (fotoAtual === item.img);
-                    html += `
-                        <div class="item-inventario ${estaEquipado ? 'equipado' : ''}" onclick="window.equiparIcone('${item.img}')">
-                            <img src="${URL_BASE_ICON + item.img}">
-                            <span>${item.nome}</span>
-                            ${estaEquipado ? '<b style="color:#28a745; font-size:8px;">EQUIPADO</b>' : ''}
-                        </div>
-                    `;
-                });
-            }
-            html += `</div>`;
-            openModal("MEUS ITENS", html);
-        } catch (e) {
-            console.error(e);
-            openModal("ERRO", "Não foi possível carregar sua coleção.");
-        }
-    };
-
-    window.equiparIcone = async (nomeImg) => {
+window.abrirInventario = async () => {
+    try {
         const user = auth.currentUser;
         if(!user) return;
-        try {
-            await updateDoc(doc(db, "usuarios", user.uid), { fotoPerfil: nomeImg });
-            modal.style.display = 'none';
-            // O snapshot vai atualizar o pódio automaticamente
-        } catch(e) {
-            alert("Erro ao equipar item.");
-        }
-    };
 
-    window.abrirStatus = () => openModal("STATUS ATIVO", "Nenhum buff ativo.");
+        // Pega os IDs que o usuário comprou no Firebase
+        // IMPORTANTE: Aqui usamos a variável que você já tem no seu script
+        const meusItensIDs = dadosUserLocais.iconesAdquiridos || [];
+        const fotoAtual = dadosUserLocais.fotoPerfil || "0.jpg";
+
+        let html = `<div class="grid-inventario-modal" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px;">`;
+        
+        // Filtra o catálogo para mostrar apenas o que o usuário comprou
+        const itensPossuidos = CATALOGO_ITENS.filter(i => meusItensIDs.includes(i.id));
+
+        if(itensPossuidos.length === 0) {
+            html = `<p style="color:#c89b3c; text-align:center; grid-column: 1/-1;">Sua coleção está vazia. Visite a Loja!</p>`;
+        } else {
+            itensPossuidos.forEach(item => {
+                const estaEquipado = (fotoAtual === item.img);
+                html += `
+                    <div class="item-inventario" 
+                         onclick="window.equiparIcone('${item.img}')"
+                         style="border: 1px solid ${estaEquipado ? '#c89b3c' : '#1e2328'}; padding:8px; text-align:center; cursor:pointer; background: rgba(9,20,40,0.9);">
+                        <img src="${URL_BASE_ICON + item.img}" style="width:100%; border-radius:4px; margin-bottom:5px;">
+                        <span style="font-size:10px; display:block; color:white;">${item.nome}</span>
+                        ${estaEquipado ? '<b style="color:#28a745; font-size:9px;">EQUIPADO</b>' : ''}
+                    </div>
+                `;
+            });
+        }
+        html += `</div>`;
+        openModal("MEUS ITENS", html);
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao carregar inventário.");
+    }
+};
+
+window.equiparIcone = async (nomeImg) => {
+    const user = auth.currentUser;
+    if(!user) return;
+    try {
+        await updateDoc(doc(db, "usuarios", user.uid), { fotoPerfil: nomeImg });
+        // Fecha o modal após equipar (certifique-se que a variável modal existe no seu código)
+        const m = document.getElementById('modal-geral') || document.querySelector('.modal-overlay');
+        if(m) m.style.display = 'none';
+    } catch(e) {
+        alert("Erro ao equipar item.");
+    }
+};
+
+        window.abrirStatus = () => openModal("STATUS ATIVO", "Nenhum buff ativo.");
     window.abrirRanking = () => { window.location.href = 'ranking.html'; };
     window.abrirPerfil = () => openModal("PERFIL", "Página de perfil em desenvolvimento.");
     window.abrirConquistas = () => openModal("BAÚS HEXTECH", "Ganhe chaves acertando 50 questões seguidas!");
