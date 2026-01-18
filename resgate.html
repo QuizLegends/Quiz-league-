@@ -223,7 +223,7 @@
         </div>
 
         <div class="resgate-selector" style="margin-bottom: 15px;">
-            <div class="resgate-opt active" onclick="abrirLoja()">🛒 LOJA</div>
+            <div class="resgate-opt active" onclick="location.href='loja.html'">🛒 LOJA</div>
             <div class="resgate-opt" onclick="abrirInventario()">🎒 ITENS</div>
             <div class="resgate-opt" onclick="abrirStatus()">🛡️ STATUS</div>
             <div class="resgate-opt" onclick="abrirRanking()">🏆 RANKING</div>
@@ -231,7 +231,7 @@
             <div class="resgate-opt" onclick="abrirConquistas()">🎁 BAÚS</div>
         </div>
 
-        <button class="option-btn" onclick="abrirLoja()" style="margin: 0; background: linear-gradient(to bottom, #091428, #0a323c); border-color: var(--gold); padding: 12px; font-size: 0.8rem;">
+        <button class="option-btn" onclick="location.href='loja.html'" style="margin: 0; background: linear-gradient(to bottom, #091428, #0a323c); border-color: var(--gold); padding: 12px; font-size: 0.8rem;">
             ACESSAR LOJA HEXTECH
         </button>
         
@@ -241,6 +241,20 @@
         </div>
     </div>
 </div>
+
+<div class="footer-ad-space">
+    </div>
+
+<script>
+    function abrirInventario() { alert("Inventário em desenvolvimento!"); }
+    function abrirStatus() { alert("Status do Invocador em desenvolvimento!"); }
+    function abrirRanking() { window.location.href = 'ranking.html'; }
+    function abrirPerfil() { alert("Página de perfil em desenvolvimento!"); }
+    function abrirConquistas() { alert("Baús e espólios em desenvolvimento!"); }
+</script>
+
+</body>
+</html>
     
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
