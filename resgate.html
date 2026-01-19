@@ -375,34 +375,34 @@
             console.error("Erro ao carregar pódio:", error);
         }
     }
+    
     function atualizarVisualPodio(posicao, nome, foto) {
+    // Busca todos os containers de colunas dentro do pódio
     const containers = document.querySelectorAll("#containerRankingResumo div[style*='flex-direction: column']");
+    if (containers.length < 3) return;
+
     const fotoPadrao = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/0.jpg';
     const urlFinal = foto ? (foto.startsWith('http') ? foto : URL_BASE_ICON + foto) : fotoPadrao;
 
-    containers.forEach(box => {
-        const small = box.querySelector("small");
-        if (!small) return;
+    // Mapeamento fixo pela ordem do seu HTML: 2º (index 0), 1º (index 1), 3º (index 2)
+    let alvo = null;
+    if (posicao === 2) alvo = containers[0];
+    if (posicao === 1) alvo = containers[1];
+    if (posicao === 3) alvo = containers[2];
 
-        const textoAtual = small.innerText;
-        const ePrimeiro = (posicao === 1 && (textoAtual === "Lenda Atual" || textoAtual === nome.split(' ')[0]));
-        const eSegundo = (posicao === 2 && (textoAtual === "Player B" || textoAtual === nome.split(' ')[0]));
-        const eTerceiro = (posicao === 3 && (textoAtual === "Player C" || textoAtual === nome.split(' ')[0]));
-
-        if (ePrimeiro || eSegundo || eTerceiro) {
-            small.innerText = nome.split(' ')[0];
-            const imgTag = box.querySelector("img");
-            if (imgTag) {
-                imgTag.src = urlFinal;
-                // Força a imagem a ocupar todo o espaço do container que definimos no HTML
-                imgTag.style.width = "100%";
-                imgTag.style.height = "100%";
-                imgTag.style.objectFit = "cover";
-            }
+    if (alvo) {
+        const small = alvo.querySelector("small");
+        const imgTag = alvo.querySelector("img");
+        
+        if (small) small.innerText = nome.split(' ')[0];
+        if (imgTag) {
+            imgTag.src = urlFinal;
+            imgTag.style.width = "100%";
+            imgTag.style.height = "100%";
+            imgTag.style.objectFit = "cover";
         }
-    });
+    }
 }
-    
     // --- 3. CONFIGURAÇÃO DE ELOS E CORES ---
 
     const configElo = [];
