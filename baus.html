@@ -36,18 +36,6 @@
             width: 100%;
         }
 
-        .bau-imagem {
-            width: 150px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 10px var(--blue));
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .bau-imagem:hover {
-            transform: scale(1.1);
-        }
-
         .bau-imagem.animar {
             animation: tremer 0.5s infinite;
         }
@@ -61,7 +49,6 @@
         }
 
         h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-size: 1.5rem; }
-        
         .status-msg { margin: 15px 0; min-height: 20px; font-size: 0.9rem; color: var(--blue); }
 
         .btn-abrir {
@@ -75,11 +62,7 @@
             width: 100%;
         }
 
-        .btn-abrir:disabled {
-            background: #333;
-            border-color: #555;
-            cursor: not-allowed;
-        }
+        .btn-abrir:disabled { background: #333; border-color: #555; cursor: not-allowed; }
 
         .btn-voltar {
             margin-top: 20px;
@@ -98,18 +81,15 @@
         <div id="bau-container">
             <div id="bau-visual" style="font-size: 80px; margin: 20px 0;">🎁</div>
         </div>
-        
         <p class="status-msg" id="mensagem">Carregando status do baú...</p>
-        
         <button id="btn-acao" class="btn-abrir" onclick="abrirBau()" disabled>Abrir Baú</button>
-        
         <br>
         <a href="resgate.html" class="btn-voltar">Voltar para Resgate</a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = { 
@@ -137,21 +117,23 @@
         });
 
         async function verificarStatusBau() {
-            const userRef = doc(db, "usuarios", usuarioAtual.uid);
-            const userDoc = await getDoc(userRef);
-            const dados = userDoc.data();
-            
-            const agora = new Date();
-            const hojeStr = agora.toISOString().split('T')[0]; // Pega apenas YYYY-MM-DD
+            try {
+                const userRef = doc(db, "usuarios", usuarioAtual.uid);
+                const userDoc = await getDoc(userRef);
+                const dados = userDoc.data() || {};
+                
+                const agora = new Date();
+                const hojeStr = agora.toISOString().split('T')[0];
 
-            if (dados.ultimoBau === hojeStr) {
-                document.getElementById('mensagem').innerText = "Você já abriu o baú de hoje! Volte amanhã.";
-                document.getElementById('btn-acao').disabled = true;
-                document.getElementById('bau-visual').innerText = "📦"; // Baú aberto
-            } else {
-                document.getElementById('mensagem').innerText = "O baú está pronto para ser aberto!";
-                document.getElementById('btn-acao').disabled = false;
-            }
+                if (dados.ultimoBau === hojeStr) {
+                    document.getElementById('mensagem').innerText = "Você já abriu o baú de hoje! Volte amanhã.";
+                    document.getElementById('btn-acao').disabled = true;
+                    document.getElementById('bau-visual').innerText = "📦";
+                } else {
+                    document.getElementById('mensagem').innerText = "O baú está pronto para ser aberto!";
+                    document.getElementById('btn-acao').disabled = false;
+                }
+            } catch (e) { console.error(e); }
         }
 
         window.abrirBau = async function() {
@@ -163,28 +145,31 @@
             msg.innerText = "Sorteando recompensa...";
             visual.classList.add('animar');
 
-            // Simula animação de 2 segundos
-            setTimeout(async () => {
-                // Sorteio: 500 a 5000 moedas
-                const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
-                
-                const agora = new Date();
-                const hojeStr = agora.toISOString().split('T')[0];
+            // Sorteio imediato para evitar atrasos de processamento
+            const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
+            const agora = new Date();
+            const hojeStr = agora.toISOString().split('T')[0];
 
+            // Aguarda 2 segundos de animação visual antes de gravar no banco
+            setTimeout(async () => {
                 try {
                     const userRef = doc(db, "usuarios", usuarioAtual.uid);
-                    await updateDoc(userRef, {
-                        pdlSemanal: increment(recompensa), // Adiciona as moedas
-                        ultimoBau: hojeStr // Salva a data de hoje
-                    });
+                    
+                    // Usamos setDoc com merge:true para garantir que os campos sejam criados se não existirem
+                    await setDoc(userRef, {
+                        pdlSemanal: increment(recompensa),
+                        ultimoBau: hojeStr
+                    }, { merge: true });
 
                     visual.classList.remove('animar');
                     visual.innerText = "💰";
-                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.2rem;">+ ${recompensa} PDL Adicionados!</span>`;
+                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.2rem;">+ ${recompensa.toLocaleString()} PDL Adicionados!</span>`;
                     
                 } catch (error) {
-                    console.error("Erro ao resgatar:", error);
-                    msg.innerText = "Erro ao conectar ao servidor.";
+                    console.error("Erro ao salvar recompensa:", error);
+                    msg.innerText = "Erro ao conectar ao servidor. Verifique as regras.";
+                    btn.disabled = false;
+                    visual.classList.remove('animar');
                 }
             }, 2000);
         }
