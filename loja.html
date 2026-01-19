@@ -177,7 +177,6 @@
         .icon-container { width: 80px; height: 80px; margin: 0 auto 15px; }
         .img-campeao { width: 100%; height: 100%; border-radius: 4px; object-fit: cover; }
 
-        /* AJUSTE DO NOME PARA NÃO CORTAR E FICAR ORGANIZADO */
         .item-nome { 
             font-weight: 900; 
             text-transform: uppercase; 
@@ -211,7 +210,6 @@
 
         .btn-comprar:disabled { background: #1e2328; color: #555; border-color: #333; cursor: not-allowed; }
 
-        /* MODAL COM DESCRIÇÃO */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: var(--azul-hex); border: 2px solid var(--ouro); padding: 30px; max-width: 400px; text-align: center; clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%); }
         .modal-nome { color: var(--ouro); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; font-size: 1.1rem; }
@@ -292,12 +290,12 @@
             { id: "ahri_comum", cat: "icones", nome: "Ahri", preco: 5000, raridade: "comum", img: "ahri-comum.png", info: "Ícone de perfil da campeã Ahri." },
             { id: "ahri_raro", cat: "icones", nome: "Ahri Raposa Flamejante", preco: 25000, raridade: "raro", img: "ahri-raro.png", info: "Ícone raro da skin Raposa Flamejante." },
             { id: "ahri_epico", cat: "icones", nome: "Ahri K/DA", preco: 50000, raridade: "epico", img: "ahri-epico.png", info: "Ícone épico da skin Ahri K/DA." },
-            // ITEM COM QUEBRA DE LINHA MANUAL NO NOME
             { id: "anjo_guardiao", cat: "itens", nome: "Anjo Guardião <br> (7 Dias)", preco: 15000, raridade: "raro", img: "anjo.png", info: "Proteção Hextech: Você não perderá PDL ao errar perguntas durante 7 dias." }
         ];
 
         let saldoGlobal = 0;
         let meusItens = [];
+        let minhaMochila = [];
         let categoriaAtual = 'icones';
         let raridadeFiltro = 'todos';
 
@@ -308,6 +306,7 @@
                         const d = snap.data();
                         saldoGlobal = d.saldo || 0;
                         meusItens = d.iconesAdquiridos || [];
+                        minhaMochila = d.mochila || []; // Lê a mochila do Firebase
                         document.getElementById('saldo-valor').innerText = saldoGlobal.toLocaleString();
                         renderLoja();
                     }
@@ -340,7 +339,6 @@
             const itensFiltrados = itens.filter(item => {
                 const bateCategoria = item.cat === categoriaAtual;
                 const bateRaridade = raridadeFiltro === 'todos' || item.raridade === raridadeFiltro;
-                // Limpa o <br> do nome para a busca funcionar corretamente
                 const nomeLimpo = item.nome.replace('<br>', '').toLowerCase();
                 const bateBusca = nomeLimpo.includes(busca);
                 return bateCategoria && bateRaridade && bateBusca;
@@ -352,7 +350,8 @@
             }
 
             itensFiltrados.forEach(item => {
-                const jaPossui = meusItens.includes(item.id);
+                // Verifica se já possui nos ícones OU na mochila
+                const jaPossui = meusItens.includes(item.id) || minhaMochila.includes(item.id);
                 const podeComprar = saldoGlobal >= item.preco;
                 const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
                 const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
@@ -391,10 +390,20 @@
             fecharModal();
             try {
                 const userRef = doc(db, "usuarios", auth.currentUser.uid);
-                await updateDoc(userRef, {
-                    saldo: increment(-valor),
-                    iconesAdquiridos: arrayUnion(id)
-                });
+                const itemDados = itens.find(i => i.id === id);
+
+                // Lógica de destino: Itens de buff vão para MOCHILA, ícones para iconesAdquiridos
+                if (itemDados.cat === 'itens') {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        mochila: arrayUnion(id)
+                    });
+                } else {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        iconesAdquiridos: arrayUnion(id)
+                    });
+                }
             } catch (e) { alert("Erro ao processar compra."); }
         }
     </script>
