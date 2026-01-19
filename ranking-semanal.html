@@ -67,16 +67,16 @@
         }
 
         .icon-wrapper {
-            width: 50px;
-            height: 50px;
+            width: 55px;   /* Tamanho solicitado: 55px */
+            height: 55px;  /* Tamanho solicitado: 55px */
             flex-shrink: 0;
         }
 
         .user-icon {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            border: 2px solid var(--hextech-gold);
+            border-radius: 50%; /* Mantém o FORMATO redondo */
+            border: none;        /* Remove a BORDA redonda (o traço dourado) */
             object-fit: cover;
         }
 
@@ -169,8 +169,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- CONFIGURAÇÃO DE PASTA LOCAL ---
-        // Usamos encodeURIComponent para garantir que o acento no "í" não quebre o link
         const PASTA_ICONES = 'ícones/'; 
         const ICONE_PADRAO = PASTA_ICONES + '0.png';
         const MOEDA_IMG = 'https://cdn-icons-png.flaticon.com/512/272/272525.png';
@@ -222,10 +220,8 @@
                     if (user.fotoPerfil) {
                         const valor = String(user.fotoPerfil);
                         if (valor.startsWith('http')) {
-                            // Se for link do Google, usa direto
                             foto = valor; 
                         } else {
-                            // Se for o ID (ex: 5), busca na sua pasta local "ícones/"
                             const idLimpo = valor.replace('.png', '').replace('.jpg', '');
                             foto = PASTA_ICONES + idLimpo + '.png';
                         }
