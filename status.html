@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status de Itens - Quiz Legends</title>
+    <title>Status de Buffs - Quiz Legends</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26,74 +26,54 @@
 
         .container-status {
             background: rgba(1, 10, 19, 0.95);
-            border: 2px solid var(--blue);
+            border: 1px solid var(--gold);
             padding: 30px;
             border-radius: 4px;
             width: 100%;
             max-width: 500px;
-            box-shadow: 0 0 25px rgba(10, 200, 185, 0.3);
         }
 
         h1 { color: var(--gold); text-align: center; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
 
         .item-ativo {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(10, 200, 185, 0.2);
+            background: rgba(255, 255, 255, 0.05);
             margin: 15px 0;
-            padding: 15px;
+            padding: 12px;
             display: flex;
             align-items: center;
-            border-radius: 8px;
             position: relative;
-            overflow: hidden;
+            border-radius: 4px;
         }
 
-        .item-icone {
-            width: 60px;
-            height: 60px;
-            background: #000;
-            border: 2px solid var(--blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .item-img {
+            width: 50px;
+            height: 50px;
             margin-right: 15px;
-            box-shadow: 0 0 10px var(--blue);
-            z-index: 2;
-        }
-
-        .item-icone img {
-            width: 70%;
-            height: 70%;
             object-fit: contain;
         }
 
-        .info-item { flex-grow: 1; z-index: 2; }
+        .info-item { flex-grow: 1; }
         .info-item h3 { margin: 0; color: #fff; font-size: 1rem; text-transform: uppercase; }
-        .info-item p { margin: 2px 0 0; font-size: 0.7rem; color: var(--blue); font-weight: bold; }
+        .info-item p { margin: 2px 0 0; font-size: 0.7rem; color: var(--gold); }
 
         .timer {
-            font-family: 'Courier New', monospace;
-            color: var(--gold);
+            font-family: monospace;
+            color: #fff;
             font-size: 1rem;
             font-weight: bold;
-            z-index: 2;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
+            padding: 5px;
         }
 
         .barra-tempo {
             position: absolute;
             left: 0;
             bottom: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--blue), #fff);
-            box-shadow: 0 0 10px var(--blue);
-            z-index: 1;
+            height: 3px;
+            background: var(--blue);
+            transition: width 1s linear;
         }
 
-        .sem-itens { text-align: center; color: #555; margin-top: 20px; font-style: italic; }
+        .sem-itens { text-align: center; color: #666; margin-top: 20px; }
 
         .btn-voltar {
             margin-top: 30px;
@@ -102,22 +82,19 @@
             color: var(--gold);
             font-size: 0.8rem;
             text-transform: uppercase;
+            padding: 10px 20px;
             border: 1px solid var(--gold);
-            padding: 10px 25px;
-            transition: 0.3s;
         }
-
-        .btn-voltar:hover { background: var(--gold); color: #000; }
     </style>
 </head>
 <body>
 
     <div class="container-status">
-        <h1>Status de Buffs</h1>
+        <h1>Buffs Ativos</h1>
         <div id="lista-status">
-            <p class="sem-itens">Sincronizando com o servidor...</p>
+            <p class="sem-itens">Carregando...</p>
         </div>
-        <center><a href="index.html" class="btn-voltar">Voltar para a Base</a></center>
+        <center><a href="index.html" class="btn-voltar">Voltar</a></center>
     </div>
 
     <script type="module">
@@ -138,10 +115,9 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Configuração de Durações Totais (para a barra de progresso)
         const DURACAO_TOTAL = {
-            'anjo_guardiao': 7 * 24 * 60 * 60 * 1000, // 7 dias em ms
-            'dobrador_pdl': 24 * 60 * 60 * 1000      // 24 horas em ms
+            'anjo_guardiao': 7 * 24 * 60 * 60 * 1000, 
+            'dobrador_pdl': 24 * 60 * 60 * 1000     
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -173,12 +149,10 @@
                     const div = document.createElement('div');
                     div.className = 'item-ativo';
                     div.innerHTML = `
-                        <div class="item-icone">
-                            <img src="ícones/${obterImagem(id)}" alt="item">
-                        </div>
+                        <img src="itens/${obterImagem(id)}" class="item-img" alt="item">
                         <div class="info-item">
                             <h3>${nomeExibicao(id)}</h3>
-                            <p>PROTEÇÃO ATIVA</p>
+                            <p>ATIVO</p>
                         </div>
                         <div class="timer" id="timer-${id}">${formatarTempo(tempoRestante)}</div>
                         <div class="barra-tempo" id="barra-${id}" style="width: ${porcentagem}%"></div>
@@ -191,7 +165,7 @@
             }
 
             if (!temItens) {
-                container.innerHTML = '<p class="sem-itens">Nenhum buff ativo no momento.</p>';
+                container.innerHTML = '<p class="sem-itens">Nenhum buff ativo.</p>';
             }
         }
 
@@ -223,8 +197,7 @@
             const h = Math.floor((seg % 86400) / 3600);
             const m = Math.floor((seg % 3600) / 60);
             const s = seg % 60;
-            
-            if (d > 0) return `${d}d ${h}h:${m}m`;
+            if (d > 0) return `${d}d ${h}h`;
             return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }
 
