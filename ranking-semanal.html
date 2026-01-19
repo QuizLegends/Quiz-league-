@@ -169,8 +169,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const PASTA_ICONES = 'ícones/'; 
-        const ICONE_PADRAO = PASTA_ICONES + '0.png';
+        // URL base correta para os ícones do GitHub
+        const URL_ICONES_BASE = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/";
+        const ICONE_PADRAO = URL_ICONES_BASE + '0.png';
         const MOEDA_IMG = 'https://cdn-icons-png.flaticon.com/512/272/272525.png';
 
         function atualizarTimer() {
@@ -216,19 +217,26 @@
                     const user = doc.data();
                     const premio = calcularPremio(i);
                     
-                    let foto;
-                    if (user.fotoPerfil) {
+                    let foto = ICONE_PADRAO;
+
+                    // PRIORIDADE 1: Ícone Equipado da Loja (Novo sistema)
+                    if (user.iconeAtual) {
+                        const idLimpo = user.iconeAtual.replace('_', '-');
+                        foto = URL_ICONES_BASE + idLimpo + '.png';
+                    } 
+                    // PRIORIDADE 2: fotoPerfil antiga
+                    else if (user.fotoPerfil) {
                         const valor = String(user.fotoPerfil);
                         if (valor.startsWith('http')) {
                             foto = valor; 
                         } else {
                             const idLimpo = valor.replace('.png', '').replace('.jpg', '');
-                            foto = PASTA_ICONES + idLimpo + '.png';
+                            foto = URL_ICONES_BASE + idLimpo + '.png';
                         }
-                    } else if (user.photoURL) {
+                    } 
+                    // PRIORIDADE 3: photoURL (Google/Auth)
+                    else if (user.photoURL) {
                         foto = user.photoURL;
-                    } else {
-                        foto = ICONE_PADRAO;
                     }
 
                     const valorPDL = user.pdlSemanal || 0;
