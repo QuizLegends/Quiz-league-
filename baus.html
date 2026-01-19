@@ -145,19 +145,18 @@
             msg.innerText = "Sorteando recompensa...";
             visual.classList.add('animar');
 
-            // Sorteio imediato para evitar atrasos de processamento
             const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
             const agora = new Date();
             const hojeStr = agora.toISOString().split('T')[0];
 
-            // Aguarda 2 segundos de animação visual antes de gravar no banco
             setTimeout(async () => {
                 try {
                     const userRef = doc(db, "usuarios", usuarioAtual.uid);
                     
-                    // Usamos setDoc com merge:true para garantir que os campos sejam criados se não existirem
+                    // ATUALIZAÇÃO: Incrementamos pdlSemanal E saldo simultaneamente
                     await setDoc(userRef, {
                         pdlSemanal: increment(recompensa),
+                        saldo: increment(recompensa), // Adicionado para refletir na conta
                         ultimoBau: hojeStr
                     }, { merge: true });
 
