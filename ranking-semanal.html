@@ -169,9 +169,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // CONFIGURAÇÕES DE ÍCONES
-        const ICONE_PADRAO = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/0.jpg';
+        // CONFIGURAÇÕES DE ÍCONES (Ajustado para PNG)
         const URL_BASE_ICON = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/';
+        const ICONE_PADRAO = URL_BASE_ICON + '0.png';
         const MOEDA_IMG = 'https://cdn-icons-png.flaticon.com/512/272/272525.png';
 
         function atualizarTimer() {
@@ -217,11 +217,17 @@
                     const user = doc.data();
                     const premio = calcularPremio(i);
                     
-                    // LÓGICA DE ÍCONE CORRIGIDA:
+                    // LÓGICA DE TRATAMENTO DO ÍCONE (PNG)
                     let foto;
                     if (user.fotoPerfil) {
-                        // Se a foto começa com http (Google), usa direto. Se for só o número, monta a URL.
-                        foto = user.fotoPerfil.startsWith('http') ? user.fotoPerfil : URL_BASE_ICON + user.fotoPerfil;
+                        const valor = String(user.fotoPerfil);
+                        if (valor.startsWith('http')) {
+                            foto = valor; 
+                        } else {
+                            // Limpa qualquer extensão e força .png
+                            const idLimpo = valor.replace('.jpg', '').replace('.png', '');
+                            foto = `${URL_BASE_ICON}${idLimpo}.png`;
+                        }
                     } else if (user.photoURL) {
                         foto = user.photoURL;
                     } else {
