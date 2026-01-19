@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cofre Hextech - Quiz Legends</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --gold: #c89b3c;
             --blue: #0ac8b9;
+            --dark-blue: #091428;
+            --hextech-blue: #0078ff;
             --dark: #010a13;
         }
 
         body {
-            background: radial-gradient(circle at center, #091428 0%, var(--dark) 100%);
+            background: radial-gradient(circle at center, var(--dark-blue) 0%, var(--dark) 100%);
             color: #f0e6d2;
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -23,46 +26,96 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            overflow: hidden;
         }
 
         .container-bau {
             text-align: center;
-            background: rgba(1, 10, 19, 0.8);
+            background: rgba(1, 10, 19, 0.9);
             border: 2px solid var(--gold);
             padding: 40px;
             border-radius: 4px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0, 200, 185, 0.2);
             max-width: 400px;
             width: 100%;
+            position: relative;
         }
 
-        .bau-imagem.animar {
-            animation: tremer 0.5s infinite;
+        /* Estilização do Baú Hextech */
+        .bau-hextech {
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(135deg, #051e3e 0%, #0078ff 100%);
+            margin: 30px auto;
+            border: 3px solid var(--blue);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 0 20px var(--blue), inset 0 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            transition: all 0.3s ease;
+        }
+
+        /* Linhas Neon */
+        .bau-hextech::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: var(--blue);
+            top: 30%;
+            box-shadow: 0 0 10px var(--blue);
+        }
+
+        .bau-hextech.aberto {
+            background: var(--gold);
+            border-color: #fff;
+            box-shadow: 0 0 40px var(--gold);
+        }
+
+        .animar {
+            animation: tremer 0.3s infinite;
         }
 
         @keyframes tremer {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            50% { transform: rotate(0deg); }
-            75% { transform: rotate(-5deg); }
-            100% { transform: rotate(0deg); }
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(3deg); }
+            50% { transform: scale(1) rotate(0deg); }
+            75% { transform: scale(1.1) rotate(-3deg); }
+            100% { transform: scale(1) rotate(0deg); }
         }
 
-        h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-size: 1.5rem; }
-        .status-msg { margin: 15px 0; min-height: 20px; font-size: 0.9rem; color: var(--blue); }
+        h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-size: 1.5rem; margin: 0; }
+        .status-msg { margin: 20px 0; min-height: 25px; font-size: 1rem; color: var(--blue); font-weight: bold; }
 
         .btn-abrir {
             background: linear-gradient(to bottom, #c89b3c, #785a28);
             border: 1px solid var(--gold);
             color: white;
-            padding: 12px 30px;
+            padding: 15px 30px;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
             width: 100%;
+            letter-spacing: 1px;
+            transition: 0.3s;
         }
 
-        .btn-abrir:disabled { background: #333; border-color: #555; cursor: not-allowed; }
+        .btn-abrir:hover:not(:disabled) {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        .btn-abrir:disabled { background: #333; border-color: #555; cursor: not-allowed; opacity: 0.6; }
+
+        /* Botão Receber Recompensa */
+        .btn-resgatar {
+            background: linear-gradient(to bottom, #0ac8b9, #005a5a);
+            border: 1px solid #fff;
+            box-shadow: 0 0 15px var(--blue);
+        }
 
         .btn-voltar {
             margin-top: 20px;
@@ -71,17 +124,21 @@
             color: var(--gold);
             font-size: 0.8rem;
             text-transform: uppercase;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 
     <div class="container-bau">
-        <h1>Baú Diário</h1>
+        <h1>Cofre Hextech</h1>
+        
         <div id="bau-container">
-            <div id="bau-visual" style="font-size: 80px; margin: 20px 0;">🎁</div>
+            <div id="bau-visual" class="bau-hextech">💎</div>
         </div>
-        <p class="status-msg" id="mensagem">Carregando status do baú...</p>
+
+        <p class="status-msg" id="mensagem">Conectando ao inventário...</p>
+        
         <button id="btn-acao" class="btn-abrir" onclick="abrirBau()" disabled>Abrir Baú</button>
         <br>
         <a href="resgate.html" class="btn-voltar">Voltar para Resgate</a>
@@ -106,6 +163,7 @@
         const auth = getAuth(app);
 
         let usuarioAtual = null;
+        const somMoedas = new Audio('https://www.soundjay.com/misc/sounds/coins-spilled-1.mp3');
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -126,11 +184,13 @@
                 const hojeStr = agora.toISOString().split('T')[0];
 
                 if (dados.ultimoBau === hojeStr) {
-                    document.getElementById('mensagem').innerText = "Você já abriu o baú de hoje! Volte amanhã.";
+                    document.getElementById('mensagem').innerText = "Baú já aberto hoje. Volte amanhã!";
                     document.getElementById('btn-acao').disabled = true;
                     document.getElementById('bau-visual').innerText = "📦";
+                    document.getElementById('bau-visual').style.background = "#333";
+                    document.getElementById('bau-visual').style.borderColor = "#555";
                 } else {
-                    document.getElementById('mensagem').innerText = "O baú está pronto para ser aberto!";
+                    document.getElementById('mensagem').innerText = "O Cofre Hextech está pronto!";
                     document.getElementById('btn-acao').disabled = false;
                 }
             } catch (e) { console.error(e); }
@@ -142,40 +202,75 @@
             const visual = document.getElementById('bau-visual');
             
             btn.disabled = true;
-            msg.innerText = "Sorteando recompensa...";
+            msg.innerText = "Descriptografando cofre...";
             visual.classList.add('animar');
 
-            // Sorteio de moedas (500 a 5000)
             const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
-            const agora = new Date();
-            const hojeStr = agora.toISOString().split('T')[0];
+            const hojeStr = new Date().toISOString().split('T')[0];
 
             setTimeout(async () => {
                 try {
                     const userRef = doc(db, "usuarios", usuarioAtual.uid);
-                    
-                    // Busca saldo atual para somar
                     const userSnap = await getDoc(userRef);
-                    const dadosAtuais = userSnap.data() || {};
-                    const saldoAtual = Number(dadosAtuais.saldo || 0);
+                    const saldoAtual = Number(userSnap.data()?.saldo || 0);
 
-                    // Salva apenas saldo de moedas e controle do baú
                     await setDoc(userRef, {
                         saldo: saldoAtual + recompensa,
                         ultimoBau: hojeStr
                     }, { merge: true });
 
+                    // Efeitos de Sucesso
                     visual.classList.remove('animar');
+                    visual.classList.add('aberto');
                     visual.innerText = "💰";
-                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.2rem;">+ ${recompensa.toLocaleString()} Moedas Adicionadas!</span>`;
                     
+                    // Disparar Fogos de Artifício
+                    dispararFogos();
+                    
+                    // Tocar som de moedas
+                    somMoedas.play();
+
+                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.4rem;">+ ${recompensa.toLocaleString()} Moedas!</span>`;
+                    
+                    // Transformar botão em botão de Resgate Hextech
+                    btn.innerText = "Receber Recompensa";
+                    btn.disabled = false;
+                    btn.classList.add('btn-resgatar');
+                    btn.onclick = () => window.location.reload();
+
                 } catch (error) {
-                    console.error("Erro ao salvar moedas:", error);
-                    msg.innerText = "Erro ao conectar ao servidor.";
+                    console.error(error);
+                    msg.innerText = "Erro no sistema Hextech.";
                     btn.disabled = false;
                     visual.classList.remove('animar');
                 }
-            }, 2000);
+            }, 2500);
+        }
+
+        function dispararFogos() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+              confetti({
+                particleCount: 7,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#c89b3c', '#0ac8b9', '#ffffff']
+              });
+              confetti({
+                particleCount: 7,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#c89b3c', '#0ac8b9', '#ffffff']
+              });
+
+              if (Date.now() < end) {
+                requestAnimationFrame(frame);
+              }
+            }());
         }
     </script>
 </body>
