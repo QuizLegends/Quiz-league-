@@ -52,7 +52,7 @@
             border: 1px solid rgba(200, 155, 60, 0.3);
             padding: 0 12px;
             border-radius: 4px;
-            height: 75px; /* Aumentei um pouco a altura para acomodar imagens maiores */
+            height: 80px; /* Ajustado para caber o ícone de 55px confortavelmente */
             justify-content: space-between;
         }
 
@@ -73,7 +73,7 @@
         }
 
         .elo-emblema {
-            width: 45px; /* Aumentado de 35px para 45px */
+            width: 45px;
             height: 45px;
             object-fit: contain;
         }
@@ -88,10 +88,10 @@
         }
 
         .user-avatar {
-            width: 48px; /* Aumentado de 35px para 48px */
-            height: 48px;
-            border-radius: 50%;
-            border: 1.5px solid var(--ouro);
+            width: 55px;  /* Aumentado para 55px */
+            height: 55px; /* Aumentado para 55px */
+            border-radius: 50%; /* Mantido o formato redondo */
+            border: none;      /* Removida a borda dourada */
             margin: 0 10px;
             flex-shrink: 0;
             object-fit: cover;
@@ -101,13 +101,13 @@
             flex-grow: 1;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 0.95rem; /* Nome um pouco maior */
+            font-size: 0.95rem;
             color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             padding-right: 5px;
-            margin-left: 15px; /* Empurra o nome para a direita, centralizando-o melhor */
+            margin-left: 15px;
         }
 
         .info-pdl {
@@ -159,7 +159,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const ICONE_PADRAO = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/0.jpg';
+
+        // Configuração da pasta local
+        const PASTA_ICONES = 'ícones/';
+        const ICONE_PADRAO = PASTA_ICONES + '0.png';
 
         function getEloInfo(xp) {
             let elo = { nome: "", arquivo: "" };
@@ -237,7 +240,22 @@
                     const usuario = doc.data();
                     const xpAtual = usuario.xp || 0;
                     const elo = getEloInfo(xpAtual);
-                    const foto = (usuario.photoURL && usuario.photoURL !== "") ? usuario.photoURL : ICONE_PADRAO;
+                    
+                    // Lógica para carregar ícone localmente
+                    let foto;
+                    const valorPerfil = usuario.fotoPerfil || usuario.photoURL;
+
+                    if (valorPerfil) {
+                        const valor = String(valorPerfil);
+                        if (valor.startsWith('http')) {
+                            foto = valor;
+                        } else {
+                            const idLimpo = valor.replace('.png', '').replace('.jpg', '');
+                            foto = PASTA_ICONES + idLimpo + '.png';
+                        }
+                    } else {
+                        foto = ICONE_PADRAO;
+                    }
 
                     const item = document.createElement('div');
                     item.className = 'ranking-item';
