@@ -600,65 +600,81 @@ function atualizarVisualPodio(posicao, nome, foto) {
         tentarImportar();
     }
 
-    function carregarQuestao() {
-        const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
-        if(!c || !t) return;
-        
-        if (acertosNoCiclo >= 10 && videosAssistidos < 3) { 
-            t.innerText = "META DE ACERTOS ATINGIDA!"; 
-            c.innerHTML = "<p style='color:var(--gold); font-weight:bold; text-align:center;'>Assista aos anúncios para liberar o quiz novamente!</p>"; 
-            return; 
+    async function carregarQuestao() {
+    const c = document.getElementById('opcoes'), t = document.getElementById('perguntaTexto');
+    if(!c || !t) return;
+    
+    if (acertosNoCiclo >= 10 && videosAssistidos < 3) { 
+        t.innerText = "META DE ACERTOS ATINGIDA!"; 
+        c.innerHTML = "<p style='color:var(--gold); font-weight:bold; text-align:center;'>Assista aos anúncios para liberar o quiz novamente!</p>"; 
+        return; 
+    }
+
+    if (bancoPerguntas.length === 0) { t.innerText = "A sincronizar questões..."; return; }
+    if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
+
+    const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
+    let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
+    
+    t.innerText = q.pergunta; 
+    c.innerHTML = "";
+
+    // --- LÓGICA DA SENTINELA (REVELAÇÃO) ---
+    const cargasSentinela = dadosUserLocais.statusAtivo?.sentinelas || 0;
+    const sentinelaAtiva = cargasSentinela > 0;
+    // ---------------------------------------
+    
+    opts.forEach(o => {
+        const b = document.createElement('button'); 
+        b.className = "option-btn"; 
+        b.innerText = o.texto;
+
+        // Se a sentinela estiver ativa e esta for a opção correta, adiciona o brilho
+        if (sentinelaAtiva && o.correta) {
+            b.classList.add('sentinela-revelar');
         }
 
-        if (bancoPerguntas.length === 0) { t.innerText = "A sincronizar questões..."; return; }
-        if (totalVideosHoje >= 35 && acertosNoCiclo >= 10) { t.innerText = "LIMITE DIÁRIO ATINGIDO!"; c.innerHTML = ""; return; }
-
-        const q = bancoPerguntas[Math.floor(Math.random()*bancoPerguntas.length)];
-        let opts = q.opcoes.map((o, i) => ({ texto: o, correta: i === q.correta })).sort(() => Math.random() - 0.5);
-        t.innerText = q.pergunta; c.innerHTML = "";
-        
-        opts.forEach(o => {
-            const b = document.createElement('button'); b.className = "option-btn"; b.innerText = o.texto;
-            b.onclick = async () => {
-                const eloAntesDoQuiz = getEloInfo(pdlInterno).nome;
-                const all = c.querySelectorAll('button'); all.forEach(x => x.disabled = true);
-                const rect = b.getBoundingClientRect();
-                
-                try {
-                    if (o.correta) {
-                        b.classList.add('btn-correct');
-                        showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
-                        await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10), pdlSemanal: increment(10) });
-                    } else {
-                        b.classList.add('btn-wrong');
-
-                        // --- LÓGICA DO ANJO GUARDIÃO ---
-                        const agora = Date.now();
-                        const dataExpiracaoAnjo = dadosUserLocais.statusAtivo?.anjo_guardiao || 0;
-                        const temAnjoAtivo = dataExpiracaoAnjo > agora;
-
-                        if (temAnjoAtivo) {
-                            // MOSTRA FEEDBACK VISUAL DE QUE FOI PROTEGIDO
-                            showFloatingPDL("🛡️ PROTEGIDO", "#00cfbc", rect.left + rect.width/2, rect.top);
-                            console.log("Anjo Guardião impediu a perda de PDL.");
-                        } else {
-                            // PERDA NORMAL CASO NÃO TENHA O ITEM
-                            showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
-                            await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 2) });
-                        }
-                        // -------------------------------
-                    }
-                } finally { 
-                    setTimeout(() => {
-                        const infoNovo = getEloInfo(pdlInterno);
-                        if (infoNovo.nome !== eloAntesDoQuiz) exibirAnimacaoElo(infoNovo, true);
-                        carregarQuestao();
-                    }, 1200); 
+        b.onclick = async () => {
+            const eloAntesDoQuiz = getEloInfo(pdlInterno).nome;
+            const all = c.querySelectorAll('button'); 
+            all.forEach(x => x.disabled = true);
+            const rect = b.getBoundingClientRect();
+            
+            try {
+                // Se o usuário usou uma carga nesta pergunta, descontamos agora
+                if (sentinelaAtiva) {
+                    await updateDoc(userRef, { "statusAtivo.sentinelas": increment(-1) });
                 }
-            };
-            c.appendChild(b);
-        });
-    }
+
+                if (o.correta) {
+                    b.classList.add('btn-correct');
+                    showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
+                    await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10), pdlSemanal: increment(10) });
+                } else {
+                    b.classList.add('btn-wrong');
+
+                    const agora = Date.now();
+                    const dataExpiracaoAnjo = dadosUserLocais.statusAtivo?.anjo_guardiao || 0;
+                    const temAnjoAtivo = dataExpiracaoAnjo > agora;
+
+                    if (temAnjoAtivo) {
+                        showFloatingPDL("🛡️ PROTEGIDO", "#00cfbc", rect.left + rect.width/2, rect.top);
+                    } else {
+                        showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
+                        await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 2) });
+                    }
+                }
+            } finally { 
+                setTimeout(() => {
+                    const infoNovo = getEloInfo(pdlInterno);
+                    if (infoNovo.nome !== eloAntesDoQuiz) exibirAnimacaoElo(infoNovo, true);
+                    carregarQuestao();
+                }, 1200); 
+            }
+        };
+        c.appendChild(b);
+    });
+}
     
     function atualizarInterface() {
     if(!document.getElementById('goldAmount')) return;
