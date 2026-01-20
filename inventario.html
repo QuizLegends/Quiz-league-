@@ -142,8 +142,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // ADICIONADO getDoc PARA LÓGICA DE SOMA DE TEMPO
-        import { getFirestore, doc, onSnapshot, updateDoc, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // ADICIONADO increment PARA LÓGICA DE CARGAS
+        import { getFirestore, doc, onSnapshot, updateDoc, arrayRemove, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -166,7 +166,8 @@
             'ahri_comum': { nome: "Ahri", tipo: "icone", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-comum.png" },
             'ahri_raro': { nome: "Ahri Raposa Flamejante", tipo: "icone", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-raro.png" },
             'ahri_epico': { nome: "Ahri K/DA", tipo: "icone", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-epico.png" },
-            'anjo_guardiao': { nome: "Anjo Guardião", tipo: "consumivel", duracao: 7, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/anjo.png" }
+            'anjo_guardiao': { nome: "Anjo Guardião", tipo: "consumivel", duracao: 7, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/anjo.png" },
+            'sentinela-epico': { nome: "Sentinela de Controle", tipo: "carga", unidades: 3, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/sentinela-epico.png" }
         };
 
         let usuarioDados = {};
@@ -212,9 +213,13 @@
         }
 
         function criarCard(id, item, txtBotao, isEquipado) {
+            let tagTexto = "Consumível";
+            if (item.tipo === 'icone') tagTexto = "Ícone de Perfil";
+            if (item.tipo === 'carga') tagTexto = "Utilizável";
+
             return `
                 <div class="item-card ${isEquipado ? 'equipado' : ''}">
-                    <div class="tag-tipo">${item.tipo === 'icone' ? 'Ícone de Perfil' : 'Consumível'}</div>
+                    <div class="tag-tipo">${tagTexto}</div>
                     <div class="icon-container">
                         <img src="${item.img}" class="img-item">
                     </div>
@@ -238,6 +243,10 @@
                 titulo.innerText = "EQUIPAR ÍCONE";
                 msg.innerText = `Deseja equipar "${item.nome}" como seu ícone de perfil?`;
                 btnSim.onclick = () => equiparIcone(id);
+            } else if (tipo === 'carga') {
+                titulo.innerText = "ATIVAR REVELAÇÃO";
+                msg.innerText = `Deseja ativar "${item.nome}"? Isso adicionará ${item.unidades} cargas de revelação ao seu Quiz.`;
+                btnSim.onclick = () => ativarSentinela(id);
             } else {
                 titulo.innerText = "ATIVAR CONSUMÍVEL";
                 msg.innerText = `Deseja ativar "${item.nome}" agora? Isso iniciará o tempo de ${item.duracao} dias (acumulativo).`;
@@ -248,12 +257,10 @@
 
         window.fecharModal = () => { document.getElementById('modal-confirm').style.display = 'none'; };
 
-        // FUNÇÃO DE MODAL CUSTOMIZADA (PARA SUBSTITUIR O ALERT)
         function mostrarModalSucesso(titulo, htmlConteudo) {
             const modal = document.getElementById('modal-confirm');
             document.getElementById('modal-title').innerText = titulo;
             document.getElementById('modal-message').innerHTML = htmlConteudo;
-            // Esconde os botões de Sim/Cancelar e coloca um de "OK"
             const containerBtns = document.querySelector('.modal-btns');
             containerBtns.innerHTML = `<button class="btn-confirm" onclick="location.reload()">OK</button>`;
             modal.style.display = 'flex';
@@ -269,6 +276,34 @@
             }
         }
 
+        async function ativarSentinela(id) {
+            fecharModal();
+            const item = DATA_BASE[id];
+            const userRef = doc(db, "usuarios", auth.currentUser.uid);
+
+            try {
+                await updateDoc(userRef, {
+                    mochila: arrayRemove(id),
+                    "statusAtivo.sentinelas": increment(3)
+                });
+
+                const snap = await getDoc(userRef);
+                const totalCargas = snap.data().statusAtivo?.sentinelas || 0;
+
+                const msgSucesso = `
+                    <div style="text-align:center;">
+                        <img src="${item.img}" style="width:60px; margin-bottom:10px; filter: drop-shadow(0 0 10px var(--raro));">
+                        <p style="color:var(--raro); font-weight:bold; text-transform:uppercase;">${item.nome} Ativada!</p>
+                        <p>Você possui agora <strong>${totalCargas} cargas</strong> disponíveis no Quiz.</p>
+                    </div>
+                `;
+                mostrarModalSucesso("SUCESSO", msgSucesso);
+            } catch (e) {
+                console.error("Erro ao ativar sentinela:", e);
+                mostrarModalSucesso("ERRO", "Falha na ativação Hextech.");
+            }
+        }
+
         async function ativarConsumivel(id) {
             fecharModal();
             const item = DATA_BASE[id];
@@ -277,12 +312,8 @@
             const tempoMs = item.duracao * 24 * 60 * 60 * 1000; 
 
             try {
-                // Busca dados atuais para verificar se já existe tempo ativo
                 const snap = await getDoc(userRef);
                 const dados = snap.data();
-                
-                // Se o tempo atual for maior que agora, somamos ao tempo restante. 
-                // Se não, somamos a partir de "agora".
                 const tempoAtual = (dados.statusAtivo && dados.statusAtivo[id] > agora) 
                     ? dados.statusAtivo[id] 
                     : agora;
@@ -290,11 +321,10 @@
                 const novaValidade = tempoAtual + tempoMs;
 
                 await updateDoc(userRef, {
-                    mochila: arrayRemove(id), // Remove 1 unidade da mochila
+                    mochila: arrayRemove(id),
                     [`statusAtivo.${id}`]: novaValidade
                 });
                 
-                // Cálculo de dias totais para exibir no modal
                 const diasRestantes = Math.ceil((novaValidade - agora) / (1000 * 60 * 60 * 24));
 
                 const msgSucesso = `
@@ -304,9 +334,7 @@
                         <p>Você possui agora <strong>${diasRestantes} dias</strong> de proteção acumulada.</p>
                     </div>
                 `;
-                
                 mostrarModalSucesso("SUCESSO", msgSucesso);
-
             } catch (e) {
                 console.error("Erro ao ativar:", e);
                 mostrarModalSucesso("ERRO", "Houve uma falha na comunicação com o servidor Hextech.");
