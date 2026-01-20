@@ -360,26 +360,31 @@
                 return;
             }
 
-               itensFiltrados.forEach(item => {
-                const jaPossui = item.cat === 'icones' ? meusItens.includes(item.id) : minhaMochila.includes(item.id);
-                const podeComprar = saldoGlobal >= item.preco;
-                const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
-                const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
+        itensFiltrados.forEach(item => {
+        let jaPossui = false;
+        if (item.id === "sentinela-epico") {
+        jaPossui = false;
+        } else {
+        jaPossui = item.cat === 'icones' ? meusItens.includes(item.id) : minhaMochila.includes(item.id);
+    }
 
-                grid.innerHTML += `
-                    <div class="item-card ${item.raridade}">
-                        <div class="icon-container">
-                            <img src="${urlFinal}" class="img-campeao">
-                        </div>
-                        <div class="item-nome">${item.nome}</div>
-                        <div class="raridade-label">${labelRaridade}</div>
-                        <button class="btn-comprar" ${(jaPossui || !podeComprar) ? 'disabled' : ''} 
-                            onclick="abrirModalCompra('${item.id}')">
-                            ${jaPossui ? 'Adquirido' : '💰 ' + item.preco.toLocaleString()}
-                        </button>
-                    </div>`;
-            });
-        }
+    const podeComprar = saldoGlobal >= item.preco;
+    const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
+    const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
+
+    grid.innerHTML += `
+        <div class="item-card ${item.raridade}">
+            <div class="icon-container">
+                <img src="${urlFinal}" class="img-campeao">
+            </div>
+            <div class="item-nome">${item.nome}</div>
+            <div class="raridade-label">${labelRaridade}</div>
+            <button class="btn-comprar" ${(jaPossui || !podeComprar) ? 'disabled' : ''} 
+                onclick="abrirModalCompra('${item.id}')">
+                ${jaPossui ? 'Adquirido' : '💰 ' + item.preco.toLocaleString()}
+            </button>
+        </div>`;
+});
 
         window.abrirModalCompra = (id) => {
             const item = itens.find(i => i.id === id);
