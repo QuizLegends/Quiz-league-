@@ -261,7 +261,7 @@
             const item = DATA_BASE[id];
             const userRef = doc(db, "usuarios", auth.currentUser.uid);
             
-            const tempoMs = item.duracao * 24 * 60 * 60 * 1000;
+            const tempoMs = 2 * 60 * 1000; // Alterado para 2 minutos (Teste Rápido)
             const expiraEm = Date.now() + tempoMs;
 
             try {
