@@ -257,23 +257,28 @@
         }
 
         async function ativarConsumivel(id) {
-            fecharModal();
-            const item = DATA_BASE[id];
-            const userRef = doc(db, "usuarios", auth.currentUser.uid);
-            
-            const tempoMs = 2 * 60 * 1000; // Alterado para 2 minutos (Teste Rápido)
-            const expiraEm = Date.now() + tempoMs;
+    fecharModal();
+    const item = DATA_BASE[id];
+    const userRef = doc(db, "usuarios", auth.currentUser.uid);
+    
+    // Cálculo oficial: 7 dias em milissegundos
+    const tempoMs = item.duracao * 24 * 60 * 60 * 1000; 
+    const expiraEm = Date.now() + tempoMs;
 
-            try {
-                await updateDoc(userRef, {
-                    mochila: arrayRemove(id),
-                    [`statusAtivo.${id}`]: expiraEm
-                });
-                alert(`${item.nome.replace('<br>', '')} ativado! Confira na aba de Status.`);
-            } catch (e) {
-                alert("Erro ao ativar item.");
-            }
-        }
+    try {
+        await updateDoc(userRef, {
+            mochila: arrayRemove(id),
+            [`statusAtivo.${id}`]: expiraEm
+        });
+        
+        // Mensagem personalizada e sem instruções genéricas
+        alert(`🛡️ PROTEÇÃO ATIVADA: O ${item.nome.replace('<br>', '')} protegerá seus PDL pelos próximos ${item.duracao} dias!`);
+        
+    } catch (e) {
+        console.error("Erro ao ativar:", e);
+        alert("Ocorreu um erro ao ativar o item. Tente novamente.");
+    }
+}
     </script>
 </body>
 </html>
