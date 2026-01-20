@@ -150,6 +150,7 @@
         .filter-rarity-btn.active[data-rarity="comum"] { border-color: var(--comum); color: var(--comum); }
         .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); }
         .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); }
+        .filter-rarity-btn.active[data-rarity="todos"] { border-color: var(--ouro); color: var(--ouro); }
 
         .grid-loja {
             display: grid;
@@ -360,31 +361,32 @@
                 return;
             }
 
-        itensFiltrados.forEach(item => {
-        let jaPossui = false;
-        if (item.id === "sentinela-epico") {
-        jaPossui = false;
-        } else {
-        jaPossui = item.cat === 'icones' ? meusItens.includes(item.id) : minhaMochila.includes(item.id);
-    }
+            itensFiltrados.forEach(item => {
+                let jaPossui = false;
+                if (item.id === "sentinela-epico") {
+                    jaPossui = false; // Sentinela pode ser comprada várias vezes
+                } else {
+                    jaPossui = item.cat === 'icones' ? meusItens.includes(item.id) : minhaMochila.includes(item.id);
+                }
 
-    const podeComprar = saldoGlobal >= item.preco;
-    const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
-    const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
+                const podeComprar = saldoGlobal >= item.preco;
+                const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
+                const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
 
-    grid.innerHTML += `
-        <div class="item-card ${item.raridade}">
-            <div class="icon-container">
-                <img src="${urlFinal}" class="img-campeao">
-            </div>
-            <div class="item-nome">${item.nome}</div>
-            <div class="raridade-label">${labelRaridade}</div>
-            <button class="btn-comprar" ${(jaPossui || !podeComprar) ? 'disabled' : ''} 
-                onclick="abrirModalCompra('${item.id}')">
-                ${jaPossui ? 'Adquirido' : '💰 ' + item.preco.toLocaleString()}
-            </button>
-        </div>`;
-});
+                grid.innerHTML += `
+                    <div class="item-card ${item.raridade}">
+                        <div class="icon-container">
+                            <img src="${urlFinal}" class="img-campeao">
+                        </div>
+                        <div class="item-nome">${item.nome}</div>
+                        <div class="raridade-label">${labelRaridade}</div>
+                        <button class="btn-comprar" ${(jaPossui || !podeComprar) ? 'disabled' : ''} 
+                            onclick="abrirModalCompra('${item.id}')">
+                            ${jaPossui ? 'Adquirido' : '💰 ' + item.preco.toLocaleString()}
+                        </button>
+                    </div>`;
+            });
+        };
 
         window.abrirModalCompra = (id) => {
             const item = itens.find(i => i.id === id);
@@ -401,7 +403,6 @@
 
         window.fecharModal = () => { document.getElementById('modal-compra').style.display = 'none'; };
 
-        // Funções para o novo Modal de Sucesso
         window.mostrarSucesso = (mensagem) => {
             document.getElementById('modal-sucesso-msg').innerText = mensagem;
             document.getElementById('modal-sucesso').style.display = 'flex';
@@ -412,41 +413,38 @@
         };
 
         async function processarCompra(id, valor) {
-    fecharModal();
-    try {
-        const userRef = doc(db, "usuarios", auth.currentUser.uid);
-        const itemDados = itens.find(i => i.id === id);
+            fecharModal();
+            try {
+                const userRef = doc(db, "usuarios", auth.currentUser.uid);
+                const itemDados = itens.find(i => i.id === id);
 
-        // Lógica para a Sentinela de Controle (Adiciona 3 cargas)
-        if (id === "sentinela-epico") {
-            await updateDoc(userRef, {
-                saldo: increment(-valor),
-                "statusAtivo.sentinelas": increment(3) // Adiciona as 3 unidades/partidas
-            });
-            mostrarSucesso("Você adquiriu 3 Sentinelas! As respostas das próximas 3 perguntas serão reveladas.");
-            return; // Interrompe para não executar a lógica de mochila comum
-        }
+                if (id === "sentinela-epico") {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        "statusAtivo.sentinelas": increment(3)
+                    });
+                    mostrarSucesso("Você adquiriu 3 Sentinelas! Ative-as no seu Inventário.");
+                    return;
+                }
 
-        // Lógica para outros Itens
-        if (itemDados.cat === 'itens') {
-            await updateDoc(userRef, {
-                saldo: increment(-valor),
-                mochila: arrayUnion(id)
-            });
-            mostrarSucesso("Item enviado para o seu inventário!"); 
-        } else {
-            // Lógica para Ícones
-            await updateDoc(userRef, {
-                saldo: increment(-valor),
-                iconesAdquiridos: arrayUnion(id)
-            });
-            mostrarSucesso("Ícone enviado para o seu inventário!");
+                if (itemDados.cat === 'itens') {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        mochila: arrayUnion(id)
+                    });
+                    mostrarSucesso("Item enviado para o seu inventário!"); 
+                } else {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        iconesAdquiridos: arrayUnion(id)
+                    });
+                    mostrarSucesso("Ícone enviado para o seu inventário!");
+                }
+            } catch (e) { 
+                console.error(e);
+                mostrarSucesso("Erro ao processar compra. Verifique sua conexão."); 
+            }
         }
-    } catch (e) { 
-        console.error(e);
-        mostrarSucesso("Erro ao processar compra. Verifique sua conexão."); 
-    }
-}
     </script>
 </body>
 </html>
