@@ -218,39 +218,43 @@
 
         function renderInventario() {
             const grid = document.getElementById('grid-inv');
-            grid.innerHTML = "";
+            let htmlFinal = ""; // Acumula primeiro para injetar uma única vez
 
             const icones = usuarioDados.iconesAdquiridos || [];
             const mochilaRaw = usuarioDados.mochila || [];
             const iconeEquipado = usuarioDados.iconeAtual || "";
 
-            // AGRUPAMENTO REAL: Contamos antes de criar qualquer HTML
-            const mapaMochila = new Map();
+            // AGRUPAMENTO ABSOLUTO
+            const contagemItens = {};
             mochilaRaw.forEach(id => {
-                mapaMochila.set(id, (mapaMochila.get(id) || 0) + 1);
+                contagemItens[id] = (contagemItens[id] || 0) + 1;
             });
 
-            if (icones.length === 0 && mapaMochila.size === 0) {
+            const idsUnicosMochila = Object.keys(contagemItens);
+
+            if (icones.length === 0 && idsUnicosMochila.length === 0) {
                 grid.innerHTML = '<p class="vazio">Você ainda não possui itens ou ícones.</p>';
                 return;
             }
 
-            // Gerar HTML dos itens da mochila agrupados
-            mapaMochila.forEach((quantidade, id) => {
+            // 1. Processa Itens da Mochila Agrupados
+            idsUnicosMochila.forEach(id => {
                 const item = DATA_BASE[id];
                 if (item) {
-                    grid.innerHTML += criarCard(id, item, "ATIVAR", false, quantidade);
+                    htmlFinal += criarCard(id, item, "ATIVAR", false, contagemItens[id]);
                 }
             });
 
-            // Ícones permanecem individuais
+            // 2. Processa Ícones (individuais)
             icones.forEach(id => {
                 const item = DATA_BASE[id];
                 if (item) {
                     const estaEquipado = (id === iconeEquipado);
-                    grid.innerHTML += criarCard(id, item, estaEquipado ? "EQUIPADO" : "EQUIPAR", estaEquipado, 1);
+                    htmlFinal += criarCard(id, item, estaEquipado ? "EQUIPADO" : "EQUIPAR", estaEquipado, 1);
                 }
             });
+
+            grid.innerHTML = htmlFinal; // Injeção única para evitar duplicidade de renderização
         }
 
         function criarCard(id, item, txtBotao, isEquipado, qtd) {
