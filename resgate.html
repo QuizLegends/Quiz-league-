@@ -661,8 +661,33 @@ function atualizarVisualPodio(posicao, nome, foto) {
 
                 if (o.correta) {
                     b.classList.add('btn-correct');
-                    showFloatingPDL("+10 PDL", "#28a745", rect.left + rect.width/2, rect.top);
-                    await updateDoc(userRef, { saldo: increment(10), acertos: increment(1), xp: increment(10), pdlSemanal: increment(10) });
+
+                    // --- LÓGICA DA COLETORA (MULTIPLICADOR 2X) ---
+                    const agora = Date.now();
+                    const expiraColetora = dadosUserLocais.statusAtivo?.dobrador_pdl || 0;
+                    const temColetoraAtiva = expiraColetora > agora;
+                    
+                    let ganhoFinal = 10; 
+                    let textoFlutuante = "+10 PDL";
+                    let corFlutuante = "#28a745";
+
+                    if (temColetoraAtiva) {
+                        ganhoFinal = 20; 
+                        textoFlutuante = "🔥 +20 PDL";
+                        corFlutuante = "#c89b3c"; 
+                    }
+                    // ----------------------------------------------
+
+                    showFloatingPDL(textoFlutuante, corFlutuante, rect.left + rect.width/2, rect.top);
+                    
+                    // Atualização com o valor calculado (10 ou 20)
+                    await updateDoc(userRef, { 
+                        saldo: increment(ganhoFinal), 
+                        acertos: increment(1), 
+                        xp: increment(ganhoFinal), 
+                        pdlSemanal: increment(ganhoFinal) 
+                    });
+
                 } else {
                     b.classList.add('btn-wrong');
 
@@ -674,6 +699,7 @@ function atualizarVisualPodio(posicao, nome, foto) {
                         showFloatingPDL("🛡️ PROTEGIDO", "#00cfbc", rect.left + rect.width/2, rect.top);
                     } else {
                         showFloatingPDL("-2 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
+                        // Mantendo sua lógica original de xp: Math.max(0, pdlInterno - 2)
                         await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 2) });
                     }
                 }
