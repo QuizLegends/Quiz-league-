@@ -12,6 +12,7 @@
             --dark: #010a13;
             --raro: #00cfbc;
             --epico: #a335ee;
+            --comum: #808080;
         }
 
         body {
@@ -52,6 +53,7 @@
         /* Cores por tipo de item */
         .item-tempo { border-left-color: var(--raro); }
         .item-carga { border-left-color: var(--epico); }
+        .item-multiplicador { border-left-color: var(--gold); }
 
         .item-img {
             width: 55px;
@@ -83,6 +85,9 @@
             background: var(--blue);
             transition: width 1s linear;
         }
+
+        /* Cor específica para a barra da coletora */
+        #barra-dobrador_pdl { background: var(--gold); }
 
         .sem-itens { text-align: center; color: #666; margin-top: 20px; font-style: italic; }
 
@@ -136,7 +141,8 @@
         const auth = getAuth(app);
 
         const DURACAO_TOTAL = {
-            'anjo_guardiao': 7 * 24 * 60 * 60 * 1000
+            'anjo_guardiao': 7 * 24 * 60 * 60 * 1000,
+            'dobrador_pdl': 2 * 60 * 60 * 1000 // 2 Horas da Coletora
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -169,7 +175,7 @@
                     continue;
                 }
 
-                // LÓGICA PARA ITENS DE TEMPO (ANJO)
+                // LÓGICA PARA ITENS DE TEMPO (ANJO E COLETORA)
                 if (agora < valor) {
                     temItensVisiveis = true;
                     const tempoRestante = valor - agora;
@@ -177,12 +183,16 @@
                     const porcentagem = (tempoRestante / total) * 100;
 
                     const div = document.createElement('div');
-                    div.className = 'item-ativo item-tempo';
+                    // Define a classe baseada no tipo de item
+                    const classeTipo = (id === 'dobrador_pdl') ? 'item-multiplicador' : 'item-tempo';
+                    const subtexto = (id === 'dobrador_pdl') ? 'PDL EM DOBRO' : 'PROTEÇÃO ATIVA';
+
+                    div.className = `item-ativo ${classeTipo}`;
                     div.innerHTML = `
-                        <img src="itens/${obterImagem(id)}" class="item-img" alt="item">
+                        <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/${obterImagem(id)}" class="item-img" alt="item">
                         <div class="info-item">
                             <h3>${nomeExibicao(id)}</h3>
-                            <p>PROTEÇÃO ATIVA</p>
+                            <p>${subtexto}</p>
                         </div>
                         <div class="status-valor" id="timer-${id}">${formatarTempo(tempoRestante)}</div>
                         <div class="barra-tempo" id="barra-${id}" style="width: ${porcentagem}%"></div>
@@ -203,7 +213,7 @@
             const div = document.createElement('div');
             div.className = 'item-ativo item-carga';
             div.innerHTML = `
-                <img src="itens/${obterImagem(id)}" class="item-img" alt="item">
+                <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/${obterImagem(id)}" class="item-img" alt="item">
                 <div class="info-item">
                     <h3>${nomeExibicao(id)}</h3>
                     <p>USO AUTOMÁTICO NO QUIZ</p>
@@ -232,7 +242,11 @@
 
         async function removerExpirado(uid, id) {
             const userRef = doc(db, "usuarios", uid);
-            await updateDoc(userRef, { [`statusAtivo.${id}`]: deleteField() });
+            try {
+                await updateDoc(userRef, { [`statusAtivo.${id}`]: deleteField() });
+            } catch (e) {
+                console.error("Erro ao remover expirado:", e);
+            }
         }
 
         function formatarTempo(ms) {
@@ -241,14 +255,17 @@
             const h = Math.floor((seg % 86400) / 3600);
             const m = Math.floor((seg % 3600) / 60);
             const s = seg % 60;
+            
             if (d > 0) return `${d}d ${h}h`;
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }
 
         function obterImagem(id) {
             const imgs = { 
                 'anjo_guardiao': 'anjo.png',
-                'sentinelas': 'sentinela-epico.png' 
+                'sentinelas': 'sentinela-epico.png',
+                'dobrador_pdl': 'coletora-comum.png'
             };
             return imgs[id] || 'default.png';
         }
@@ -256,7 +273,8 @@
         function nomeExibicao(id) {
             const nomes = { 
                 'anjo_guardiao': 'Anjo Guardião',
-                'sentinelas': 'Sentinelas de Controle'
+                'sentinelas': 'Sentinelas de Controle',
+                'dobrador_pdl': 'A Coletora'
             };
             return nomes[id] || id;
         }
