@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adquirir Moedas - Quiz Legends</title>
+    <title>Depósito Hextech - Quiz Legends</title>
     <style>
         :root {
             --ouro: #c89b3c;
             --ouro-claro: #f0e6d2;
             --fundo: #010a13;
+            --card-bg: rgba(9, 20, 40, 0.95);
             --azul-hex: #091428;
             --comum: #808080;
             --raro: #00cfbc;
             --epico: #a335ee;
-            --prismatico: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
+            --prismatico-gradient: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
         }
 
         body {
@@ -21,19 +22,16 @@
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            overflow-x: hidden; /* Evita trepidação lateral */
         }
 
         .header-vendas {
             text-align: center;
-            margin-bottom: 40px;
+            margin: 0 auto 50px;
             border-bottom: 2px solid var(--ouro);
             padding-bottom: 20px;
-            width: 100%;
             max-width: 800px;
         }
 
@@ -44,143 +42,138 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
+            font-size: 2.2rem;
         }
 
         .container-pacotes {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
             width: 100%;
-            max-width: 1000px;
-            padding: 10px;
+            max-width: 1100px;
+            margin: 0 auto;
         }
 
-        /* Estilo Base do Card */
+        /* CARD FORMATO LOJA ORIGINAL */
         .card-pacote {
-            background: rgba(9, 20, 40, 0.9);
-            border: 2px solid #1e2328;
-            padding: 30px 20px;
+            background: var(--card-bg);
+            border: 1px solid #1e2328;
+            padding: 35px 20px;
             text-align: center;
             position: relative;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, filter 0.3s ease;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-height: 350px;
+            box-sizing: border-box;
+            /* Clipping igual da loja */
             clip-path: polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%);
         }
 
         .card-pacote:hover {
-            transform: translateY(-10px);
-            border-color: var(--ouro);
+            transform: translateY(-8px);
         }
 
-        /* Selo de "Mais Vendido" */
+        /* Efeitos de Raridade da Loja */
+        .comum { border-color: var(--comum); filter: drop-shadow(0 0 2px var(--comum)); }
+        .raro { border-color: var(--raro); filter: drop-shadow(0 0 8px var(--raro)); }
+        .epico { border-color: var(--epico); filter: drop-shadow(0 0 12px var(--epico)); }
+        
+        /* Efeito Prismático Estilo TFT */
+        .prismatico {
+            border: 2px solid transparent;
+            background: linear-gradient(var(--azul-hex), var(--azul-hex)) padding-box,
+                        var(--prismatico-gradient) border-box;
+            animation: anime-border 4s linear infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 0, 255, 0.4));
+        }
+
+        @keyframes anime-border {
+            0% { filter: hue-rotate(0deg) drop-shadow(0 0 15px rgba(255, 0, 255, 0.4)); }
+            100% { filter: hue-rotate(360deg) drop-shadow(0 0 15px rgba(0, 255, 255, 0.4)); }
+        }
+
+        /* Badge Mais Vendido */
         .badge-popular {
             position: absolute;
-            top: 10px;
-            right: -10px;
+            top: 15px;
+            right: -15px;
             background: #d94242;
             color: white;
             font-size: 10px;
-            font-weight: bold;
-            padding: 5px 15px;
+            font-weight: 900;
+            padding: 6px 20px;
             transform: rotate(15deg);
             border: 1px solid white;
-            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 5;
+            text-transform: uppercase;
         }
 
         .moedas-qtd {
-            font-size: 1.8rem;
-            font-weight: bold;
+            font-size: 1.6rem;
+            font-weight: 900;
             color: var(--ouro-claro);
-            margin-bottom: 5px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .bonus-label {
             color: #00ff00;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 15px;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            min-height: 1.2rem;
         }
 
         .raridade-tag {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            font-weight: bold;
             margin-bottom: 20px;
+            opacity: 0.8;
         }
 
         .preco {
-            font-size: 1.5rem;
-            color: white;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #fff;
+            margin: 20px 0;
+            font-weight: bold;
         }
 
-        /* Estilo Específico por Raridade */
-        .comum { border-color: var(--comum); }
-        .comum .raridade-tag { color: var(--comum); }
-
-        .raro { border-color: var(--raro); }
-        .raro .raridade-tag { color: var(--raro); }
-
-        .epico { 
-            border-color: var(--epico); 
-            box-shadow: 0 0 15px rgba(163, 53, 238, 0.3);
-        }
-        .epico .raridade-tag { color: var(--epico); }
-
-        /* EFEITO PRISMÁTICO (TFT STYLE) */
-        .prismatico {
-            border: 2px solid transparent;
-            background: linear-gradient(var(--azul-hex), var(--azul-hex)) padding-box,
-                        var(--prismatico) border-box;
-            animation: anime-border 4s linear infinite;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
-        }
-        
-        .prismatico::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: skewX(-25deg);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes anime-border {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 200%; }
-        }
-
+        /* BOTÃO HEXAGONAL */
         .btn-comprar {
             background: linear-gradient(to bottom, #c89b3c, #785a28);
             border: 1px solid var(--ouro-claro);
             color: black;
-            padding: 12px;
+            padding: 14px;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
             transition: 0.2s;
-            clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
+            clip-path: polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%);
+            width: 100%;
         }
 
         .btn-comprar:hover {
-            filter: brightness(1.2);
-            transform: scale(1.05);
+            filter: brightness(1.3);
+            transform: scale(1.02);
         }
 
         .footer-info {
-            margin-top: 50px;
-            color: #888;
-            font-size: 0.8rem;
+            margin: 60px auto 20px;
+            color: #555;
+            font-size: 0.85rem;
             text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -188,62 +181,62 @@
 
     <div class="header-vendas">
         <h1>Depósito Hextech</h1>
-        <p>Escolha seu suprimento de moedas para o Quiz Legends</p>
+        <p style="color: var(--ouro); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">Suprimentos de Moedas do Quiz Legends</p>
     </div>
 
     <div class="container-pacotes">
         <div class="card-pacote comum">
-            <div class="raridade-tag">Comum</div>
+            <div class="raridade-tag" style="color: var(--comum);">Comum</div>
             <div>
-                <div class="moedas-qtd">50.000</div>
-                <div class="bonus-label" style="visibility: hidden;">-</div>
-            </div>
+                <div class="moedas-qtd">🪙50.000</div>
+                <div class="bonus-label"></div> </div>
             <div class="preco">R$ 2,00</div>
             <button class="btn-comprar" onclick="iniciarCompra(2.00, 50000)">Adquirir</button>
         </div>
 
         <div class="card-pacote raro">
-            <div class="raridade-tag">Raro</div>
+            <div class="raridade-tag" style="color: var(--raro);">Raro</div>
             <div>
-                <div class="moedas-qtd">300.000</div>
-                <div class="bonus-label">Mais Econômico</div>
+                <div class="moedas-qtd">🪙300.000</div>
+                <div class="bonus-label"></div>
             </div>
             <div class="preco">R$ 11,00</div>
             <button class="btn-comprar" onclick="iniciarCompra(11.00, 300000)">Adquirir</button>
         </div>
 
         <div class="card-pacote epico">
-            <div class="badge-popular">MAIS VENDIDO</div>
-            <div class="raridade-tag">Épico</div>
+            <div class="badge-popular">Mais Vendido</div>
+            <div class="raridade-tag" style="color: var(--epico);">Épico</div>
             <div>
-                <div class="moedas-qtd">600.000</div>
-                <div class="bonus-label">+25.000 BÔNUS</div>
+                <div class="moedas-qtd">🪙600.000</div>
+                <div class="bonus-label">+25.000 Bônus</div>
             </div>
             <div class="preco">R$ 19,00</div>
             <button class="btn-comprar" onclick="iniciarCompra(19.00, 625000)">Adquirir</button>
         </div>
 
         <div class="card-pacote prismatico">
-            <div class="raridade-tag" style="color: #fff; text-shadow: 0 0 5px #ff00ff;">Prismático</div>
+            <div class="raridade-tag" style="color: #fff; text-shadow: 0 0 10px #ff00ff;">Prismático</div>
             <div>
-                <div class="moedas-qtd" style="color: #fff;">1.000.000</div>
-                <div class="bonus-label" style="color: #00ffff;">+100.000 BÔNUS</div>
+                <div class="moedas-qtd" style="color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5);">🪙1.000.000</div>
+                <div class="bonus-label" style="color: #00ffff; text-shadow: 0 0 5px #00ffff;">+100.000 Bônus</div>
             </div>
             <div class="preco">R$ 35,00</div>
-            <button class="btn-comprar" style="background: white; color: black;" onclick="iniciarCompra(35.00, 1100000)">Adquirir</button>
+            <button class="btn-comprar" style="background: white; color: black; border-color: white;" onclick="iniciarCompra(35.00, 1100000)">Adquirir</button>
         </div>
     </div>
 
     <div class="footer-info">
-        Pagamentos processados via Mercado Pago. <br>
-        A entrega das moedas é feita de forma imediata após a confirmação do Pix.
+        <p>🔒 Ambiente Seguro via Mercado Pago</p>
+        O crédito das moedas ocorre automaticamente após a confirmação do pagamento via Pix.
+        Em caso de dúvidas, entre em contato com o suporte do Quiz Legends.
     </div>
 
     <script>
         function iniciarCompra(valor, qtdMoedas) {
-            console.log(`Iniciando checkout de R$ ${valor} para ${qtdMoedas} moedas.`);
-            alert(`Integração Mercado Pago: Gerando Pix de R$ ${valor.toFixed(2)}...`);
-            // Aqui entrará a chamada para sua API de pagamento futuramente
+            // Placeholder para integração futura
+            console.log(`Checkout: R$ ${valor} | Moedas: ${qtdMoedas}`);
+            alert(`Processando pedido de 🪙${qtdMoedas.toLocaleString()}...\nValor: R$ ${valor.toFixed(2)}\n\nPróximo passo: Integração com a API do Mercado Pago.`);
         }
     </script>
 
