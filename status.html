@@ -54,6 +54,7 @@
         .item-tempo { border-left-color: var(--raro); }
         .item-carga { border-left-color: var(--epico); }
         .item-multiplicador { border-left-color: var(--gold); }
+        .item-atlas { border-left-color: var(--raro); }
         
         /* Cor Épica para a Sedenta */
         .item-multiplicador.status-epico { border-left-color: var(--epico); }
@@ -89,10 +90,10 @@
             transition: width 1s linear;
         }
 
-        /* Cor específica para a barra de multiplicadores */
+        /* Cores específicas para as barras */
         #barra-dobrador_pdl { background: var(--gold); }
-        /* Barra Roxa se for o multiplicador Épico */
         #barra-dobrador_pdl.barra-epica { background: var(--epico); }
+        #barra-dobrador_moedas { background: var(--raro); }
 
         .sem-itens { text-align: center; color: #666; margin-top: 20px; font-style: italic; }
 
@@ -145,10 +146,10 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // CONFIGURAÇÕES DE DURAÇÃO PARA AS BARRAS
         const DURACAO_TOTAL = {
             'anjo_guardiao': 7 * 24 * 60 * 60 * 1000,
-            'dobrador_pdl': 2 * 60 * 60 * 1000 
+            'dobrador_pdl': 2 * 60 * 60 * 1000,
+            'dobrador_moedas': 2 * 60 * 60 * 1000 
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -172,7 +173,7 @@
 
             for (let [id, valor] of Object.entries(itensAtivos)) {
                 
-                if (id === 'valor_multiplicador') continue;
+                if (id === 'valor_multiplicador' || id === 'valor_multiplicador_moedas') continue;
 
                 if (id === 'sentinelas') {
                     if (valor > 0) {
@@ -185,23 +186,28 @@
                 if (agora < valor) {
                     temItensVisiveis = true;
                     const tempoRestante = valor - agora;
-                    const total = DURACAO_TOTAL[id] || (24 * 60 * 60 * 1000);
+                    const total = DURACAO_TOTAL[id] || (2 * 60 * 60 * 1000);
                     const porcentagem = (tempoRestante / total) * 100;
 
                     let nome = nomeExibicao(id);
-                    let subtexto = (id === 'anjo_guardiao') ? 'PROTEÇÃO ATIVA' : 'BÔNUS ATIVO';
+                    let subtexto = 'BÔNUS ATIVO';
                     let imgItem = obterImagem(id);
                     let extraClass = "";
                     let barraClass = "";
+                    let tipoClasse = 'item-tempo';
+
+                    if (id === 'anjo_guardiao') {
+                        subtexto = 'PROTEÇÃO ATIVA';
+                    }
 
                     if (id === 'dobrador_pdl') {
+                        tipoClasse = 'item-multiplicador';
                         const mult = itensAtivos.valor_multiplicador || 2;
-                        
                         if (mult === 6) {
                             nome = 'Sedenta por Sangue';
                             imgItem = 'sedenta-epico.png';
-                            extraClass = "status-epico"; // Para a borda roxa
-                            barraClass = "barra-epica"; // Para a barra roxa
+                            extraClass = "status-epico";
+                            barraClass = "barra-epica";
                         } else if (mult === 4) {
                             nome = 'Gume do Infinito';
                             imgItem = 'gume-raro.png';
@@ -209,14 +215,19 @@
                             nome = 'A Coletora';
                             imgItem = 'coletora-comum.png';
                         }
-                        
                         subtexto = `GANHOS DE PDL ${mult}X`;
                     }
 
-                    const div = document.createElement('div');
-                    const classeTipo = (id === 'dobrador_pdl') ? `item-multiplicador ${extraClass}` : 'item-tempo';
+                    if (id === 'dobrador_moedas') {
+                        tipoClasse = 'item-atlas';
+                        nome = 'Atlas Mundial';
+                        imgItem = 'atlas-raro.png';
+                        const multM = itensAtivos.valor_multiplicador_moedas || 2;
+                        subtexto = `GANHOS DE MOEDAS ${multM}X`;
+                    }
 
-                    div.className = `item-ativo ${classeTipo}`;
+                    const div = document.createElement('div');
+                    div.className = `item-ativo ${tipoClasse} ${extraClass}`;
                     div.innerHTML = `
                         <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/${imgItem}" class="item-img" alt="item">
                         <div class="info-item">
@@ -229,7 +240,7 @@
                     container.appendChild(div);
                     iniciarContagem(id, valor, total, uid);
                 } else {
-                    revolverExpiradoSeNecessario(uid, id, valor, agora);
+                    removerExpiradoSeNecessario(uid, id, valor, agora);
                 }
             }
 
@@ -238,9 +249,9 @@
             }
         }
 
-        // Função auxiliar para evitar remoção infinita no loop
-        function revolverExpiradoSeNecessario(uid, id, valor, agora) {
-            if (id !== 'sentinelas' && id !== 'valor_multiplicador' && agora >= valor) {
+        function removerExpiradoSeNecessario(uid, id, valor, agora) {
+            const itensIgnorar = ['sentinelas', 'valor_multiplicador', 'valor_multiplicador_moedas'];
+            if (!itensIgnorar.includes(id) && agora >= valor) {
                 removerExpirado(uid, id);
             }
         }
@@ -283,6 +294,9 @@
                 if (id === 'dobrador_pdl') {
                     updates['statusAtivo.valor_multiplicador'] = deleteField();
                 }
+                if (id === 'dobrador_moedas') {
+                    updates['statusAtivo.valor_multiplicador_moedas'] = deleteField();
+                }
                 await updateDoc(userRef, updates);
             } catch (e) {
                 console.error("Erro ao remover expirado:", e);
@@ -305,7 +319,8 @@
             const imgs = { 
                 'anjo_guardiao': 'anjo.png',
                 'sentinelas': 'sentinela-epico.png',
-                'dobrador_pdl': 'coletora-comum.png' 
+                'dobrador_pdl': 'coletora-comum.png',
+                'dobrador_moedas': 'atlas-raro.png'
             };
             return imgs[id] || 'default.png';
         }
@@ -314,7 +329,8 @@
             const nomes = { 
                 'anjo_guardiao': 'Anjo Guardião',
                 'sentinelas': 'Sentinelas de Controle',
-                'dobrador_pdl': 'Multiplicador de PDL'
+                'dobrador_pdl': 'Multiplicador de PDL',
+                'dobrador_moedas': 'Atlas Mundial'
             };
             return nomes[id] || id;
         }
