@@ -701,18 +701,24 @@ function atualizarVisualPodio(posicao, nome, foto) {
                 if (o.correta) {
                     b.classList.add('btn-correct');
 
-                    // --- LÓGICA DA COLETORA ATUALIZADA (50 base -> 100 dobrado) ---
+                    // --- LÓGICA DE MULTIPLICADOR DINÂMICO (COLETORA OU GUME) ---
                     const agora = Date.now();
-                    const expiraColetora = dadosUserLocais.statusAtivo?.dobrador_pdl || 0;
-                    const temColetoraAtiva = expiraColetora > agora;
+                    const expiraMultiplicador = dadosUserLocais.statusAtivo?.dobrador_pdl || 0;
+                    const temMultiplicadorAtivo = expiraMultiplicador > agora;
                     
-                    let ganhoFinal = 50; // Novo valor base
-                    let textoFlutuante = "+50 PDL";
+                    // Se não houver multiplicador, o valor é 1. Se houver, usa o valor salvo (2 ou 4).
+                    const fatorMultiplicador = temMultiplicadorAtivo ? (dadosUserLocais.statusAtivo?.valor_multiplicador || 2) : 1;
+                    
+                    const basePDL = 50;
+                    let ganhoFinal = basePDL * fatorMultiplicador;
+                    
+                    let textoFlutuante = `+${ganhoFinal} PDL`;
                     let corFlutuante = "#28a745";
 
-                    if (temColetoraAtiva) {
-                        ganhoFinal = 100; // Novo valor dobrado
-                        textoFlutuante = "🔥 +100 PDL";
+                    if (temMultiplicadorAtivo) {
+                        // Se o fator for 4 (Gume), muda o ícone e a cor para destacar
+                        const icone = fatorMultiplicador === 4 ? "💎" : "🔥";
+                        textoFlutuante = `${icone} +${ganhoFinal} PDL`;
                         corFlutuante = "#c89b3c"; 
                     }
                     // -------------------------------------------------------------
@@ -736,7 +742,6 @@ function atualizarVisualPodio(posicao, nome, foto) {
                     if (temAnjoAtivo) {
                         showFloatingPDL("🛡️ PROTEGIDO", "#00cfbc", rect.left + rect.width/2, rect.top);
                     } else {
-                        // Perda ajustada para 10 para acompanhar o ganho de 50
                         showFloatingPDL("-10 PDL", "#dc3545", rect.left + rect.width/2, rect.top);
                         await updateDoc(userRef, { xp: Math.max(0, pdlInterno - 10) });
                     }
