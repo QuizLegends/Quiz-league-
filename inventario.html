@@ -197,8 +197,9 @@
             'gume-raro': { nome: "Gume do infinito", tipo: "multiplicador", raridade: "raro", duracaoHoras: 2, multiplicadorPDL: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/gume-raro.png" },
             'sedenta-epico': { nome: "Sedenta por Sangue", tipo: "multiplicador", raridade: "epico", duracaoHoras: 2, multiplicadorPDL: 6, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/sedenta-epico.png" },
             'atlas-comum': { nome: "Atlas Mundial", tipo: "multiplicadorMoedas", raridade: "comum", duracaoHoras: 2, multiplicadorMoedas: 2, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/atlas-comum.png" },
-            // ADICIONADO: Bússola Rara (4x Moedas)
-            'bussola-raro': { nome: "Bússola Arcaica", tipo: "multiplicadorMoedas", raridade: "raro", duracaoHoras: 2, multiplicadorMoedas: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/bussola-raro.png" }
+            'bussola-raro': { nome: "Bússola Arcaica", tipo: "multiplicadorMoedas", raridade: "raro", duracaoHoras: 2, multiplicadorMoedas: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/bussola-raro.png" },
+            // ADICIONADO: Oposição Celestial (6x Moedas)
+            'oposicao-epico': { nome: "Oposição Celestial", tipo: "multiplicadorMoedas", raridade: "epico", duracaoHoras: 2, multiplicadorMoedas: 6, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/oposicao-epico.png" }
         };
 
         let usuarioDados = {};
@@ -381,14 +382,20 @@
             const userRef = doc(db, "usuarios", auth.currentUser.uid);
             const agora = Date.now();
             const duracaoMs = item.duracaoHoras * 60 * 60 * 1000;
+            const multiplicador = item.multiplicadorMoedas;
 
             try {
                 await updateDoc(userRef, {
                     mochila: arrayRemove(id),
                     "statusAtivo.dobrador_moedas": agora + duracaoMs,
-                    "statusAtivo.valor_multiplicador_moedas": item.multiplicadorMoedas
+                    "statusAtivo.valor_multiplicador_moedas": multiplicador
                 });
-                mostrarModalSucesso("BÔNUS ATIVADO", `<p>O item <strong>${item.nome}</strong> está ativo! Ganhos de moedas multiplicados por ${item.multiplicadorMoedas}x por ${item.duracaoHoras}h.</p>`);
+
+                let textoEfeito = "DOBRADOS";
+                if (multiplicador === 4) textoEfeito = "QUADRUPLICADOS";
+                if (multiplicador === 6) textoEfeito = "SEXTUPLICADOS";
+
+                mostrarModalSucesso("BÔNUS ATIVADO", `<p>O item <strong>${item.nome}</strong> está ativo! Ganhos de moedas estão <strong>${textoEfeito}</strong> (${multiplicador}x) por ${item.duracaoHoras}h.</p>`);
             } catch (e) { console.error(e); }
         }
 
