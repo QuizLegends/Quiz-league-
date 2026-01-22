@@ -906,14 +906,17 @@ function atualizarVisualPodio(posicao, nome, foto) {
     }
     
     let dadosUserLocais = {};
+    // Trava para evitar que o modal abra várias vezes na mesma sessão
+    let modalAbertoNestaSessao = false;
 
     // --- FUNÇÃO DO MODAL DE PREMIAÇÃO ---
     async function verificarPremios(data, userRef) {
-        // Verifica se existe o campo de notificação no documento do usuário
-        if (data && data.notificacaoPremio) {
+        // Só dispara se houver notificação E se ainda não abrimos o modal nesta atualização
+        if (data && data.notificacaoPremio && !modalAbertoNestaSessao) {
+            modalAbertoNestaSessao = true; // Ativa a trava imediatamente
+            
             const dados = data.notificacaoPremio;
             
-            // Cria o elemento do modal
             const div = document.createElement('div');
             div.className = 'modal-premiação';
             div.style.cssText = `
@@ -938,9 +941,15 @@ function atualizarVisualPodio(posicao, nome, foto) {
             document.body.appendChild(div);
 
             document.getElementById('btnColetar').onclick = async () => {
-                // Remove a notificação do banco de dados para não repetir
-                await updateDoc(userRef, { notificacaoPremio: null });
-                div.remove();
+                try {
+                    // Remove a notificação do banco de dados
+                    await updateDoc(userRef, { notificacaoPremio: null });
+                    div.remove();
+                    // Mantemos a trava como true para que o onSnapshot não reabra o modal após o updateDoc
+                } catch (error) {
+                    console.error("Erro ao coletar:", error);
+                    modalAbertoNestaSessao = false; // Se der erro, permite tentar de novo
+                }
             };
         }
     }
@@ -954,8 +963,10 @@ function atualizarVisualPodio(posicao, nome, foto) {
                     dadosUserLocais = data; 
                     const hoje = new Date().toLocaleDateString('pt-BR');
 
-                    // Chamar a verificação de prêmios do ranking
-                    verificarPremios(data, userRef);
+                    // Só chama a verificação se o campo existir no banco
+                    if (data.notificacaoPremio) {
+                        verificarPremios(data, userRef);
+                    }
 
                     if (data.ultimaDataAcesso !== hoje) {
                         updateDoc(userRef, { totalVideosHoje: 0, videosAssistidos: 0, acertos: 0, ultimaDataAcesso: hoje });
