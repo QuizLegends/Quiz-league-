@@ -713,7 +713,7 @@ function atualizarVisualPodio(posicao, nome, foto) {
                     const temPDLAtivo = expiraMultiplicadorPDL > agora;
                     const fatorPDL = temPDLAtivo ? (dadosUserLocais.statusAtivo?.valor_multiplicador || 2) : 1;
 
-                    // --- LÓGICA DE MULTIPLICADOR DE MOEDAS (ATLAS MUNDIAL) ---
+                    // --- LÓGICA DE MULTIPLICADOR DE MOEDAS (ATLAS, BÚSSOLA OU OPOSIÇÃO) ---
                     const expiraMultiplicadorMoedas = dadosUserLocais.statusAtivo?.dobrador_moedas || 0;
                     const temMoedasAtivo = expiraMultiplicadorMoedas > agora;
                     const fatorMoedas = temMoedasAtivo ? (dadosUserLocais.statusAtivo?.valor_multiplicador_moedas || 2) : 1;
@@ -743,10 +743,23 @@ function atualizarVisualPodio(posicao, nome, foto) {
                         textoFlutuante = `${iconePDL} +${ganhoFinalPDL} PDL`;
                     }
 
-                    // Adição do feedback de Moedas se o Atlas Mundial estiver ativo
+                    // --- LÓGICA DE FEEDBACK DE MOEDAS (ATUALIZADO PARA 6X) ---
                     if (temMoedasAtivo) {
-                        textoFlutuante += ` | 🪙 +${ganhoFinalMoedas} Moedas`;
-                        if (!temPDLAtivo) corFlutuante = "#00cfbc"; // Cor ciano se apenas o Atlas estiver ativo
+                        let iconeMoedas = "🪙"; // Comum (Atlas)
+                        if (fatorMoedas === 4) {
+                            iconeMoedas = "💰"; // Raro (Bússola)
+                        } else if (fatorMoedas === 6) {
+                            iconeMoedas = "💸"; // Épico (Oposição Celestial)
+                        }
+                        
+                        textoFlutuante += ` | ${iconeMoedas} +${ganhoFinalMoedas} Moedas`;
+                        
+                        // Se não houver PDL ativo, a cor do texto assume a raridade da moeda
+                        if (!temPDLAtivo) {
+                            if (fatorMoedas === 4) corFlutuante = "#00cfbc"; // Ciano Raro
+                            else if (fatorMoedas === 6) corFlutuante = "#a335ee"; // Roxo Épico
+                            else corFlutuante = "#00cfbc"; 
+                        }
                     } else {
                         console.log(`Ganho padrão: ${ganhoFinalMoedas} moedas`);
                     }
