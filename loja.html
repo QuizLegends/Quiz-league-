@@ -61,6 +61,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
         .tab-btn {
             background: transparent;
@@ -78,54 +79,63 @@
             color: var(--ouro);
             border-bottom: 2px solid var(--ouro);
         }
+        /* CORREÇÃO AQUI: Alinhamento centralizado e proporcional */
         .barra-ferramentas {
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Centraliza o conjunto */
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 30px; /* Espaço maior entre busca e filtros */
             background: rgba(1, 10, 19, 0.8);
-            padding: 10px 20px;
+            padding: 15px 20px;
             border: 1px solid #1e2328;
+            box-sizing: border-box;
         }
         .busca-container {
             position: relative;
-            width: 250px;
+            width: 300px; /* Largura um pouco maior para equilíbrio */
+            max-width: 100%;
         }
         .busca-container input {
             width: 100%;
             background: #091428;
             border: 1px solid var(--ouro);
-            padding: 8px 35px 8px 15px;
+            padding: 10px 40px 10px 15px;
             color: white;
             outline: none;
             box-sizing: border-box;
+            font-size: 0.9rem;
         }
         .busca-container span {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--ouro);
+            pointer-events: none;
         }
         .filtros-raridade {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .filter-rarity-btn {
             background: transparent;
             border: 1px solid #333;
             color: #888;
-            padding: 5px 12px;
+            padding: 7px 15px; /* Tamanho proporcional */
             font-size: 11px;
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.2s;
+            min-width: 70px;
         }
-        .filter-rarity-btn.active[data-rarity="comum"] { border-color: var(--comum); color: var(--comum); }
-        .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); }
-        .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); }
-        .filter-rarity-btn.active[data-rarity="todos"] { border-color: var(--ouro); color: var(--ouro); }
+        .filter-rarity-btn.active[data-rarity="comum"] { border-color: var(--comum); color: var(--comum); background: rgba(128, 128, 128, 0.1); }
+        .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); background: rgba(0, 207, 188, 0.1); }
+        .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); background: rgba(163, 53, 238, 0.1); }
+        .filter-rarity-btn.active[data-rarity="todos"] { border-color: var(--ouro); color: var(--ouro); background: rgba(200, 155, 60, 0.1); }
+        
         .grid-loja {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -222,6 +232,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal-overlay" id="modal-sucesso">
         <div class="modal-content">
             <div class="modal-nome">AQUISIÇÃO CONCLUÍDA</div>
