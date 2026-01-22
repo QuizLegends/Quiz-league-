@@ -64,7 +64,7 @@
 
         <div class="admin-card-header">
             <strong style="color: var(--ouro); font-size: 14px;">🏆 GERENCIAR TEMPORADA</strong>
-            <p style="font-size: 12px; color: #aaa; margin: 5px 0;">Isso pagará os prêmios (até o Top 100) e zerará o PDL Semanal de todos.</p>
+            <p style="font-size: 12px; color: #aaa; margin: 5px 0;">Isso pagará os prêmios (Sequencial) e zerará o PDL Semanal de todos.</p>
             <button class="btn-reset" onclick="resetarRankingSemanal()">PAGAR E ZERAR RANKING SEMANAL</button>
         </div>
 
@@ -110,7 +110,7 @@
         document.getElementById('btn_sair').onclick = () => signOut(auth).then(() => location.reload());
 
         window.resetarRankingSemanal = async () => {
-            if (!confirm("⚠️ ATENÇÃO: Deseja pagar prêmios (respeitando empates) e zerar o ranking agora?")) return;
+            if (!confirm("⚠️ ATENÇÃO: Deseja pagar prêmios (Sequencial - Sem pular números) e zerar o ranking agora?")) return;
 
             try {
                 const q = query(collection(db, "usuarios"), orderBy("pdlSemanal", "desc"), limit(100));
@@ -121,10 +121,9 @@
                     return;
                 }
 
-                let posicaoExibida = 1;
+                let posicaoAtual = 0; 
                 let pdlAnterior = -1;
                 let premiadosCount = 0;
-                let acumuladorDeVagas = 0;
 
                 for (const usuarioDoc of querySnapshot.docs) {
                     const userRef = doc(db, "usuarios", usuarioDoc.id);
@@ -132,25 +131,21 @@
                     const pdlAtual = dados.pdlSemanal || 0;
 
                     if (pdlAtual > 0) {
-                        // LÓGICA DE EMPATE (RANKING DE COMPETIÇÃO)
+                        // LÓGICA DE RANKING DENSO (SEQUENCIAL)
+                        // Se o PDL atual for diferente do anterior, avançamos a posição.
+                        // Se for igual, ele mantém a mesma posição do anterior.
                         if (pdlAtual !== pdlAnterior) {
-                            // Se o PDL mudou, a posição "anda" conforme as vagas ocupadas anteriormente
-                            posicaoExibida = posicaoExibida + acumuladorDeVagas;
-                            acumuladorDeVagas = 1;
-                        } else {
-                            // Se o PDL é igual ao anterior, mantém a posiçãoExibida e apenas conta a vaga
-                            acumuladorDeVagas++;
+                            posicaoAtual++;
                         }
-
                         pdlAnterior = pdlAtual;
 
-                        // VALORES DE RECOMPENSA BASEADOS NA POSIÇÃO (COM EMPATE)
+                        // VALORES DE RECOMPENSA BASEADOS NA POSIÇÃO SEQUENCIAL
                         let premio = 0;
-                        if (posicaoExibida === 1) premio = 50000;
-                        else if (posicaoExibida === 2) premio = 40000;
-                        else if (posicaoExibida === 3) premio = 30000;
-                        else if (posicaoExibida >= 4 && posicaoExibida <= 10) premio = 25000;
-                        else if (posicaoExibida >= 11 && posicaoExibida <= 100) premio = 10000;
+                        if (posicaoAtual === 1) premio = 50000;
+                        else if (posicaoAtual === 2) premio = 40000;
+                        else if (posicaoAtual === 3) premio = 30000;
+                        else if (posicaoAtual >= 4 && posicaoAtual <= 10) premio = 25000;
+                        else if (posicaoAtual >= 11 && posicaoAtual <= 100) premio = 10000;
 
                         // Atualiza saldo, zera PDL e cria o registro da notificação
                         await updateDoc(userRef, {
@@ -158,19 +153,18 @@
                             pdlSemanal: 0,
                             notificacaoPremio: {
                                 valor: premio,
-                                posicao: posicaoExibida,
+                                posicao: posicaoAtual,
                                 data: new Date().toLocaleDateString()
                             }
                         });
                         
                         premiadosCount++;
                     } else {
-                        // Apenas zera quem não pontuou
                         await updateDoc(userRef, { pdlSemanal: 0 });
                     }
                 }
 
-                alert(`Sucesso! ${premiadosCount} jogadores foram premiados (empates aplicados) e o ranking reiniciado.`);
+                alert(`Sucesso! ${premiadosCount} jogadores premiados seguindo a lógica sequencial.`);
                 location.reload();
             } catch (e) {
                 console.error("Erro no processamento:", e);
