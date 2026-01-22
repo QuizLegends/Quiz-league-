@@ -227,12 +227,14 @@
                 return;
             }
 
+            // Mochila primeiro (itens ativáveis)
             mochila.forEach(id => {
                 const item = DATA_BASE[id];
                 if (!item) return;
                 grid.innerHTML += criarCard(id, item, "ATIVAR", false);
             });
 
+            // Ícones (itens equipáveis)
             icones.forEach(id => {
                 const item = DATA_BASE[id];
                 if (!item) return;
