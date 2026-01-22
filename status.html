@@ -50,14 +50,10 @@
             border-left: 3px solid transparent;
         }
 
-        /* Cores por tipo de item */
-        .item-tempo { border-left-color: var(--raro); }
-        .item-carga { border-left-color: var(--epico); }
-        .item-multiplicador { border-left-color: var(--gold); }
-        .item-atlas { border-left-color: var(--raro); }
-        
-        /* Cor Épica para a Sedenta */
-        .item-multiplicador.status-epico { border-left-color: var(--epico); }
+        /* Cores de borda por categoria */
+        .item-comum { border-left-color: var(--gold); }
+        .item-raro { border-left-color: var(--raro); }
+        .item-epico { border-left-color: var(--epico); }
 
         .item-img {
             width: 55px;
@@ -86,14 +82,14 @@
             left: 0;
             bottom: 0;
             height: 3px;
-            background: var(--blue);
+            background: var(--gold); /* Padrão Comum (Dourado) */
             transition: width 1s linear;
         }
 
-        /* Cores específicas para as barras */
-        #barra-dobrador_pdl { background: var(--gold); }
-        #barra-dobrador_pdl.barra-epica { background: var(--epico); }
-        #barra-dobrador_moedas { background: var(--raro); }
+        /* Variações de cores das barras */
+        .barra-raro { background: var(--raro); }
+        .barra-epica { background: var(--epico); }
+        .barra-comum { background: var(--gold); }
 
         .sem-itens { text-align: center; color: #666; margin-top: 20px; font-style: italic; }
 
@@ -146,7 +142,6 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // CONFIGURAÇÕES DE DURAÇÃO PARA AS BARRAS
         const DURACAO_TOTAL = {
             'anjo_guardiao': 7 * 24 * 60 * 60 * 1000,
             'dobrador_pdl': 2 * 60 * 60 * 1000,
@@ -193,44 +188,49 @@
                     let nome = nomeExibicao(id);
                     let subtexto = 'BÔNUS ATIVO';
                     let imgItem = obterImagem(id);
-                    let extraClass = "";
-                    let barraClass = "";
-                    let tipoClasse = 'item-tempo';
+                    let cardClass = "item-comum"; // Padrão
+                    let barraClass = "barra-comum"; // Padrão
 
                     if (id === 'anjo_guardiao') {
                         subtexto = 'PROTEÇÃO ATIVA';
+                        cardClass = "item-raro";
+                        barraClass = "barra-raro";
                     }
 
                     if (id === 'dobrador_pdl') {
-                        tipoClasse = 'item-multiplicador';
                         const mult = itensAtivos.valor_multiplicador || 2;
                         
                         if (mult === 6) {
                             nome = 'Sedenta por Sangue';
                             imgItem = 'sedenta-epico.png';
-                            extraClass = "status-epico"; 
+                            cardClass = "item-epico"; 
                             barraClass = "barra-epica"; 
                         } else if (mult === 4) {
                             nome = 'Gume do Infinito';
                             imgItem = 'gume-raro.png';
+                            cardClass = "item-raro";
+                            barraClass = "barra-raro";
                         } else {
                             nome = 'A Coletora';
                             imgItem = 'coletora-comum.png';
+                            cardClass = "item-comum";
+                            barraClass = "barra-comum";
                         }
                         
                         subtexto = `GANHOS DE PDL ${mult}X`;
                     }
 
                     if (id === 'dobrador_moedas') {
-                        tipoClasse = 'item-atlas';
                         nome = 'Atlas Mundial';
-                        imgItem = 'atlas-comum.png'; // CORREÇÃO REALIZADA AQUI
+                        imgItem = 'atlas-comum.png';
+                        cardClass = "item-comum"; // Dourado
+                        barraClass = "barra-comum"; // Dourado
                         const multM = itensAtivos.valor_multiplicador_moedas || 2;
                         subtexto = `GANHOS DE MOEDAS ${multM}X`;
                     }
 
                     const div = document.createElement('div');
-                    div.className = `item-ativo ${tipoClasse} ${extraClass}`;
+                    div.className = `item-ativo ${cardClass}`;
                     div.innerHTML = `
                         <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/${imgItem}" class="item-img" alt="item">
                         <div class="info-item">
@@ -261,7 +261,7 @@
 
         function criarCardCarga(id, cargas) {
             const div = document.createElement('div');
-            div.className = 'item-ativo item-carga';
+            div.className = 'item-ativo item-epico'; // Sentinela é épica
             div.innerHTML = `
                 <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/${obterImagem(id)}" class="item-img" alt="item">
                 <div class="info-item">
@@ -323,7 +323,7 @@
                 'anjo_guardiao': 'anjo.png',
                 'sentinelas': 'sentinela-epico.png',
                 'dobrador_pdl': 'coletora-comum.png',
-                'dobrador_moedas': 'atlas-comum.png' // CORREÇÃO REALIZADA AQUI
+                'dobrador_moedas': 'atlas-comum.png'
             };
             return imgs[id] || 'default.png';
         }
