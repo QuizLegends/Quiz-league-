@@ -14,6 +14,8 @@
             --comum: #808080;
             --raro: #00cfbc;
             --epico: #a335ee;
+            /* Nova variável com o seu gradiente Prismático */
+            --prismatico: linear-gradient(135deg, #1bc8ce 0%, #cefff7 25%, #4739b2 50%, #1bc8ce 75%, #fff311 100%);
         }
         body {
             background: radial-gradient(circle at center, #0a323c 0%, #010a13 100%);
@@ -133,6 +135,15 @@
         .filter-rarity-btn.active[data-rarity="comum"] { border-color: var(--comum); color: var(--comum); background: rgba(128, 128, 128, 0.1); }
         .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); background: rgba(0, 207, 188, 0.1); }
         .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); background: rgba(163, 53, 238, 0.1); }
+        
+        /* Estilo do botão de filtro Prismático */
+        .filter-rarity-btn.active[data-rarity="prismatico"] { 
+            border-color: #1bc8ce; 
+            color: #cefff7; 
+            background: rgba(71, 57, 178, 0.2); 
+            box-shadow: 0 0 10px rgba(27, 200, 206, 0.3);
+        }
+
         .filter-rarity-btn.active[data-rarity="todos"] { border-color: var(--ouro); color: var(--ouro); background: rgba(200, 155, 60, 0.1); }
         
         .grid-loja {
@@ -155,6 +166,30 @@
         .comum { border-color: var(--comum) !important; filter: drop-shadow(0 0 5px var(--comum)); }
         .raro { border-color: var(--raro) !important; filter: drop-shadow(0 0 10px var(--raro)); }
         .epico { border-color: var(--epico) !important; filter: drop-shadow(0 0 15px var(--epico)); }
+
+        /* --- NOVO: ESTILO PRISMÁTICO NO CARD --- */
+        .prismatico {
+            border: 1px solid transparent !important;
+            background-image: linear-gradient(var(--card-bg), var(--card-bg)), var(--prismatico);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            filter: drop-shadow(0 0 15px rgba(27, 200, 206, 0.5));
+            animation: animaPrismatico 4s ease infinite;
+        }
+
+        @keyframes animaPrismatico {
+            0% { filter: drop-shadow(0 0 10px #1bc8ce) brightness(1.1); }
+            50% { filter: drop-shadow(0 0 20px #fff311) brightness(1.2); }
+            100% { filter: drop-shadow(0 0 10px #1bc8ce) brightness(1.1); }
+        }
+
+        .prismatico .raridade-label {
+            background: var(--prismatico);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: brightness(1.3);
+            font-weight: 900;
+        }
         
         /* --- BLOCO DE ÍCONES (REDONDOS) --- */
         .icon-container { 
@@ -174,7 +209,6 @@
         }
 
         /* --- BLOCO DE ITENS (QUADRADOS) --- */
-        /* Se o card tiver a classe 'tipo-item', forçamos o formato quadrado */
         .item-card.tipo-item .icon-container,
         .item-card.tipo-item .img-campeao {
             border-radius: 4px !important; /* FORMATO QUADRADO PARA ITENS */
@@ -196,6 +230,7 @@
         .comum .raridade-label { color: var(--comum); }
         .raro .raridade-label { color: var(--raro); }
         .epico .raridade-label { color: var(--epico); }
+
         .btn-comprar {
             background: linear-gradient(to bottom, #c89b3c, #785a28);
             border: 1px solid var(--ouro-claro);
@@ -243,6 +278,7 @@
                 <button class="filter-rarity-btn" data-rarity="comum" onclick="setRaridade('comum', this)">Comum</button>
                 <button class="filter-rarity-btn" data-rarity="raro" onclick="setRaridade('raro', this)">Raro</button>
                 <button class="filter-rarity-btn" data-rarity="epico" onclick="setRaridade('epico', this)">Épico</button>
+                <button class="filter-rarity-btn" data-rarity="prismatico" onclick="setRaridade('prismatico', this)">Prismático</button>
             </div>
         </div>
     </div>
@@ -257,7 +293,8 @@
             </div>
         </div>
     </div>
-
+</body>
+</html>
     <div class="modal-overlay" id="modal-sucesso">
         <div class="modal-content">
             <div class="modal-nome">AQUISIÇÃO CONCLUÍDA</div>
@@ -267,204 +304,213 @@
             </div>
         </div>
     </div>
+      <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
-            authDomain: "quizlegends-f58fc.firebaseapp.com",
-            projectId: "quizlegends-f58fc",
-            storageBucket: "quizlegends-f58fc.firebasestorage.app",
-            messagingSenderId: "1050463164018",
-            appId: "1:1050463164018:web:91de002b8afc8e678f54eb"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const URL_ICONES = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/";
-        const URL_ITENS = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/";
+    const firebaseConfig = {
+        apiKey: "AIzaSyC4dm0KoyJswhyCY7tgbF4D2nmuZl84X8E",
+        authDomain: "quizlegends-f58fc.firebaseapp.com",
+        projectId: "quizlegends-f58fc",
+        storageBucket: "quizlegends-f58fc.firebasestorage.app",
+        messagingSenderId: "1050463164018",
+        appId: "1:1050463164018:web:91de002b8afc8e678f54eb"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const URL_ICONES = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/";
+    const URL_ITENS = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/";
+    
+    const itens = [
+        { id: "aatrox_comum", cat: "icones", nome: "Aatrox", preco: 5000, raridade: "comum", img: "aatrox-comum.png", info: "Ícone de perfil do campeão Aatrox." },
+        { id: "aatrox_raro", cat: "icones", nome: "Aatrox Caçador dos Mares", preco: 25000, raridade: "raro", img: "aatrox-raro.png", info: "Ícone raro da skin Caçador dos Mares." },
+        { id: "aatrox_epico", cat: "icones", nome: "Aatrox Justiceiro", preco: 50000, raridade: "epico", img: "aatrox-epico.png", info: "Ícone exclusivo Aatrox Justiceiro." },
+        { id: "aatrox-mech", cat: "icones", nome: "Mech Aatrox", preco: 50000, raridade: "epico", img: "aatrox-mech-epico.png", info: "Ícone exclusivo Mech Aatrox." },
+        { id: "aatrox-drx", cat: "icones", nome: "Aatrox DRX", preco: 50000, raridade: "epico", img: "aatrox-drx-epico.png", info: "Ícone exclusivo Aatrox DRX." },
+        { id: "aatrox-eclipse", cat: "icones", nome: "Aatrox Eclipse Lunar", preco: 50000, raridade: "epico", img: "aatrox-eclipse-epico.png", info: "Ícone exclusivo Aatrox Eclipse Lunar." },
+        { id: "aatrox-odisseia", cat: "icones", nome: "Aatrox Odisseia", preco: 50000, raridade: "epico", img: "aatrox-odisseia-epico.png", info: "Ícone exclusivo Aatrox Odisseia." },
+        { id: "aatrox-vitorioso", cat: "icones", nome: "Aatrox Vitorioso", preco: 50000, raridade: "epico", img: "aatrox-vitorioso-epico.png", info: "Ícone exclusivo Aatrox Vitorioso." },
+        { id: "aatrox-lua", cat: "icones", nome: "Aatrox Lua Sangrenta", preco: 50000, raridade: "epico", img: "aatrox-lua-epico.png", info: "Ícone exclusivo Aatrox Lua Sangrenta." },
+      
+        { id: "ahri_comum", cat: "icones", nome: "Ahri", preco: 5000, raridade: "comum", img: "ahri-comum.png", info: "Ícone de perfil da campeã Ahri." },
+        { id: "ahri_raro", cat: "icones", nome: "Ahri Raposa Flamejante", preco: 25000, raridade: "raro", img: "ahri-raro.png", info: "Ícone raro da skin Raposa Flamejante." },
+        { id: "ahri_epico", cat: "icones", nome: "Ahri K/DA", preco: 50000, raridade: "epico", img: "ahri-epico.png", info: "Ícone épico da skin Ahri K/DA." },
+        { id: "chibi-akali", cat: "icones", nome: "Chibi Akali", preco: 5000, raridade: "comum", img: "chibi-akali.png", info: "Ícone de perfil da campeã Akali." },
         
-        const itens = [
-            { id: "aatrox_comum", cat: "icones", nome: "Aatrox", preco: 5000, raridade: "comum", img: "aatrox-comum.png", info: "Ícone de perfil do campeão Aatrox." },
-            { id: "aatrox_raro", cat: "icones", nome: "Aatrox Caçador dos Mares", preco: 25000, raridade: "raro", img: "aatrox-raro.png", info: "Ícone raro da skin Caçador dos Mares." },
-            { id: "aatrox_epico", cat: "icones", nome: "Aatrox Justiceiro", preco: 50000, raridade: "epico", img: "aatrox-epico.png", info: "Ícone exclusivo Aatrox Justiceiro." },
-            { id: "aatrox-mech", cat: "icones", nome: "Mech Aatrox", preco: 50000, raridade: "epico", img: "aatrox-mech-epico.png", info: "Ícone exclusivo Mech Aatrox." },
-            { id: "aatrox-drx", cat: "icones", nome: "Aatrox DRX", preco: 50000, raridade: "epico", img: "aatrox-drx-epico.png", info: "Ícone exclusivo Aatrox DRX." },
-            { id: "aatrox-eclipse", cat: "icones", nome: "Aatrox Eclipse Lunar", preco: 50000, raridade: "epico", img: "aatrox-eclipse-epico.png", info: "Ícone exclusivo Aatrox Eclipse Lunar." },
-            { id: "aatrox-odisseia", cat: "icones", nome: "Aatrox Odisseia", preco: 50000, raridade: "epico", img: "aatrox-odisseia-epico.png", info: "Ícone exclusivo Aatrox Odisseia." },
-            { id: "aatrox-vitorioso", cat: "icones", nome: "Aatrox Vitorioso", preco: 50000, raridade: "epico", img: "aatrox-vitorioso-epico.png", info: "Ícone exclusivo Aatrox Vitorioso." },
-            { id: "aatrox-lua", cat: "icones", nome: "Aatrox Lua Sangrenta", preco: 50000, raridade: "epico", img: "aatrox-lua-epico.png", info: "Ícone exclusivo Aatrox Lua Sangrenta." },
-          
-            { id: "ahri_comum", cat: "icones", nome: "Ahri", preco: 5000, raridade: "comum", img: "ahri-comum.png", info: "Ícone de perfil da campeã Ahri." },
-            { id: "ahri_raro", cat: "icones", nome: "Ahri Raposa Flamejante", preco: 25000, raridade: "raro", img: "ahri-raro.png", info: "Ícone raro da skin Raposa Flamejante." },
-            { id: "ahri_epico", cat: "icones", nome: "Ahri K/DA", preco: 50000, raridade: "epico", img: "ahri-epico.png", info: "Ícone épico da skin Ahri K/DA." },
-            { id: "chibi-akali", cat: "icones", nome: "Chibi Akali", preco: 5000, raridade: "comum", img: "chibi-akali.png", info: "Ícone de perfil da campeã Akali." },
-            
-            { id: "anjo_guardiao", cat: "itens", nome: "Anjo Guardião <br> (7 Dias)", preco: 100000, raridade: "raro", img: "anjo.png", info: "Proteção Hextech: Você não perderá PDL ao errar perguntas durante 7 dias." },
-            { id: "sentinela-epico", cat: "itens", nome: "Sentinela de Controle <br> (3 Unidades)", preco: 3000, raridade: "epico", img: "sentinela-epico.png", info: "Revelação: Revela a resposta da próxima pergunta." },
-            { id: "coletora-comum", cat: "itens", nome: "A Coletora <br> (2 Horas)", preco: 10000, raridade: "comum", img: "coletora-comum.png", info: "Efeito Passivo: Dobra seus ganhos de PDL por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de PDL." },
-            { id: "gume-raro", cat: "itens", nome: "Gume do infinito <br> (2 Horas)", preco: 18000, raridade: "raro", img: "gume-raro.png", info: "Efeito Passivo: Multiplica 4x seus ganhos de PDL por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de PDL." },
-            { id: "sedenta-epico", cat: "itens", nome: "Sedenta por Sangue <br> (2 Horas)", preco: 21000, raridade: "epico", img: "sedenta-epico.png", info: "Efeito Passivo: Multiplica 6x seus ganhos de PDL por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de PDL." },
-            { id: "atlas-comum", cat: "itens", nome: "Atlas Mundial <br> (2 Horas)", preco: 10000, raridade: "comum", img: "atlas-comum.png", info: "Efeito Passivo: Dobra seus ganhos de Moedas por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de moedas." },
-            { id: "bussola-raro", cat: "itens", nome: "Bússola Rúnica <br> (2 Horas)", preco: 18000, raridade: "raro", img: "bussola-raro.png", info: "Efeito Passivo: Multiplica 4x seus ganhos de Moedas por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de moedas." },
-            { id: "oposicao-epico", cat: "itens", nome: "Oposição Celestial <br> (2 Horas)", preco: 21000, raridade: "epico", img: "oposicao-epico.png", info: "Efeito Passivo: Multiplica 6x seus ganhos de Moedas por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de moedas." }
-        ];        
-        
-        let saldoGlobal = 0;
-        let meusItens = [];
-        let minhaMochila = [];
-        let categoriaAtual = 'icones';
-        let raridadeFiltro = 'todos';
+        { id: "anjo_guardiao", cat: "itens", nome: "Anjo Guardião <br> (7 Dias)", preco: 100000, raridade: "raro", img: "anjo.png", info: "Proteção Hextech: Você não perderá PDL ao errar perguntas durante 7 dias." },
+        { id: "sentinela-epico", cat: "itens", nome: "Sentinela de Controle <br> (3 Unidades)", preco: 3000, raridade: "epico", img: "sentinela-epico.png", info: "Revelação: Revela a resposta da próxima pergunta." },
+        { id: "coletora-comum", cat: "itens", nome: "A Coletora <br> (2 Horas)", preco: 10000, raridade: "comum", img: "coletora-comum.png", info: "Efeito Passivo: Dobra seus ganhos de PDL por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de PDL." },
+        { id: "gume-raro", cat: "itens", nome: "Gume do infinito <br> (2 Horas)", preco: 18000, raridade: "raro", img: "gume-raro.png", info: "Efeito Passivo: Multiplica 4x seus ganhos de PDL por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de PDL." },
+        { id: "sedenta-epico", cat: "itens", nome: "Sedenta por Sangue <br> (2 Horas)", preco: 21000, raridade: "epico", img: "sedenta-epico.png", info: "Efeito Passivo: Multiplica 6x seus ganhos de PDL por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de PDL." },
+        { id: "atlas-comum", cat: "itens", nome: "Atlas Mundial <br> (2 Horas)", preco: 10000, raridade: "comum", img: "atlas-comum.png", info: "Efeito Passivo: Dobra seus ganhos de Moedas por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de moedas." },
+        { id: "bussola-raro", cat: "itens", nome: "Bússola Rúnica <br> (2 Horas)", preco: 18000, raridade: "raro", img: "bussola-raro.png", info: "Efeito Passivo: Multiplica 4x seus ganhos de Moedas por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de moedas." },
+        { id: "oposicao-epico", cat: "itens", nome: "Oposição Celestial <br> (2 Horas)", preco: 21000, raridade: "epico", img: "oposicao-epico.png", info: "Efeito Passivo: Multiplica 6x seus ganhos de Moedas por 2 horas. Atenção: Este item não é acumulativo com outros multiplicadores de moedas." }
+    ];        
+    
+    let saldoGlobal = 0;
+    let meusItens = [];
+    let minhaMochila = [];
+    let categoriaAtual = 'icones';
+    let raridadeFiltro = 'todos';
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
-                    if (snap.exists()) {
-                        const d = snap.data();
-                        saldoGlobal = d.saldo || 0;
-                        meusItens = d.iconesAdquiridos || [];
-                        minhaMochila = d.mochila || [];
-                        document.getElementById('saldo-valor').innerText = saldoGlobal.toLocaleString();
-                        renderLoja();
-                    }
-                });
-            } else {
-                window.location.href = "index.html";
-            }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
+                if (snap.exists()) {
+                    const d = snap.data();
+                    saldoGlobal = d.saldo || 0;
+                    meusItens = d.iconesAdquiridos || [];
+                    minhaMochila = d.mochila || [];
+                    document.getElementById('saldo-valor').innerText = saldoGlobal.toLocaleString();
+                    renderLoja();
+                }
+            });
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+
+    window.filtrarCategoria = (categoria, elemento) => {
+        categoriaAtual = categoria;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        elemento.classList.add('active');
+        document.getElementById('barra-filtros').style.display = (categoria === 'moedas') ? 'none' : 'flex';
+        renderLoja();
+    };
+
+    window.setRaridade = (raridade, elemento) => {
+        raridadeFiltro = raridade;
+        document.querySelectorAll('.filter-rarity-btn').forEach(btn => btn.classList.remove('active'));
+        elemento.classList.add('active');
+        renderLoja();
+    };
+
+    window.renderLoja = function() {
+        const grid = document.getElementById('grid-itens');
+        const busca = document.getElementById('input-busca').value.toLowerCase().trim();
+        grid.innerHTML = "";
+
+        const itensFiltrados = itens.filter(item => {
+            const bateCategoria = item.cat === categoriaAtual;
+            const bateRaridade = raridadeFiltro === 'todos' || item.raridade === raridadeFiltro;
+            const nomeLimpo = item.nome.replace('<br>', '').toLowerCase();
+            const bateBusca = nomeLimpo.includes(busca);
+            return bateCategoria && bateRaridade && bateBusca;
         });
 
-        window.filtrarCategoria = (categoria, elemento) => {
-            categoriaAtual = categoria;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            elemento.classList.add('active');
-            document.getElementById('barra-filtros').style.display = (categoria === 'moedas') ? 'none' : 'flex';
-            renderLoja();
-        };
-
-        window.setRaridade = (raridade, elemento) => {
-            raridadeFiltro = raridade;
-            document.querySelectorAll('.filter-rarity-btn').forEach(btn => btn.classList.remove('active'));
-            elemento.classList.add('active');
-            renderLoja();
-        };
-
-        window.renderLoja = function() {
-    const grid = document.getElementById('grid-itens');
-    const busca = document.getElementById('input-busca').value.toLowerCase().trim();
-    grid.innerHTML = "";
-
-    const itensFiltrados = itens.filter(item => {
-        const bateCategoria = item.cat === categoriaAtual;
-        const bateRaridade = raridadeFiltro === 'todos' || item.raridade === raridadeFiltro;
-        const nomeLimpo = item.nome.replace('<br>', '').toLowerCase();
-        const bateBusca = nomeLimpo.includes(busca);
-        return bateCategoria && bateRaridade && bateBusca;
-    });
-
-    if (itensFiltrados.length === 0) {
-        grid.innerHTML = "<p style='grid-column: 1/-1; opacity: 0.5; text-align:center; margin-top: 50px;'>Nenhum item encontrado.</p>";
-        return;
-    }
-
-    itensFiltrados.forEach(item => {
-        let jaPossui = false;
-        if (item.cat === 'icones') {
-            jaPossui = meusItens.includes(item.id);
-        } else if (item.cat === 'itens') {
-            jaPossui = minhaMochila.includes(item.id);
+        if (itensFiltrados.length === 0) {
+            grid.innerHTML = "<p style='grid-column: 1/-1; opacity: 0.5; text-align:center; margin-top: 50px;'>Nenhum item encontrado.</p>";
+            return;
         }
 
-        const desabilitado = jaPossui || (saldoGlobal < item.preco);
-        const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
-        const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
-
-        // A MÁGICA ACONTECE AQUI:
-        // Se item.cat for 'itens', adicionamos a classe 'tipo-item' para o CSS deixar quadrado.
-        const classeExtra = (item.cat === 'itens') ? 'tipo-item' : '';
-
-        grid.innerHTML += `
-            <div class="item-card ${item.raridade} ${classeExtra}">
-                <div class="icon-container">
-                    <img src="${urlFinal}" class="img-campeao">
-                </div>
-                <div class="item-nome">${item.nome}</div>
-                <div class="raridade-label">${labelRaridade}</div>
-                <button class="btn-comprar" ${desabilitado ? 'disabled' : ''} 
-                    onclick="abrirModalCompra('${item.id}')">
-                    ${jaPossui ? 'Possuído' : '💰 ' + item.preco.toLocaleString()}
-                </button>
-            </div>`;
-    });
-};
-
-        window.abrirModalCompra = (id) => {
-            const item = itens.find(i => i.id === id);
-            if(!item) return;
-            const modal = document.getElementById('modal-compra');
-            document.getElementById('modal-item-nome').innerHTML = item.nome;
-            document.getElementById('modal-item-info').innerText = `${item.info} \n\n Preço: ${item.preco.toLocaleString()} moedas.`;
-            const btnConfirmar = document.getElementById('confirmar-btn');
-            modal.style.display = 'flex';
-            btnConfirmar.onclick = () => processarCompra(id, item.preco);
-        };
-
-        window.fecharModal = () => { document.getElementById('modal-compra').style.display = 'none'; };
-
-        window.mostrarSucesso = (mensagem) => {
-            document.getElementById('modal-sucesso-msg').innerText = mensagem;
-            document.getElementById('modal-sucesso').style.display = 'flex';
-        };
-
-        window.fecharModalSucesso = () => {
-            document.getElementById('modal-sucesso').style.display = 'none';
-        };
-
-        async function processarCompra(id, valor) {
-            fecharModal();
-            try {
-                const userRef = doc(db, "usuarios", auth.currentUser.uid);
-                const itemDados = itens.find(i => i.id === id);
-                if (itemDados.cat === 'itens') {
-                    await updateDoc(userRef, {
-                        saldo: increment(-valor),
-                        mochila: arrayUnion(id)
-                    });
-                    
-                    if (id === "sentinela-epico") {
-                        mostrarSucesso("Você adquiriu o pacote de Sentinelas! Ative-as no seu Inventário para ganhar 3 cargas.");
-                    } else if (id === "coletora-comum") {
-                        mostrarSucesso("A Coletora foi enviada para seu inventário. Ative-a para dobrar seus PDLs por 2 horas!");
-                    } else if (id === "gume-raro") {
-                        mostrarSucesso("O Gume do Infinito foi enviado para seu inventário. Ative-o para quadruplicar seus PDLs por 2 horas!");
-                    } else if (id === "sedenta-epico") {
-                        mostrarSucesso("A Sedenta por Sangue foi enviada para seu inventário. Ative-a para multiplicar seus PDLs por 6 por 2 horas!");
-                    } else if (id === "atlas-comum") {
-                        mostrarSucesso("O Atlas Mundial foi enviado para seu inventário. Ative-a para dobrar seus ganhos de Moedas por 2 horas!");
-                    } else if (id === "bussola-raro") {
-                        mostrarSucesso("A Bússola Rúnica foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 4 por 2 horas!");
-                    } else if (id === "oposicao-epico") {
-                        mostrarSucesso("A Oposição Celestial foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 6 por 2 horas!");
-                    } else {
-                        mostrarSucesso("Item enviado para o seu inventário! Vá até lá para ativar seu benefício.");
-                    }
-                    return;
-                }
-                if (itemDados.cat === 'icones') {
-                    await updateDoc(userRef, {
-                        saldo: increment(-valor),
-                        iconesAdquiridos: arrayUnion(id)
-                    });
-                    mostrarSucesso("Ícone enviado para o seu inventário!");
-                    return;
-                }
-            } catch (e) { 
-                console.error(e);
-                mostrarSucesso("Erro ao processar compra. Verifique sua conexão."); 
+        itensFiltrados.forEach(item => {
+            let jaPossui = false;
+            if (item.cat === 'icones') {
+                jaPossui = meusItens.includes(item.id);
+            } else if (item.cat === 'itens') {
+                jaPossui = minhaMochila.includes(item.id);
             }
+
+            const desabilitado = jaPossui || (saldoGlobal < item.preco);
+            
+            // AJUSTE: Tradução da Label incluindo Prismático
+            let labelRaridade = "";
+            if (item.raridade === 'epico') labelRaridade = 'Épico';
+            else if (item.raridade === 'prismatico') labelRaridade = 'Prismático';
+            else labelRaridade = item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
+
+            const urlFinal = (item.cat === 'itens') ? URL_ITENS + item.img : URL_ICONES + item.img;
+            const classeExtra = (item.cat === 'itens') ? 'tipo-item' : '';
+
+            grid.innerHTML += `
+                <div class="item-card ${item.raridade} ${classeExtra}">
+                    <div class="icon-container">
+                        <img src="${urlFinal}" class="img-campeao">
+                    </div>
+                    <div class="item-nome">${item.nome}</div>
+                    <div class="raridade-label">${labelRaridade}</div>
+                    <button class="btn-comprar" ${desabilitado ? 'disabled' : ''} 
+                        onclick="abrirModalCompra('${item.id}')">
+                        ${jaPossui ? 'Possuído' : '💰 ' + item.preco.toLocaleString()}
+                    </button>
+                </div>`;
+        });
+    };
+
+    window.abrirModalCompra = (id) => {
+        const item = itens.find(i => i.id === id);
+        if(!item) return;
+        const modal = document.getElementById('modal-compra');
+        document.getElementById('modal-item-nome').innerHTML = item.nome;
+        document.getElementById('modal-item-info').innerText = `${item.info} \n\n Preço: ${item.preco.toLocaleString()} moedas.`;
+        const btnConfirmar = document.getElementById('confirmar-btn');
+        modal.style.display = 'flex';
+        btnConfirmar.onclick = () => processarCompra(id, item.preco);
+    };
+
+    window.fecharModal = () => { document.getElementById('modal-compra').style.display = 'none'; };
+
+    window.mostrarSucesso = (mensagem) => {
+        // Nota: Certifique-se de que o HTML do modal-sucesso exista na sua página
+        const msgSucesso = document.getElementById('modal-sucesso-msg');
+        if(msgSucesso) msgSucesso.innerText = mensagem;
+        
+        const modalSucesso = document.getElementById('modal-sucesso');
+        if(modalSucesso) modalSucesso.style.display = 'flex';
+        else alert(mensagem); // Fallback caso o modal de sucesso não esteja no HTML
+    };
+
+    window.fecharModalSucesso = () => {
+        const modalSucesso = document.getElementById('modal-sucesso');
+        if(modalSucesso) modalSucesso.style.display = 'none';
+    };
+
+    async function processarCompra(id, valor) {
+        fecharModal();
+        try {
+            const userRef = doc(db, "usuarios", auth.currentUser.uid);
+            const itemDados = itens.find(i => i.id === id);
+            
+            if (itemDados.cat === 'itens') {
+                await updateDoc(userRef, {
+                    saldo: increment(-valor),
+                    mochila: arrayUnion(id)
+                });
+                
+                if (id === "sentinela-epico") {
+                    mostrarSucesso("Você adquiriu o pacote de Sentinelas! Ative-as no seu Inventário para ganhar 3 cargas.");
+                } else if (id === "coletora-comum") {
+                    mostrarSucesso("A Coletora foi enviada para seu inventário. Ative-a para dobrar seus PDLs por 2 horas!");
+                } else if (id === "gume-raro") {
+                    mostrarSucesso("O Gume do Infinito foi enviado para seu inventário. Ative-o para quadruplicar seus PDLs por 2 horas!");
+                } else if (id === "sedenta-epico") {
+                    mostrarSucesso("A Sedenta por Sangue foi enviada para seu inventário. Ative-a para multiplicar seus PDLs por 6 por 2 horas!");
+                } else if (id === "atlas-comum") {
+                    mostrarSucesso("O Atlas Mundial foi enviado para seu inventário. Ative-a para dobrar seus ganhos de Moedas por 2 horas!");
+                } else if (id === "bussola-raro") {
+                    mostrarSucesso("A Bússola Rúnica foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 4 por 2 horas!");
+                } else if (id === "oposicao-epico") {
+                    mostrarSucesso("A Oposição Celestial foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 6 por 2 horas!");
+                } else {
+                    mostrarSucesso("Item enviado para o seu inventário! Vá até lá para ativar seu benefício.");
+                }
+                return;
+            }
+            if (itemDados.cat === 'icones') {
+                await updateDoc(userRef, {
+                    saldo: increment(-valor),
+                    iconesAdquiridos: arrayUnion(id)
+                });
+                mostrarSucesso("Ícone enviado para o seu inventário!");
+                return;
+            }
+        } catch (e) { 
+            console.error(e);
+            mostrarSucesso("Erro ao processar compra. Verifique sua conexão."); 
         }
-    </script>
-</body>
+    }
+</script>
+    </body>
 </html>
