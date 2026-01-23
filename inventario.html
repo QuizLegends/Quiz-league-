@@ -228,22 +228,35 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // DATA_BASE ATUALIZADA (Certifique-se de adicionar seus novos itens prismáticos aqui também)
+        // DATA_BASE ATUALIZADA
         const DATA_BASE = {
+            // --- ÍCONES ---
             'aatrox_comum': { nome: "Aatrox", tipo: "icone", raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-comum.png" },
             'aatrox_raro': { nome: "Aatrox Caçador dos Mares", tipo: "icone", raridade: "raro", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-raro.png" },
             'aatrox_epico': { nome: "Aatrox Justiceiro", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-epico.png" },
+            'aatrox-mech': { nome: "Mech Aatrox", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-mech-epico.png" },
+            'aatrox-drx': { nome: "Aatrox DRX", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-drx-epico.png" },
+            'aatrox-eclipse': { nome: "Aatrox Eclipse Lunar", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-eclipse-epico.png" },
+            'aatrox-odisseia': { nome: "Aatrox Odisseia", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-odisseia-epico.png" },
+            'aatrox-vitorioso': { nome: "Aatrox Vitorioso", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-vitorioso-epico.png" },
+            'aatrox-lua': { nome: "Aatrox Lua Sangrenta", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-lua-epico.png" },
+            'aatrox-primordiano': { nome: "Aatrox Primordiano", tipo: "icone", raridade: "prismatico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-primordiano-prismatico.png" },
+            'aatrox-prestigio': { nome: "Aatrox Lua Sangrenta de Prestígio", tipo: "icone", raridade: "prismatico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-lua-prestigio-prismatico.png" },
+            'aatrox-drx-prestigio': { nome: "Aatrox DRX de Prestígio", tipo: "icone", raridade: "prismatico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-drx-prestigio-prismatico.png" },
+            
             'ahri_comum': { nome: "Ahri", tipo: "icone", raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-comum.png" },
             'ahri_raro': { nome: "Ahri Raposa Flamejante", tipo: "icone", raridade: "raro", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-raro.png" },
             'ahri_epico': { nome: "Ahri K/DA", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-epico.png" },
-          
+            'chibi-akali': { nome: "Chibi Akali", tipo: "icone", raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/chibi-akali.png" },
+
+            // --- ITENS CONSUMÍVEIS ---
             'anjo_guardiao': { nome: "Anjo Guardião", tipo: "consumivel", raridade: "raro", duracao: 7, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/anjo.png" },
             'sentinela-epico': { nome: "Sentinela de Controle", tipo: "carga", raridade: "epico", unidades: 3, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/sentinela-epico.png" },
             'coletora-comum': { nome: "A Coletora", tipo: "multiplicador", raridade: "comum", duracaoHoras: 2, multiplicadorPDL: 2, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/coletora-comum.png" },
-            'gume-raro': { nome: "Gume do infinito", tipo: "multiplicador", raridade: "raro", duracaoHoras: 2, multiplicadorPDL: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/gume-raro.png" },
+            'gume-raro': { nome: "Gume do Infinito", tipo: "multiplicador", raridade: "raro", duracaoHoras: 2, multiplicadorPDL: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/gume-raro.png" },
             'sedenta-epico': { nome: "Sedenta por Sangue", tipo: "multiplicador", raridade: "epico", duracaoHoras: 2, multiplicadorPDL: 6, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/sedenta-epico.png" },
             'atlas-comum': { nome: "Atlas Mundial", tipo: "multiplicadorMoedas", raridade: "comum", duracaoHoras: 2, multiplicadorMoedas: 2, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/atlas-comum.png" },
-            'bussola-raro': { nome: "Bússola Arcaica", tipo: "multiplicadorMoedas", raridade: "raro", duracaoHoras: 2, multiplicadorMoedas: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/bussola-raro.png" },
+            'bussola-raro': { nome: "Bússola Rúnica", tipo: "multiplicadorMoedas", raridade: "raro", duracaoHoras: 2, multiplicadorMoedas: 4, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/bussola-raro.png" },
             'oposicao-epico': { nome: "Oposição Celestial", tipo: "multiplicadorMoedas", raridade: "epico", duracaoHoras: 2, multiplicadorMoedas: 6, img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/itens/oposicao-epico.png" }
         };
 
