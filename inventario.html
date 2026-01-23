@@ -228,7 +228,6 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // DATA_BASE ATUALIZADA - ID CORRIGIDO PARA O PRESTÍGIO
         const DATA_BASE = {
             // --- ÍCONES ---
             'aatrox_comum': { nome: "Aatrox", tipo: "icone", raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-comum.png" },
@@ -242,8 +241,6 @@
             'aatrox-lua': { nome: "Aatrox Lua Sangrenta", tipo: "icone", raridade: "epico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-lua-epico.png" },
             'aatrox-primordiano': { nome: "Aatrox Primordiano", tipo: "icone", raridade: "prismatico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-primordiano-prismatico.png" },
             'aatrox-prestigio': { nome: "Aatrox Lua Sangrenta de Prestígio", tipo: "icone", raridade: "prismatico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-lua-prestigio-prismatico.png" },
-            
-            // ID ÚNICO PARA PRESTÍGIO CORRIGIDO
             'aatrox-drx-prestigio': { nome: "Aatrox DRX de Prestígio", tipo: "icone", raridade: "prismatico", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-drx-prestigio-prismatico.png" },
             
             'ahri_comum': { nome: "Ahri", tipo: "icone", raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/ahri-comum.png" },
@@ -301,7 +298,11 @@
             icones.forEach(id => {
                 const item = DATA_BASE[id];
                 if (!item) return;
-                const estaEquipado = (id === iconeEquipado);
+                
+                // LÓGICA DE COMPARAÇÃO CORRIGIDA PARA O BRILHO DOURADO
+                const nomeArquivo = item.img.split('/').pop().replace('.png', '');
+                const estaEquipado = (nomeArquivo === iconeEquipado);
+                
                 grid.innerHTML += criarCard(id, item, estaEquipado ? "EQUIPADO" : "EQUIPAR", estaEquipado, false);
             });
         }
@@ -313,7 +314,6 @@
             if (item.tipo === 'multiplicador') tagTexto = `Bônus ${item.multiplicadorPDL}x PDL`;
             if (item.tipo === 'multiplicadorMoedas') tagTexto = `Bônus ${item.multiplicadorMoedas}x Moedas`;
 
-            // LÓGICA DE LABEL PRISMÁTICA
             let labelRaridade = "";
             if (item.raridade === 'epico') labelRaridade = 'Épico';
             else if (item.raridade === 'prismatico') labelRaridade = 'Prismático';
@@ -395,12 +395,21 @@
             modal.style.display = 'flex';
         }
 
+        // --- FUNÇÃO CORRIGIDA PARA FUNCIONAR COM O RANKING ---
         async function equiparIcone(id) {
             fecharModal();
             try {
+                const item = DATA_BASE[id];
+                if (!item) return;
+
+                // Extrai o nome real do arquivo (ex: aatrox-primordiano-prismatico)
+                const nomeArquivo = item.img.split('/').pop().replace('.png', '');
+
                 const userRef = doc(db, "usuarios", auth.currentUser.uid);
-                await updateDoc(userRef, { iconeAtual: id });
-                // Removido o alerta manual para evitar travamento da renderização
+                
+                // Salva o nome exato que o Ranking precisa encontrar no GitHub
+                await updateDoc(userRef, { iconeAtual: nomeArquivo });
+                
             } catch (e) { console.error(e); }
         }
 
@@ -482,5 +491,5 @@
             } catch (e) { console.error(e); }
         }
     </script>
-    </body>
+</body>
 </html>
