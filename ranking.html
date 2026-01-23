@@ -86,13 +86,15 @@
             margin-top: 2px;
         }
 
+        /* AVATAR REDONDO E SEM BORDA */
         .user-avatar {
-            width: 50px;  
-            height: 50px; 
+            width: 55px;  
+            height: 55px; 
             margin: 0 15px;
             flex-shrink: 0;
             object-fit: cover;
-            border: 1px solid var(--ouro);
+            border-radius: 50%; /* Deixa redondo */
+            border: none;       /* Remove a borda */
         }
 
         .nome {
@@ -157,39 +159,20 @@
         const db = getFirestore(app);
 
         const URL_RAIZ = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/";
-        const ICONE_PADRAO = URL_RAIZ + "ícones/0.png";
-
-        // DATA_BASE IDENTICA AO SEU INVENTÁRIO PARA NÃO TER ERRO
-        const DATA_BASE = {
-            'aatrox_comum': { img: URL_RAIZ + "ícones/aatrox-comum.png" },
-            'aatrox_raro': { img: URL_RAIZ + "ícones/aatrox-raro.png" },
-            'aatrox_epico': { img: URL_RAIZ + "ícones/aatrox-epico.png" },
-            'aatrox-mech': { img: URL_RAIZ + "ícones/aatrox-mech-epico.png" },
-            'aatrox-drx': { img: URL_RAIZ + "ícones/aatrox-drx-epico.png" },
-            'aatrox-eclipse': { img: URL_RAIZ + "ícones/aatrox-eclipse-epico.png" },
-            'aatrox-odisseia': { img: URL_RAIZ + "ícones/aatrox-odisseia-epico.png" },
-            'aatrox-vitorioso': { img: URL_RAIZ + "ícones/aatrox-vitorioso-epico.png" },
-            'aatrox-lua': { img: URL_RAIZ + "ícones/aatrox-lua-epico.png" },
-            'aatrox-primordiano': { img: URL_RAIZ + "ícones/aatrox-primordiano-prismatico.png" },
-            'aatrox-prestigio': { img: URL_RAIZ + "ícones/aatrox-lua-prestigio-prismatico.png" },
-            'aatrox-drx-prestigio': { img: URL_RAIZ + "ícones/aatrox-drx-prestigio-prismatico.png" },
-            'ahri_comum': { img: URL_RAIZ + "ícones/ahri-comum.png" },
-            'ahri_raro': { img: URL_RAIZ + "ícones/ahri-raro.png" },
-            'ahri_epico': { img: URL_RAIZ + "ícones/ahri-epico.png" },
-            'chibi-akali': { img: URL_RAIZ + "ícones/chibi-akali.png" }
-        };
+        const URL_ICONES = URL_RAIZ + "ícones/";
+        const ICONE_PADRAO = URL_ICONES + "0.png";
 
         function getEloInfo(xp) {
             let elo = { nome: "Ferro", arquivo: "ferro.png" };
-            if (xp >= 1000000) { elo = { nome: "Desafiante", arquivo: "desafiante.png" }; }
-            else if (xp >= 600000) { elo = { nome: "Grão-Mestre", arquivo: "graomestre.png" }; }
-            else if (xp >= 300000) { elo = { nome: "Mestre", arquivo: "mestre.png" }; }
-            else if (xp >= 150000) { elo = { nome: "Diamante", arquivo: "diamante.png" }; }
-            else if (xp >= 100000) { elo = { nome: "Esmeralda", arquivo: "esmeralda.png" }; }
-            else if (xp >= 60000) { elo = { nome: "Platina", arquivo: "platina.png" }; }
-            else if (xp >= 30000) { elo = { nome: "Ouro", arquivo: "ouro.png" }; }
-            else if (xp >= 10000) { elo = { nome: "Prata", arquivo: "prata.png" }; }
-            else if (xp >= 5000) { elo = { nome: "Bronze", arquivo: "bronze.png" }; }
+            if (xp >= 1000000) elo = { nome: "Desafiante", arquivo: "desafiante.png" };
+            else if (xp >= 600000) elo = { nome: "Grão-Mestre", arquivo: "graomestre.png" };
+            else if (xp >= 300000) elo = { nome: "Mestre", arquivo: "mestre.png" };
+            else if (xp >= 150000) elo = { nome: "Diamante", arquivo: "diamante.png" };
+            else if (xp >= 100000) elo = { nome: "Esmeralda", arquivo: "esmeralda.png" };
+            else if (xp >= 60000) elo = { nome: "Platina", arquivo: "platina.png" };
+            else if (xp >= 30000) elo = { nome: "Ouro", arquivo: "ouro.png" };
+            else if (xp >= 10000) elo = { nome: "Prata", arquivo: "prata.png" };
+            else if (xp >= 5000) elo = { nome: "Bronze", arquivo: "bronze.png" };
             return elo;
         }
 
@@ -205,14 +188,15 @@
                     const user = docSnap.data();
                     const elo = getEloInfo(user.xp || 0);
                     
-                    // AQUI ESTÁ O SEGREDO: Usar o ID salvo para pegar a imagem na DATA_BASE
                     let fotoUrl = ICONE_PADRAO;
                     const idEquipado = user.iconeAtual;
 
-                    if (idEquipado && DATA_BASE[idEquipado]) {
-                        fotoUrl = DATA_BASE[idEquipado].img;
+                    if (idEquipado) {
+                        // Lógica Dinâmica: Troca _ por - para bater com o GitHub
+                        const nomeArquivo = String(idEquipado).replace(/_/g, '-');
+                        fotoUrl = `${URL_ICONES}${nomeArquivo}.png`;
                     } else if (user.photoURL) {
-                        fotoUrl = user.photoURL; // Fallback para foto do Google
+                        fotoUrl = user.photoURL;
                     }
 
                     const item = document.createElement('div');
