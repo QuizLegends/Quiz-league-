@@ -14,6 +14,7 @@
             --comum: #808080;
             --raro: #00cfbc;
             --epico: #a335ee;
+            /* Nova variável com o seu gradiente Prismático */
             --prismatico: linear-gradient(135deg, #1bc8ce 0%, #cefff7 25%, #4739b2 50%, #1bc8ce 75%, #fff311 100%);
         }
         body {
@@ -24,8 +25,6 @@
             padding: 20px;
             min-height: 100vh;
         }
-
-        /* HEADER */
         .header-loja {
             display: flex;
             justify-content: space-between;
@@ -53,8 +52,6 @@
             align-items: center;
             gap: 10px;
         }
-
-        /* CONTROLES */
         .controles-loja {
             max-width: 1000px;
             margin: 0 auto 30px;
@@ -80,8 +77,10 @@
             border-bottom: 2px solid transparent;
             transition: 0.3s;
         }
-        .tab-btn.active { color: var(--ouro); border-bottom: 2px solid var(--ouro); }
-
+        .tab-btn.active {
+            color: var(--ouro);
+            border-bottom: 2px solid var(--ouro);
+        }
         .barra-ferramentas {
             display: flex;
             justify-content: center; 
@@ -93,7 +92,11 @@
             border: 1px solid #1e2328;
             box-sizing: border-box;
         }
-        .busca-container { position: relative; width: 300px; max-width: 100%; }
+        .busca-container {
+            position: relative;
+            width: 300px; 
+            max-width: 100%;
+        }
         .busca-container input {
             width: 100%;
             background: #091428;
@@ -101,25 +104,48 @@
             padding: 10px 40px 10px 15px;
             color: white;
             outline: none;
+            box-sizing: border-box;
             font-size: 0.9rem;
         }
-        .busca-container span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ouro); }
-
-        /* RARIDADES */
-        .filtros-raridade { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .busca-container span {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ouro);
+            pointer-events: none;
+        }
+        .filtros-raridade {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
         .filter-rarity-btn {
-            background: transparent; border: 1px solid #333; color: #888;
-            padding: 7px 15px; font-size: 11px; cursor: pointer; text-transform: uppercase; transition: 0.2s;
+            background: transparent;
+            border: 1px solid #333;
+            color: #888;
+            padding: 7px 15px; 
+            font-size: 11px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+            min-width: 70px;
         }
-        .filter-rarity-btn.active[data-rarity="todos"] { border-color: var(--ouro); color: var(--ouro); }
-        .filter-rarity-btn.active[data-rarity="comum"] { border-color: var(--comum); color: var(--comum); }
-        .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); }
-        .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); }
+        .filter-rarity-btn.active[data-rarity="comum"] { border-color: var(--comum); color: var(--comum); background: rgba(128, 128, 128, 0.1); }
+        .filter-rarity-btn.active[data-rarity="raro"] { border-color: var(--raro); color: var(--raro); background: rgba(0, 207, 188, 0.1); }
+        .filter-rarity-btn.active[data-rarity="epico"] { border-color: var(--epico); color: var(--epico); background: rgba(163, 53, 238, 0.1); }
+        
+        /* Estilo do botão de filtro Prismático */
         .filter-rarity-btn.active[data-rarity="prismatico"] { 
-            border-color: #1bc8ce; color: #cefff7; box-shadow: 0 0 10px rgba(27, 200, 206, 0.3);
+            border-color: #1bc8ce; 
+            color: #cefff7; 
+            background: rgba(71, 57, 178, 0.2); 
+            box-shadow: 0 0 10px rgba(27, 200, 206, 0.3);
         }
 
-        /* GRID E CARDS */
+        .filter-rarity-btn.active[data-rarity="todos"] { border-color: var(--ouro); color: var(--ouro); background: rgba(200, 155, 60, 0.1); }
+        
         .grid-loja {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -132,127 +158,130 @@
             border: 1px solid #1e2328;
             padding: 20px 15px;
             text-align: center;
+            position: relative;
             transition: all 0.3s;
             clip-path: polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%);
         }
         .item-card:hover { transform: translateY(-8px); }
+        .item-card.comum { border-color: var(--comum) !important; filter: drop-shadow(0 0 5px var(--comum)); }
+        .item-card.raro { border-color: var(--raro) !important; filter: drop-shadow(0 0 10px var(--raro)); }
+        .item-card.epico { border-color: var(--epico) !important; filter: drop-shadow(0 0 15px var(--epico)); }
 
-        /* Estilo Específico Prismático no Card */
+        /* --- ESTILO PRISMÁTICO NO CARD --- */
         .item-card.prismatico {
             border: 1px solid transparent !important;
             background-image: linear-gradient(var(--card-bg), var(--card-bg)), var(--prismatico);
             background-origin: border-box;
             background-clip: padding-box, border-box;
+            filter: drop-shadow(0 0 15px rgba(27, 200, 206, 0.5));
             animation: animaPrismatico 4s ease infinite;
         }
-        .item-card.prismatico .icon-container { width: 100px; height: 100px; }
 
         @keyframes animaPrismatico {
-            0%, 100% { filter: drop-shadow(0 0 10px #1bc8ce); }
-            50% { filter: drop-shadow(0 0 20px #fff311); }
+            0% { filter: drop-shadow(0 0 10px #1bc8ce) brightness(1.1); }
+            50% { filter: drop-shadow(0 0 20px #fff311) brightness(1.2); }
+            100% { filter: drop-shadow(0 0 10px #1bc8ce) brightness(1.1); }
         }
 
-        .icon-container { width: 80px; height: 80px; margin: 0 auto 15px; overflow: hidden; border-radius: 50%; }
-        .img-campeao { width: 100%; height: 100%; object-fit: cover; }
+        .prismatico .raridade-label {
+            background: var(--prismatico);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: brightness(1.3);
+            font-weight: 900;
+        }
+        
+        /* --- BLOCO DE ÍCONES (REDONDOS) --- */
+        .icon-container { 
+            width: 80px; 
+            height: 80px; 
+            margin: 0 auto 15px; 
+            overflow: hidden; 
+            border-radius: 50%; /* PADRÃO É REDONDO */
+            transition: 0.3s ease; /* Transição suave para o pulso */
+        }
+        .img-campeao { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; /* PADRÃO É REDONDO */
+            object-fit: cover; 
+            border: none; 
+            display: block;
+        }
 
-        .item-card.tipo-item .icon-container { border-radius: 4px !important; }
+        /* --- BLOCO DE ITENS (QUADRADOS) --- */
+        .item-card.tipo-item .icon-container,
+        .item-card.tipo-item .img-campeao {
+            border-radius: 4px !important; /* FORMATO QUADRADO PARA ITENS */
+        }
+        
+        .item-nome { 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 0.85rem; 
+            margin-bottom: 8px; 
+            min-height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+        .raridade-label { font-size: 10px; text-transform: uppercase; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; }
+        .comum .raridade-label { color: var(--comum); }
+        .raro .raridade-label { color: var(--raro); }
+        .epico .raridade-label { color: var(--epico); }
 
-        /* MODAL */
+        .btn-comprar {
+            background: linear-gradient(to bottom, #c89b3c, #785a28);
+            border: 1px solid var(--ouro-claro);
+            color: black;
+            padding: 10px;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            clip-path: polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%);
+        }
+        .btn-comprar:disabled { background: #1e2328 !important; color: #555 !important; border-color: #333 !important; cursor: not-allowed; box-shadow: none !important; filter: grayscale(1); }
+        
+        /* --- MODAL E EFEITO DE PULSO PRISMÁTICO --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: var(--azul-hex); border: 2px solid var(--ouro); padding: 30px; max-width: 400px; text-align: center; clip-path: polygon(10% 0, 90% 0, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0 85%, 0 15%); }
         
+        /* Container da imagem no modal para o efeito de pulso */
         .preview-img-container {
-            width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 50%; border: 3px solid var(--ouro); overflow: hidden;
-        }
-        /* Efeito de destaque no Modal para Prismáticos */
-        .modal-content.is-prismatico .preview-img-container {
-            width: 150px; height: 150px;
-            animation: pulsePrismatico 2s infinite;
-            border-color: #fff311;
-        }
-        @keyframes pulsePrismatico {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            border: 2px solid var(--ouro);
+            overflow: hidden;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-confirm { background: var(--ouro); border: 1px solid var(--ouro-claro); color: black; padding: 10px 25px; font-weight: bold; cursor: pointer; }
-        .btn-cancel { background: transparent; border: 1px solid var(--ouro); color: var(--ouro); padding: 10px 25px; font-weight: bold; cursor: pointer; }
+        /* Classe ativada via JS quando o item é Prismático */
+        .modal-content.is-prismatico .preview-img-container {
+            width: 140px; /* Aumenta o tamanho (O Salto) */
+            height: 140px;
+            border: 3px solid #fff311;
+            box-shadow: 0 0 25px rgba(255, 243, 17, 0.5);
+            animation: pulsePrismatico 2s infinite;
+        }
+
+        @keyframes pulsePrismatico {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .modal-nome { color: var(--ouro); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; font-size: 1.1rem; }
+        .modal-info { color: #888; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4; }
+        .btn-confirm { background: var(--ouro); border: 1px solid var(--ouro-claro); color: black; padding: 10px 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 5px; }
+        .btn-cancel { background: transparent; border: 1px solid var(--ouro); color: var(--ouro); padding: 10px 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 5px; }
     </style>
 </head>
 <body>
-
-    <div class="header-loja">
-        <h1>Loja Hextech</h1>
-        <div class="saldo-box">
-            <span id="saldo-moedas">0</span>
-            <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/moeda.png" width="20">
-        </div>
-    </div>
-
-    <div class="controles-loja">
-        <div class="menu-categorias">
-            <button class="tab-btn active" onclick="filtrarCategoria('todos')">Tudo</button>
-            <button class="tab-btn" onclick="filtrarCategoria('icone')">Ícones</button>
-            <button class="tab-btn" onclick="filtrarCategoria('item')">Itens</button>
-        </div>
-
-        <div class="barra-ferramentas">
-            <div class="busca-container">
-                <input type="text" id="input-busca" placeholder="Buscar campeão ou item..." oninput="filtrarLoja()">
-                <span>🔍</span>
-            </div>
-            <div class="filtros-raridade">
-                <button class="filter-rarity-btn active" data-rarity="todos" onclick="filtrarRaridade('todos')">Todos</button>
-                <button class="filter-rarity-btn" data-rarity="comum" onclick="filtrarRaridade('comum')">Comum</button>
-                <button class="filter-rarity-btn" data-rarity="raro" onclick="filtrarRaridade('raro')">Raro</button>
-                <button class="filter-rarity-btn" data-rarity="epico" onclick="filtrarRaridade('epico')">Épico</button>
-                <button class="filter-rarity-btn" data-rarity="prismatico" onclick="filtrarRaridade('prismatico')">Prismático</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid-loja" id="grid-loja"></div>
-
-    <div class="modal-overlay" id="modal-compra">
-        <div class="modal-content" id="modal-content-box">
-            <div class="preview-img-container">
-                <img id="modal-img" src="" style="width:100%; height:100%; object-fit:cover;">
-            </div>
-            <div id="modal-nome" style="color:var(--ouro); font-weight:bold; margin-bottom:5px;"></div>
-            <div id="modal-info" style="color:#888; margin-bottom:20px;"></div>
-            <div class="modal-btns">
-                <button class="btn-confirm" id="btn-confirmar-compra">Confirmar</button>
-                <button class="btn-cancel" onclick="fecharModal()">Sair</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function abrirModalCompra(idItem) {
-            const item = DATA_BASE[idItem];
-            const modal = document.getElementById('modal-compra');
-            const contentBox = document.getElementById('modal-content-box');
-            
-            document.getElementById('modal-img').src = item.img;
-            document.getElementById('modal-nome').innerText = item.nome;
-            document.getElementById('modal-info').innerText = `Deseja adquirir este item por ${item.preco} moedas?`;
-            
-            contentBox.classList.remove('is-prismatico');
-            if(item.raridade === 'prismatico') {
-                contentBox.classList.add('is-prismatico');
-            }
-            
-            document.getElementById('btn-confirmar-compra').onclick = () => realizarCompra(idItem);
-            modal.style.display = 'flex';
-        }
-
-        function fecharModal() {
-            document.getElementById('modal-compra').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
-
     <div class="header-loja">
         <h1>Loja Hextech</h1>
         <div class="saldo-box">
@@ -286,7 +315,10 @@
     <div class="grid-loja" id="grid-itens"></div>
 
     <div class="modal-overlay" id="modal-compra">
-        <div class="modal-content">
+        <div class="modal-content" id="modal-content-box">
+            <div class="preview-img-container" id="modal-img-container">
+                <img id="modal-item-img" src="" style="width:100%; height:100%; object-fit:cover;">
+            </div>
             <div id="modal-item-nome" class="modal-nome"></div>
             <div id="modal-item-info" class="modal-info"></div>
             <div class="modal-btns">
@@ -295,6 +327,38 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Função para abrir o modal com a lógica de raridade
+        function abrirModalCompra(idItem) {
+            const item = DATA_BASE[idItem]; // Certifique-se que sua DATA_BASE está acessível
+            const modal = document.getElementById('modal-compra');
+            const contentBox = document.getElementById('modal-content-box');
+            const imgElement = document.getElementById('modal-item-img');
+            const imgContainer = document.getElementById('modal-img-container');
+            
+            // Preenche dados
+            imgElement.src = item.img;
+            document.getElementById('modal-item-nome').innerText = item.nome;
+            document.getElementById('modal-item-info').innerText = `Deseja adquirir este item por ${item.preco} moedas?`;
+            
+            // Reseta formato (redondo para ícone, quadrado para item)
+            imgContainer.style.borderRadius = (item.tipo === 'item') ? "4px" : "50%";
+            imgElement.style.borderRadius = (item.tipo === 'item') ? "4px" : "50%";
+
+            // A Lógica do "Salto" Prismático
+            contentBox.classList.remove('is-prismatico');
+            if(item.raridade === 'prismatico') {
+                contentBox.classList.add('is-prismatico');
+            }
+            
+            document.getElementById('confirmar-btn').onclick = () => realizarCompra(idItem);
+            modal.style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-compra').style.display = 'none';
+        }
 
     <div class="modal-overlay" id="modal-sucesso">
         <div class="modal-content">
