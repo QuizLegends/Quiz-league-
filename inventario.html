@@ -14,6 +14,8 @@
             --comum: #808080;
             --raro: #00cfbc;
             --epico: #a335ee;
+            /* NOVA RARIDADE PRISMÁTICA */
+            --prismatico: linear-gradient(135deg, #1bc8ce 0%, #cefff7 25%, #4739b2 50%, #1bc8ce 75%, #fff311 100%);
         }
 
         body {
@@ -68,33 +70,46 @@
         .item-card.raro { border-color: var(--raro); filter: drop-shadow(0 0 10px var(--raro)); }
         .item-card.epico { border-color: var(--epico); filter: drop-shadow(0 0 15px var(--epico)); }
 
+        /* ESTILO PRISMÁTICO NO INVENTÁRIO */
+        .item-card.prismatico {
+            border: 1px solid transparent !important;
+            background-image: linear-gradient(var(--card-bg), var(--card-bg)), var(--prismatico);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            filter: drop-shadow(0 0 15px rgba(27, 200, 206, 0.5));
+            animation: animaPrismatico 4s ease infinite;
+        }
+
+        @keyframes animaPrismatico {
+            0% { filter: drop-shadow(0 0 10px #1bc8ce) brightness(1.1); }
+            50% { filter: drop-shadow(0 0 20px #fff311) brightness(1.2); }
+            100% { filter: drop-shadow(0 0 10px #1bc8ce) brightness(1.1); }
+        }
+
         .item-card.equipado { 
             border-color: var(--ouro) !important; 
             filter: drop-shadow(0 0 15px var(--ouro));
             box-shadow: inset 0 0 15px rgba(200, 155, 60, 0.2);
         }
 
-        /* --- ESTILO PADRÃO: ÍCONES (REDONDOS) --- */
         .icon-container { 
             width: 80px; 
             height: 80px; 
             margin: 0 auto 15px; 
             position: relative; 
             overflow: hidden; 
-            border-radius: 50%; /* Redondo por padrão */
+            border-radius: 50%; 
         }
         .img-item { 
             width: 100%; 
             height: 100%; 
-            border-radius: 50%; /* Redondo por padrão */
+            border-radius: 50%; 
             object-fit: cover; 
         }
 
-        /* --- EXCEÇÃO: ITENS (QUADRADOS) --- */
-        /* Quando o card do inventário tiver a classe 'tipo-item' */
         .item-card.tipo-item .icon-container,
         .item-card.tipo-item .img-item {
-            border-radius: 4px !important; /* Volta a ser quadrado */
+            border-radius: 4px !important; 
         }
 
         .item-nome { 
@@ -128,6 +143,15 @@
         .comum .raridade-label { color: var(--comum); }
         .raro .raridade-label { color: var(--raro); }
         .epico .raridade-label { color: var(--epico); }
+        
+        /* LABEL PRISMÁTICA */
+        .prismatico .raridade-label {
+            background: var(--prismatico);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: brightness(1.3);
+            font-weight: 900;
+        }
 
         .btn-acao {
             background: linear-gradient(to bottom, #1e2328, #010a13);
@@ -185,6 +209,7 @@
             </div>
         </div>
     </div>
+
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, arrayRemove, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -203,6 +228,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // DATA_BASE ATUALIZADA (Certifique-se de adicionar seus novos itens prismáticos aqui também)
         const DATA_BASE = {
             'aatrox_comum': { nome: "Aatrox", tipo: "icone", raridade: "comum", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-comum.png" },
             'aatrox_raro': { nome: "Aatrox Caçador dos Mares", tipo: "icone", raridade: "raro", img: "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/aatrox-raro.png" },
@@ -253,7 +279,6 @@
             mochila.forEach(id => {
                 const item = DATA_BASE[id];
                 if (!item) return;
-                // Passamos 'true' para indicar que deve ser quadrado (tipo-item)
                 grid.innerHTML += criarCard(id, item, "ATIVAR", false, true);
             });
 
@@ -262,12 +287,10 @@
                 const item = DATA_BASE[id];
                 if (!item) return;
                 const estaEquipado = (id === iconeEquipado);
-                // Passamos 'false' para indicar que deve ser redondo
                 grid.innerHTML += criarCard(id, item, estaEquipado ? "EQUIPADO" : "EQUIPAR", estaEquipado, false);
             });
         }
 
-        // Adicionado o parâmetro 'isQuadrado' para controlar a classe CSS
         function criarCard(id, item, txtBotao, isEquipado, isQuadrado) {
             let tagTexto = "Consumível";
             if (item.tipo === 'icone') tagTexto = "Ícone de Perfil";
@@ -275,9 +298,12 @@
             if (item.tipo === 'multiplicador') tagTexto = `Bônus ${item.multiplicadorPDL}x PDL`;
             if (item.tipo === 'multiplicadorMoedas') tagTexto = `Bônus ${item.multiplicadorMoedas}x Moedas`;
 
-            const labelRaridade = item.raridade === 'epico' ? 'Épico' : item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
+            // LÓGICA DE LABEL PRISMÁTICA
+            let labelRaridade = "";
+            if (item.raridade === 'epico') labelRaridade = 'Épico';
+            else if (item.raridade === 'prismatico') labelRaridade = 'Prismático';
+            else labelRaridade = item.raridade.charAt(0).toUpperCase() + item.raridade.slice(1);
             
-            // Define se aplica a classe de item quadrado ou não
             const classeFormato = isQuadrado ? 'tipo-item' : '';
 
             return `
