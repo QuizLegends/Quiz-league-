@@ -56,6 +56,7 @@
             border-radius: 4px;
             height: 70px; 
             transition: all 0.3s;
+            position: relative;
         }
 
         /* ESTILO PRISMÁTICO NO RANKING */
@@ -65,11 +66,12 @@
             background-origin: border-box;
             background-clip: padding-box, border-box;
             animation: animaPrismaticoRank 2s ease-in-out infinite;
+            z-index: 1;
         }
 
         @keyframes animaPrismaticoRank {
             0% { filter: drop-shadow(0 0 5px #1bc8ce); transform: scale(1); }
-            50% { filter: drop-shadow(0 0 15px #fff311); transform: scale(1.02); }
+            50% { filter: drop-shadow(0 0 12px #fff311); transform: scale(1.01); }
             100% { filter: drop-shadow(0 0 5px #1bc8ce); transform: scale(1); }
         }
 
@@ -114,10 +116,11 @@
             transition: 0.3s;
         }
 
-        /* AVATAR PRISMÁTICO NO RANKING */
+        /* AUMENTA O AVATAR SE FOR PRISMÁTICO */
         .ranking-item.prismatico .user-avatar {
-            width: 70px;
-            height: 70px;
+            width: 62px;
+            height: 62px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
 
         .nome {
@@ -152,7 +155,9 @@
             text-decoration: none;
             text-transform: uppercase;
             font-size: 0.8rem;
+            transition: 0.3s;
         }
+        .btn-voltar:hover { background: var(--ouro); color: black; }
     </style>
 </head>
 <body>
@@ -185,8 +190,8 @@
         const URL_ICONES = URL_RAIZ + "ícones/";
         const ICONE_PADRAO = URL_ICONES + "0.png";
 
-        // Lista de IDs ou nomes de arquivos que são Prismáticos (Adicione aqui os nomes dos seus GIFs)
-        const ICONES_PRISMATICOS = ["brasao-invencivel", "rei-da-loja", "mestre-prismático"]; 
+        // LISTA DE ITENS PRISMÁTICOS (Nomes exatos dos arquivos no GitHub sem a extensão)
+        const ICONES_PRISMATICOS = ["brasao-invencivel", "rei-da-loja", "mestre-prismatico"]; 
 
         function getEloInfo(xp) {
             let elo = { nome: "Ferro", arquivo: "ferro.png" };
@@ -194,7 +199,7 @@
             else if (xp >= 600000) elo = { nome: "Grão-Mestre", arquivo: "graomestre.png" };
             else if (xp >= 300000) elo = { nome: "Mestre", arquivo: "mestre.png" };
             else if (xp >= 150000) elo = { nome: "Diamante", arquivo: "diamante.png" };
-            else if (xp >= 10000) elo = { nome: "Esmeralda", arquivo: "esmeralda.png" };
+            else if (xp >= 100000) elo = { nome: "Esmeralda", arquivo: "esmeralda.png" };
             else if (xp >= 60000) elo = { nome: "Platina", arquivo: "platina.png" };
             else if (xp >= 30000) elo = { nome: "Ouro", arquivo: "ouro.png" };
             else if (xp >= 10000) elo = { nome: "Prata", arquivo: "prata.png" };
@@ -219,14 +224,21 @@
                     let classePrismatica = "";
 
                     if (idEquipado) {
-                        const nomeArquivo = String(idEquipado).replace(/_/g, '-');
+                        // Padroniza o ID para comparar (minúsculo e com traço)
+                        const nomeBase = String(idEquipado).replace(/_/g, '-').toLowerCase().trim();
                         
-                        // Verifica se o ícone equipado está na lista de prismáticos
-                        if (ICONES_PRISMATICOS.includes(nomeArquivo)) {
-                            fotoUrl = `${URL_ICONES}${nomeArquivo}.gif`;
+                        // Verifica se este nome base está na nossa lista de prismáticos
+                        // Usamos normalize para ignorar acentos na hora da comparação
+                        const isPrismatico = ICONES_PRISMATICOS.some(p => 
+                            p.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 
+                            nomeBase.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                        );
+
+                        if (isPrismatico) {
+                            fotoUrl = `${URL_ICONES}${nomeBase}.gif`;
                             classePrismatica = "prismatico";
                         } else {
-                            fotoUrl = `${URL_ICONES}${nomeArquivo}.png`;
+                            fotoUrl = `${URL_ICONES}${nomeBase}.png`;
                         }
                     } else if (user.photoURL) {
                         fotoUrl = user.photoURL;
@@ -249,7 +261,9 @@
                     container.appendChild(item);
                     posicao++;
                 });
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                console.error("Erro ao carregar o ranking: ", error); 
+            }
         }
 
         carregarRanking();
