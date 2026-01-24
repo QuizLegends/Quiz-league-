@@ -59,7 +59,6 @@
             position: relative;
         }
 
-        /* ESTILO PRISMÁTICO NO RANKING */
         .ranking-item.prismatico {
             border: 1px solid transparent !important;
             background-image: linear-gradient(rgba(9, 20, 40, 0.9), rgba(9, 20, 40, 0.9)), var(--prismatico);
@@ -116,7 +115,6 @@
             transition: 0.3s;
         }
 
-        /* AUMENTA O AVATAR SE FOR PRISMÁTICO */
         .ranking-item.prismatico .user-avatar {
             width: 62px;
             height: 62px;
@@ -190,8 +188,8 @@
         const URL_ICONES = URL_RAIZ + "ícones/";
         const ICONE_PADRAO = URL_ICONES + "0.png";
 
-        // LISTA DE ITENS PRISMÁTICOS (Normalizados para comparação)
-        const ICONES_PRISMATICOS = ["brasao-invencivel", "rei-da-loja", "mestre-prismatico"]; 
+        // IMPORTANTE: Use exatamente o nome que está no banco de dados aqui
+        const ICONES_PRISMATICOS = ["brasao_invencivel", "rei_da_loja", "mestre_prismatico"]; 
 
         function getEloInfo(xp) {
             let elo = { nome: "Ferro", arquivo: "ferro.png" };
@@ -224,22 +222,15 @@
                     let classePrismatica = "";
 
                     if (idEquipado) {
-                        // MANTÉM O NOME ORIGINAL PARA A URL (Evita erro de underline/traço)
-                        const nomeOriginal = String(idEquipado).trim();
+                        const idLimpo = String(idEquipado).trim();
                         
-                        // CRIA VERSÃO DE COMPARAÇÃO (Padroniza apenas para checar na lista)
-                        const nomeParaComparar = nomeOriginal.replace(/_/g, '-').toLowerCase();
-
-                        const isPrismatico = ICONES_PRISMATICOS.some(p => 
-                            p.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === 
-                            nomeParaComparar.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                        );
-
-                        if (isPrismatico) {
-                            fotoUrl = `${URL_ICONES}${nomeOriginal}.gif`;
+                        // Se o ID estiver na lista de prismáticos, força .gif
+                        // Caso contrário, usa .png
+                        if (ICONES_PRISMATICOS.includes(idLimpo)) {
+                            fotoUrl = URL_ICONES + idLimpo + ".gif";
                             classePrismatica = "prismatico";
                         } else {
-                            fotoUrl = `${URL_ICONES}${nomeOriginal}.png`;
+                            fotoUrl = URL_ICONES + idLimpo + ".png";
                         }
                     } else if (user.photoURL) {
                         fotoUrl = user.photoURL;
@@ -253,7 +244,7 @@
                             <img src="${URL_RAIZ + elo.arquivo}" class="elo-emblema">
                             <span class="elo-nome-abaixo">${elo.nome}</span>
                         </div>
-                        <img src="${fotoUrl}" class="user-avatar" onerror="this.src='${ICONE_PADRAO}'">
+                        <img src="${fotoUrl}" class="user-avatar" onerror="this.onerror=null; this.src='${ICONE_PADRAO}';">
                         <div class="nome">${user.nome || "Invocador"}</div>
                         <div class="info-pdl">
                             <span class="pdl-valor">${Math.floor(user.xp || 0).toLocaleString()} PDL</span>
@@ -263,7 +254,7 @@
                     posicao++;
                 });
             } catch (error) { 
-                console.error("Erro ao carregar o ranking: ", error); 
+                console.error("Erro no ranking: ", error); 
             }
         }
 
