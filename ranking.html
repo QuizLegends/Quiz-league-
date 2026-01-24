@@ -59,6 +59,7 @@
             position: relative;
         }
 
+        /* ESTILO APLICADO QUANDO O GIF É DETECTADO */
         .ranking-item.prismatico {
             border: 1px solid transparent !important;
             background-image: linear-gradient(rgba(9, 20, 40, 0.9), rgba(9, 20, 40, 0.9)), var(--prismatico);
@@ -188,9 +189,6 @@
         const URL_ICONES = URL_RAIZ + "ícones/";
         const ICONE_PADRAO = URL_ICONES + "0.png";
 
-        // IMPORTANTE: Use exatamente o nome que está no banco de dados aqui
-        const ICONES_PRISMATICOS = ["brasao_invencivel", "rei_da_loja", "mestre_prismatico"]; 
-
         function getEloInfo(xp) {
             let elo = { nome: "Ferro", arquivo: "ferro.png" };
             if (xp >= 1000000) elo = { nome: "Desafiante", arquivo: "desafiante.png" };
@@ -216,41 +214,51 @@
                 querySnapshot.forEach((docSnap) => {
                     const user = docSnap.data();
                     const elo = getEloInfo(user.xp || 0);
-                    
-                    let fotoUrl = ICONE_PADRAO;
                     const idEquipado = user.iconeAtual;
-                    let classePrismatica = "";
-
-                    if (idEquipado) {
-                        const idLimpo = String(idEquipado).trim();
-                        
-                        // Se o ID estiver na lista de prismáticos, força .gif
-                        // Caso contrário, usa .png
-                        if (ICONES_PRISMATICOS.includes(idLimpo)) {
-                            fotoUrl = URL_ICONES + idLimpo + ".gif";
-                            classePrismatica = "prismatico";
-                        } else {
-                            fotoUrl = URL_ICONES + idLimpo + ".png";
-                        }
-                    } else if (user.photoURL) {
-                        fotoUrl = user.photoURL;
-                    }
 
                     const item = document.createElement('div');
-                    item.className = `ranking-item ${classePrismatica}`;
+                    item.className = `ranking-item`; // Começa sem a classe prismática
+                    
+                    // URL inicial: Tentamos o GIF primeiro por padrão
+                    let fotoUrl = idEquipado ? `${URL_ICONES}${idEquipado}.gif` : (user.photoURL || ICONE_PADRAO);
+
                     item.innerHTML = `
                         <div class="posicao">${posicao}°</div>
                         <div class="coluna-elo">
                             <img src="${URL_RAIZ + elo.arquivo}" class="elo-emblema">
                             <span class="elo-nome-abaixo">${elo.nome}</span>
                         </div>
-                        <img src="${fotoUrl}" class="user-avatar" onerror="this.onerror=null; this.src='${ICONE_PADRAO}';">
+                        <img src="${fotoUrl}" class="user-avatar" id="img-${posicao}">
                         <div class="nome">${user.nome || "Invocador"}</div>
                         <div class="info-pdl">
                             <span class="pdl-valor">${Math.floor(user.xp || 0).toLocaleString()} PDL</span>
                         </div>
                     `;
                     container.appendChild(item);
+
+                    // LÓGICA DE DETECÇÃO AUTOMÁTICA
+                    const imgElement = document.getElementById(`img-${posicao}`);
+                    
+                    // Se a tentativa inicial (GIF) carregar com sucesso:
+                    imgElement.onload = function() {
+                        if (this.src.endsWith('.gif')) {
+                            item.classList.add('prismatico'); // Ativa o brilho se for GIF
+                        }
+                    };
+
+                    // Se a tentativa inicial (GIF) falhar:
+                    imgElement.onerror = function() {
+                        if (this.src.endsWith('.gif')) {
+                            // Se o GIF falhou, tenta o PNG
+                            this.src = `${URL_ICONES}${idEquipado}.png`;
+                        } else if (this.src.endsWith('.png')) {
+                            // Se o PNG também falhar, coloca o ícone padrão 0.png
+                            this.src = ICONE_PADRAO;
+                            item.classList.remove('prismatico');
+                        }
+                        this.onerror = null; // Evita loop infinito
+                    };
+
                     posicao++;
                 });
             } catch (error) { 
