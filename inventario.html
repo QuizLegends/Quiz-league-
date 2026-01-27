@@ -33,6 +33,9 @@
             border-bottom: 2px solid var(--ouro);
             padding-bottom: 15px;
             margin-bottom: 30px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .header-inv h1 {
@@ -43,6 +46,23 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
+        }
+
+        .btn-voltar {
+            text-decoration: none;
+            color: var(--ouro);
+            border: 1px solid var(--ouro);
+            padding: 8px 25px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.3s;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+        }
+
+        .btn-voltar:hover {
+            background: var(--ouro);
+            color: black;
         }
 
         .barra-ferramentas-inventario {
@@ -104,7 +124,11 @@
             min-width: 70px;
         }
 
-        .filter-btn-inv.active { border-color: var(--ouro); color: var(--ouro); background: rgba(200, 155, 60, 0.1); }
+        .filter-btn-inv.active {
+            border-color: var(--ouro);
+            color: var(--ouro);
+            background: rgba(200, 155, 60, 0.1);
+        }
 
         .grid-inventario {
             display: grid;
@@ -250,8 +274,6 @@
         .btn-cancel { background: transparent; border: 1px solid var(--ouro); color: var(--ouro); padding: 10px 20px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 5px; }
 
         .vazio { grid-column: 1/-1; text-align: center; padding: 100px; opacity: 0.5; font-style: italic; }
-        .btn-voltar { text-decoration: none; color: var(--ouro); border: 1px solid var(--ouro); padding: 5px 25px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
-        .btn-voltar:hover { background: var(--ouro); color: black; }
     </style>
 </head>
 <body>
@@ -263,20 +285,19 @@
 
     <div class="barra-ferramentas-inventario">
         <div class="busca-container-inv">
-            <input type="text" id="input-busca-inv" placeholder="PESQUISAR NO INVENTÁRIO..." oninput="filtrarPorTexto(this.value)">
+            <input type="text" id="input-busca-inv" placeholder="PESQUISAR NO INVENTÁRIO..." oninput="window.filtrarPorTexto(this.value)">
             <span>🔍</span>
         </div>
         <div class="filtros-raridade-inv">
-            <button class="filter-btn-inv active" onclick="setFiltroRaridade('todos', this)">Todos</button>
-            <button class="filter-btn-inv" onclick="setFiltroRaridade('comum', this)">Comum</button>
-            <button class="filter-btn-inv" onclick="setFiltroRaridade('raro', this)">Raro</button>
-            <button class="filter-btn-inv" onclick="setFiltroRaridade('epico', this)">Épico</button>
-            <button class="filter-btn-inv" onclick="setFiltroRaridade('prismatico', this)">Prismático</button>
+            <button class="filter-btn-inv active" onclick="window.setFiltroRaridade('todos', this)">Todos</button>
+            <button class="filter-btn-inv" onclick="window.setFiltroRaridade('comum', this)">Comum</button>
+            <button class="filter-btn-inv" onclick="window.setFiltroRaridade('raro', this)">Raro</button>
+            <button class="filter-btn-inv" onclick="window.setFiltroRaridade('epico', this)">Épico</button>
+            <button class="filter-btn-inv" onclick="window.setFiltroRaridade('prismatico', this)">Prismático</button>
         </div>
     </div>
 
-    <div class="grid-inventario" id="grid-inv">
-        </div>
+    <div class="grid-inventario" id="grid-inv"></div>
 
     <div class="modal-overlay" id="modal-confirm">
         <div class="modal-content">
@@ -285,7 +306,6 @@
             <div id="container-btns-modal"></div>
         </div>
     </div>
-    
 <div class="header-inv">
         <h1>Meu Inventário</h1>
         <a href="resgate.html" class="btn-voltar">Voltar</a>
