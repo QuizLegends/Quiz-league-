@@ -5,6 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventário Hextech - Quiz Legends</title>
     <style>
+
+        /* Container que agrupa busca e filtros */
+.barra-ferramentas-inventario {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px; 
+    background: rgba(1, 10, 19, 0.8);
+    padding: 15px 20px;
+    border: 1px solid #1e2328;
+    box-sizing: border-box;
+    margin: 0 auto 30px;
+    max-width: 1000px; /* Mesma largura da grade da loja */
+}
+
+/* Campo de Busca Exato */
+.busca-container-inv {
+    position: relative;
+    width: 300px; 
+    max-width: 100%;
+}
+
+.busca-container-inv input {
+    width: 100%;
+    background: #091428;
+    border: 1px solid var(--ouro);
+    padding: 10px 40px 10px 15px; /* Espaço para a lupa na direita */
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+
+.busca-container-inv span {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ouro);
+    pointer-events: none;
+}
+
+/* Botões de Filtro de Raridade */
+.filtros-raridade-inv {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-btn-inv {
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    padding: 7px 15px; 
+    font-size: 11px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.2s;
+    min-width: 70px;
+}
+
+/* Estados ativos conforme sua loja */
+.filter-btn-inv.active { border-color: var(--ouro); color: var(--ouro); background: rgba(200, 155, 60, 0.1); }
+        
         :root {
             --ouro: #c89b3c;
             --ouro-claro: #f0e6d2;
