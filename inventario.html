@@ -532,20 +532,20 @@
             msg.innerText = `Deseja equipar "${item.nome}" como seu ícone de perfil?`;
             novoBtnSim.onclick = () => equiparIcone(id);
         } else if (tipo === 'carga') {
-            titulo.innerText = "ATIVAR REVELAÇÃO (ACUMULATIVO)";
-            msg.innerText = `Deseja ativar "${item.nome}"? Isso adicionará ${item.unidades} cargas.`;
+            titulo.innerText = "ATIVAR REVELAÇÃO";
+            msg.innerText = `Deseja ativar "${item.nome}"? Isso adicionará ${item.unidades} cargas. (ACUMULATIVO)`;
             novoBtnSim.onclick = () => ativarSentinela(id);
         } else if (tipo === 'multiplicador') {
-            titulo.innerText = "ATIVAR MULTIPLICADOR (NÃO ACUMULATIVO)";
-            msg.innerText = `Deseja ativar "${item.nome}"?`;
+            titulo.innerText = "ATIVAR MULTIPLICADOR";
+            msg.innerText = `Deseja ativar "${item.nome}"? (NÃO ACUMULATIVO)`;
             novoBtnSim.onclick = () => ativarMultiplicador(id);
         } else if (tipo === 'multiplicadorMoedas') {
-            titulo.innerText = "ATIVAR (NÃO ACUMULATIVO)" + item.nome.toUpperCase();
-            msg.innerText = `Deseja ativar "${item.nome}"?`;
+            titulo.innerText = "ATIVAR" + item.nome.toUpperCase();
+            msg.innerText = `Deseja ativar "${item.nome}"? (NÃO ACUMULATIVO)`;
             novoBtnSim.onclick = () => ativarMultiplicadorMoedas(id);
         } else {
             titulo.innerText = "ATIVAR CONSUMÍVEL";
-            msg.innerText = `Deseja ativar "${item.nome}"?`;
+            msg.innerText = `Deseja ativar "${item.nome}"? (ACUMULATIVO)`;
             novoBtnSim.onclick = () => ativarConsumivel(id);
         }
         modal.style.display = 'flex';
