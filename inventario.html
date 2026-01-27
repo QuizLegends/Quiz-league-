@@ -278,6 +278,11 @@
 </head>
 <body>
 
+    <div class="header-inv">
+        <h1>Inventário Hextech</h1>
+        <a href="resgate.html" class="btn-voltar">VOLTAR</a>
+    </div>
+
     <div class="barra-ferramentas-inventario">
         <div class="busca-container-inv">
             <input type="text" id="input-busca-inv" placeholder="PESQUISAR NO INVENTÁRIO..." oninput="window.filtrarPorTexto(this.value)">
@@ -292,29 +297,15 @@
         </div>
     </div>
 
-    <div class="grid-inventario" id="grid-inv"></div>
-
-    <div class="modal-overlay" id="modal-confirm">
-        <div class="modal-content">
-            <div class="modal-nome" id="modal-title">CONFIRMAR AÇÃO</div>
-            <div class="modal-msg" id="modal-message">Deseja realizar esta ação?</div>
-            <div id="container-btns-modal"></div>
-        </div>
-    </div>
-<div class="header-inv">
-        <h1>Meu Inventário</h1>
-        <a href="resgate.html" class="btn-voltar">Voltar</a>
-    </div>
-
     <div class="grid-inventario" id="grid-inv">
         <p class="vazio">Carregando seus espólios...</p>
     </div>
 
     <div class="modal-overlay" id="modal-confirm">
         <div class="modal-content">
-            <div id="modal-title" class="modal-nome">ATIVAR ITEM?</div>
-            <div id="modal-message" class="modal-msg"></div>
-            <div class="modal-btns" id="container-btns-modal">
+            <div id="modal-title" class="modal-nome">CONFIRMAR AÇÃO</div>
+            <div id="modal-message" class="modal-msg">Deseja realizar esta ação?</div>
+            <div id="container-btns-modal" class="modal-btns">
                 <button class="btn-confirm" id="btn-sim">Sim, Confirmar</button>
                 <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
             </div>
@@ -423,6 +414,7 @@
                 window.location.href = "index.html";
             }
         });
+
     let filtroRaridadeAtivo = 'todos';
     let buscaTextoAtiva = '';
 
