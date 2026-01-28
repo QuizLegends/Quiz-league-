@@ -551,27 +551,37 @@
             const itemDados = itens.find(i => i.id === id);
             
             if (itemDados.cat === 'itens') {
-                await updateDoc(userRef, {
-                    saldo: increment(-valor),
-                    mochila: arrayUnion(id)
-                });
                 
+                // --- INÍCIO DA LÓGICA DE ESTOQUE DA SENTINELA ---
                 if (id === "sentinela-epico") {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        estoque_sentinelas: increment(1) // Registra a compra somando ao estoque
+                    });
                     mostrarSucesso("Você adquiriu o pacote de Sentinelas! Ative-as no seu Inventário para ganhar 3 cargas.");
-                } else if (id === "coletora-comum") {
-                    mostrarSucesso("A Coletora foi enviada para seu inventário. Ative-a para dobrar seus PDLs por 2 horas!");
-                } else if (id === "gume-raro") {
-                    mostrarSucesso("O Gume do Infinito foi enviado para seu inventário. Ative-o para quadruplicar seus PDLs por 2 horas!");
-                } else if (id === "sedenta-epico") {
-                    mostrarSucesso("A Sedenta por Sangue foi enviada para seu inventário. Ative-a para multiplicar seus PDLs por 6 por 2 horas!");
-                } else if (id === "atlas-comum") {
-                    mostrarSucesso("O Atlas Mundial foi enviado para seu inventário. Ative-a para dobrar seus ganhos de Moedas por 2 horas!");
-                } else if (id === "bussola-raro") {
-                    mostrarSucesso("A Bússola Rúnica foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 4 por 2 horas!");
-                } else if (id === "oposicao-epico") {
-                    mostrarSucesso("A Oposição Celestial foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 6 por 2 horas!");
-                } else {
-                    mostrarSucesso("Item enviado para o seu inventário! Vá até lá para ativar seu benefício.");
+                } 
+                // --- FIM DA LÓGICA DE ESTOQUE DA SENTINELA ---
+                else {
+                    await updateDoc(userRef, {
+                        saldo: increment(-valor),
+                        mochila: arrayUnion(id)
+                    });
+                    
+                    if (id === "coletora-comum") {
+                        mostrarSucesso("A Coletora foi enviada para seu inventário. Ative-a para dobrar seus PDLs por 2 horas!");
+                    } else if (id === "gume-raro") {
+                        mostrarSucesso("O Gume do Infinito foi enviado para seu inventário. Ative-o para quadruplicar seus PDLs por 2 horas!");
+                    } else if (id === "sedenta-epico") {
+                        mostrarSucesso("A Sedenta por Sangue foi enviada para seu inventário. Ative-a para multiplicar seus PDLs por 6 por 2 horas!");
+                    } else if (id === "atlas-comum") {
+                        mostrarSucesso("O Atlas Mundial foi enviado para seu inventário. Ative-a para dobrar seus ganhos de Moedas por 2 horas!");
+                    } else if (id === "bussola-raro") {
+                        mostrarSucesso("A Bússola Rúnica foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 4 por 2 horas!");
+                    } else if (id === "oposicao-epico") {
+                        mostrarSucesso("A Oposição Celestial foi enviada para seu inventário. Ative-a para multiplicar seus ganhos de Moedas por 6 por 2 horas!");
+                    } else {
+                        mostrarSucesso("Item enviado para o seu inventário! Vá até lá para ativar seu benefício.");
+                    }
                 }
                 return;
             }
