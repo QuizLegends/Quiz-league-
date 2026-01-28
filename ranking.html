@@ -41,7 +41,6 @@
             letter-spacing: 2px;
         }
 
-        /* ESTILO DO CAMPO DE PESQUISA HEXTECH */
         .busca-container {
             position: relative;
             margin-bottom: 20px;
@@ -88,7 +87,6 @@
             transition: transform 0.2s;
         }
 
-        /* Classe para esconder itens filtrados */
         .hidden {
             display: none !important;
         }
@@ -203,48 +201,40 @@
         const URL_ICONES = URL_RAIZ + "ícones/";
         const ICONE_PADRAO = URL_ICONES + "0.png";
 
-        // TABELA OFICIAL DE ELOS BASEADA NOS SEUS REQUISITOS
         const TABELA_ELOS = [
             { min: 1000000, nome: "Desafiante", arq: "desafiante.png" },
             { min: 600000, nome: "Grão-Mestre", arq: "graomestre.png" },
             { min: 300000, nome: "Mestre", arq: "mestre.png" },
-            
             { min: 270000, nome: "Diamante I", arq: "diamante.png" },
             { min: 240000, nome: "Diamante II", arq: "diamante.png" },
             { min: 210000, nome: "Diamante III", arq: "diamante.png" },
             { min: 180000, nome: "Diamante IV", arq: "diamante.png" },
             { min: 150000, nome: "Diamante V", arq: "diamante.png" },
-
             { min: 140000, nome: "Esmeralda I", arq: "esmeralda.png" },
             { min: 130000, nome: "Esmeralda II", arq: "esmeralda.png" },
             { min: 120000, nome: "Esmeralda III", arq: "esmeralda.png" },
             { min: 110000, nome: "Esmeralda IV", arq: "esmeralda.png" },
             { min: 100000, nome: "Esmeralda V", arq: "esmeralda.png" },
-
             { min: 92000, nome: "Platina I", arq: "platina.png" },
             { min: 84000, nome: "Platina II", arq: "platina.png" },
             { min: 76000, nome: "Platina III", arq: "platina.png" },
             { min: 68000, nome: "Platina IV", arq: "platina.png" },
             { min: 60000, nome: "Platina V", arq: "platina.png" },
-
             { min: 54000, nome: "Ouro I", arq: "ouro.png" },
             { min: 48000, nome: "Ouro II", arq: "ouro.png" },
             { min: 42000, nome: "Ouro III", arq: "ouro.png" },
             { min: 36000, nome: "Ouro IV", arq: "ouro.png" },
             { min: 30000, nome: "Ouro V", arq: "ouro.png" },
-
             { min: 26000, nome: "Prata I", arq: "prata.png" },
             { min: 22000, nome: "Prata II", arq: "prata.png" },
             { min: 18000, nome: "Prata III", arq: "prata.png" },
             { min: 14000, nome: "Prata IV", arq: "prata.png" },
             { min: 10000, nome: "Prata V", arq: "prata.png" },
-
             { min: 9000, nome: "Bronze I", arq: "bronze.png" },
             { min: 8000, nome: "Bronze II", arq: "bronze.png" },
             { min: 7000, nome: "Bronze III", arq: "bronze.png" },
             { min: 6000, nome: "Bronze IV", arq: "bronze.png" },
             { min: 5000, nome: "Bronze V", arq: "bronze.png" },
-
             { min: 4000, nome: "Ferro I", arq: "ferro.png" },
             { min: 3000, nome: "Ferro II", arq: "ferro.png" },
             { min: 2000, nome: "Ferro III", arq: "ferro.png" },
@@ -253,8 +243,7 @@
         ];
 
         function getEloInfo(xp) {
-            // Percorre a tabela do maior para o menor
-            for (let elo de TABELA_ELOS) {
+            for (let elo of TABELA_ELOS) {
                 if (xp >= elo.min) {
                     return { nome: elo.nome, arquivo: elo.arq };
                 }
@@ -282,10 +271,11 @@
 
         async function carregarRanking() {
             try {
-                // Busca por 'xp' que é onde os PDLs estão armazenados
                 const q = query(collection(db, "usuarios"), orderBy("xp", "desc"), limit(50));
                 const querySnapshot = await getDocs(q);
                 const container = document.getElementById('lista-ranking');
+                if(!container) return;
+                
                 container.innerHTML = "";
                 let posicao = 1;
 
