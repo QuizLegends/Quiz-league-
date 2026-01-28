@@ -451,9 +451,11 @@
         const icones = usuarioDados.iconesAdquiridos || [];
         const mochila = usuarioDados.mochila || [];
         const iconeEquipado = usuarioDados.iconeAtual || "";
-        const cargasSentinela = (usuarioDados.statusAtivo && usuarioDados.statusAtivo.sentinelas) || 0;
+        
+        // AQUI ESTÁ A LÓGICA DA SENTINELA: Pega do campo 'estoque_sentinelas' (compras feitas)
+        const estoqueSentinela = usuarioDados.estoque_sentinelas || 0;
 
-        if (icones.length === 0 && mochila.length === 0 && cargasSentinela === 0) {
+        if (icones.length === 0 && mochila.length === 0 && estoqueSentinela === 0) {
             grid.innerHTML = '<p class="vazio">Você ainda não possui itens ou ícones.</p>';
             return;
         }
@@ -461,21 +463,18 @@
         let itensVisiveis = 0;
         let htmlFinal = "";
 
-        // --- LÓGICA ESPECIAL SENTINELA ---
-        // Se o usuário tem cargas OU tem o item na mochila, o card aparece
-        if (mochila.includes("sentinela-epico") || cargasSentinela > 0) {
+        // --- EXIBIÇÃO DA SENTINELA BASEADA NO ESTOQUE DE COMPRAS ---
+        if (estoqueSentinela > 0) {
             const itemSenti = DATA_BASE["sentinela-epico"];
             if (itemSenti && passaNoFiltro(itemSenti)) {
-                const temNaMochila = mochila.includes("sentinela-epico");
-                const labelBotao = temNaMochila ? "ATIVAR" : `CARGAS: ${cargasSentinela}`;
-                htmlFinal += criarCard("sentinela-epico", itemSenti, labelBotao, false, true, !temNaMochila, cargasSentinela);
+                // O número exibido no card é o estoque (quantas vezes ele comprou)
+                htmlFinal += criarCard("sentinela-epico", itemSenti, "ATIVAR", false, true, false, estoqueSentinela);
                 itensVisiveis++;
             }
         }
 
-        // Renderiza outros itens da mochila (exceto sentinela que já tratamos acima)
+        // Outros itens da mochila
         mochila.forEach(id => {
-            if (id === "sentinela-epico") return; 
             const item = DATA_BASE[id];
             if (item && passaNoFiltro(item)) {
                 htmlFinal += criarCard(id, item, "ATIVAR", false, true);
@@ -483,7 +482,7 @@
             }
         });
 
-        // Renderiza ícones
+        // Ícones
         icones.forEach(id => {
             const item = DATA_BASE[id];
             if (item && passaNoFiltro(item)) {
@@ -504,7 +503,10 @@
     function criarCard(id, item, txtBotao, isEquipado, isQuadrado, isDisabled = false, contador = 0) {
         let tagTexto = "Consumível";
         if (item.tipo === 'icone') tagTexto = "Ícone de Perfil";
-        if (item.tipo === 'carga') tagTexto = contador > 0 ? `Cargas Ativas: ${contador}` : "Utilizável";
+        
+        // Se for carga (Sentinela), mostra a quantidade que ele tem disponível para ativar (o Estoque)
+        if (item.tipo === 'carga') tagTexto = `Disponíveis: ${contador}`;
+        
         if (item.tipo === 'multiplicador') tagTexto = `Bônus ${item.multiplicadorPDL}x PDL`;
         if (item.tipo === 'multiplicadorMoedas') tagTexto = `Bônus ${item.multiplicadorMoedas}x Moedas`;
 
@@ -550,7 +552,7 @@
             novoBtnSim.onclick = () => equiparIcone(id);
         } else if (tipo === 'carga') {
             titulo.innerText = "ATIVAR REVELAÇÃO";
-            msg.innerText = `Deseja ativar "${item.nome}"? Isso adicionará ${item.unidades} cargas. (ACUMULATIVO)`;
+            msg.innerText = `Deseja usar 1 unidade de "${item.nome}"? Isso adicionará 3 cargas ao seu jogo.`;
             novoBtnSim.onclick = () => ativarSentinela(id);
         } else if (tipo === 'multiplicador') {
             titulo.innerText = "ATIVAR MULTIPLICADOR";
@@ -590,15 +592,14 @@
 
     async function ativarSentinela(id) {
         fecharModal();
-        const item = DATA_BASE[id];
         const userRef = doc(db, "usuarios", auth.currentUser.uid);
         try {
-            // Remove o item da mochila e adiciona +3 cargas ao status numérico
+            // REDUZ 1 do estoque do inventário e ADICIONA 3 nas cargas de uso (statusAtivo)
             await updateDoc(userRef, { 
-                mochila: arrayRemove(id), 
+                estoque_sentinelas: increment(-1), 
                 "statusAtivo.sentinelas": increment(3) 
             });
-            mostrarModalSucesso("SUCESSO", `<p>${item.nome} Ativado!</p>`);
+            mostrarModalSucesso("SENTINELA ATIVADA", `<p>Você ativou 3 cargas de revelação!</p>`);
         } catch (e) { console.error(e); }
     }
 
