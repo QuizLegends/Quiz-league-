@@ -55,18 +55,17 @@
             top: 0;
             left: 0;
             will-change: opacity;
-            transition: opacity 0.05s linear;
+            transition: opacity 0.15s ease-in-out; /* Transição levemente mais suave */
             pointer-events: none;
         }
 
         #layer-static { z-index: 2; filter: drop-shadow(0 0 15px var(--blue)); }
-        #layer-animated { z-index: 1; opacity: 0; }
+        #layer-animated { z-index: 1; opacity: 0; display: none; } /* Começa como display:none */
 
         .glow-victory {
             filter: drop-shadow(0 0 40px var(--gold)) brightness(1.2) !important;
         }
 
-        /* Botões Estilizados */
         .btn-hextech {
             background: linear-gradient(180deg, #c89b3c 0%, #785a28 100%);
             border: 1px solid var(--gold);
@@ -97,7 +96,6 @@
             box-shadow: 0 0 20px var(--blue);
         }
 
-        /* Botão Voltar Discreto */
         .btn-voltar {
             display: block;
             margin-top: 15px;
@@ -169,8 +167,6 @@
         let currentUser = null;
         let isReady = false;
 
-        const preloadGIF = new Image();
-        preloadGIF.src = GIF_URL;
         const rewardAudio = new Audio(AUDIO_URL);
 
         onAuthStateChanged(auth, async (user) => {
@@ -220,12 +216,17 @@
             btn.disabled = true;
             status.innerText = "ABRINDO...";
 
-            animatedImg.src = GIF_URL + "?t=" + performance.now();
+            // CORREÇÃO DE CONFLITO DE RENDERIZAÇÃO
+            animatedImg.style.display = "block"; // Primeiro ativa o elemento
+            animatedImg.src = GIF_URL + "?t=" + performance.now(); // Reseta o GIF
             
-            requestAnimationFrame(() => {
-                staticImg.style.opacity = "0";
-                animatedImg.style.opacity = "1";
-            });
+            // Micro-atraso de 30ms para o navegador processar o novo SRC antes de mostrar
+            setTimeout(() => {
+                requestAnimationFrame(() => {
+                    staticImg.style.opacity = "0";
+                    animatedImg.style.opacity = "1";
+                });
+            }, 30);
 
             const reward = Math.floor(Math.random() * 4501) + 500;
             const todayStr = new Date().toISOString().split('T')[0];
@@ -241,10 +242,17 @@
                         ultimoBau: todayStr
                     }, { merge: true });
 
+                    // Finalização limpa
                     animatedImg.style.opacity = "0";
                     staticImg.style.opacity = "1";
                     staticImg.classList.add('glow-victory');
                     
+                    // Remove o GIF da renderização após 200ms (tempo da transição)
+                    setTimeout(() => { 
+                        animatedImg.style.display = "none";
+                        animatedImg.src = ""; // Limpa para evitar loops fantasmas
+                    }, 200);
+
                     triggerConfetti();
                     rewardAudio.play();
 
@@ -257,7 +265,7 @@
                 } catch (err) {
                     status.innerText = "ERRO AO SALVAR MOEDAS";
                 }
-            }, 4000); // 4 segundos exatos do seu GIF
+            }, 4000); 
         };
 
         function triggerConfetti() {
