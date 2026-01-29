@@ -55,12 +55,13 @@
             top: 0;
             left: 0;
             will-change: opacity;
-            transition: opacity 0.15s ease-in-out; /* Transição levemente mais suave */
+            transition: opacity 0.15s ease-in-out;
             pointer-events: none;
         }
 
-        #layer-static { z-index: 2; filter: drop-shadow(0 0 15px var(--blue)); }
-        #layer-animated { z-index: 1; opacity: 0; display: none; } /* Começa como display:none */
+        #layer-static { z-index: 3; } /* Baú Fechado */
+        #layer-animated { z-index: 2; opacity: 0; display: none; } /* GIF */
+        #layer-open { z-index: 1; opacity: 0; } /* Baú Aberto (Novo) */
 
         .glow-victory {
             filter: drop-shadow(0 0 40px var(--gold)) brightness(1.2) !important;
@@ -134,6 +135,7 @@
         <div class="bau-viewport">
             <img id="layer-static" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-img.png" class="bau-layer">
             <img id="layer-animated" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif" class="bau-layer">
+            <img id="layer-open" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-aberto.png" class="bau-layer">
         </div>
 
         <div id="status" class="status-text">PREPARANDO AS MOEDAS</div>
@@ -187,10 +189,15 @@
 
                 const btn = document.getElementById('main-button');
                 const status = document.getElementById('status');
+                const staticImg = document.getElementById('layer-static');
+                const openImg = document.getElementById('layer-open');
 
                 if (data.ultimoBau === today) {
                     status.innerText = "ACESSO DIÁRIO CONCLUÍDO";
-                    document.getElementById('layer-static').style.filter = "grayscale(1) brightness(0.2)";
+                    // Se já resgatou, mostra o baú aberto e desativado
+                    staticImg.style.opacity = "0";
+                    openImg.style.opacity = "1";
+                    openImg.style.filter = "grayscale(1) brightness(0.4)";
                     btn.disabled = true;
                     btn.innerText = "VOLTE AMANHÃ";
                 } else {
@@ -212,15 +219,14 @@
             const status = document.getElementById('status');
             const staticImg = document.getElementById('layer-static');
             const animatedImg = document.getElementById('layer-animated');
+            const openImg = document.getElementById('layer-open');
 
             btn.disabled = true;
             status.innerText = "ABRINDO...";
 
-            // CORREÇÃO DE CONFLITO DE RENDERIZAÇÃO
-            animatedImg.style.display = "block"; // Primeiro ativa o elemento
-            animatedImg.src = GIF_URL + "?t=" + performance.now(); // Reseta o GIF
+            animatedImg.style.display = "block";
+            animatedImg.src = GIF_URL + "?t=" + performance.now();
             
-            // Micro-atraso de 30ms para o navegador processar o novo SRC antes de mostrar
             setTimeout(() => {
                 requestAnimationFrame(() => {
                     staticImg.style.opacity = "0";
@@ -242,15 +248,14 @@
                         ultimoBau: todayStr
                     }, { merge: true });
 
-                    // Finalização limpa
+                    // TROCA PARA A IMAGEM DO BAÚ ABERTO
                     animatedImg.style.opacity = "0";
-                    staticImg.style.opacity = "1";
-                    staticImg.classList.add('glow-victory');
+                    openImg.style.opacity = "1";
+                    openImg.classList.add('glow-victory');
                     
-                    // Remove o GIF da renderização após 200ms (tempo da transição)
                     setTimeout(() => { 
                         animatedImg.style.display = "none";
-                        animatedImg.src = ""; // Limpa para evitar loops fantasmas
+                        animatedImg.src = ""; 
                     }, 200);
 
                     triggerConfetti();
