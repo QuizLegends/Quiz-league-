@@ -55,15 +55,17 @@
             height: 100%;
             object-fit: contain;
             filter: drop-shadow(0 0 15px var(--blue));
-            transition: filter 0.5s ease;
+            position: absolute; /* Para sobrepor as imagens corretamente */
         }
 
-        /* Quando o baú termina de abrir, damos um destaque dourado */
+        #bau-gif {
+            display: none; /* Escondido por padrão */
+        }
+
         .bau-finalizado {
             filter: drop-shadow(0 0 30px var(--gold)) !important;
         }
 
-        /* Quando já foi aberto no dia */
         .bau-bloqueado {
             filter: grayscale(1) brightness(0.3) !important;
         }
@@ -104,14 +106,18 @@
 </head>
 <body>
 
+    <img src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif" style="display:none;">
+
     <div class="container-bau">
         <h1>Cofre Hextech</h1>
         
         <div class="bau-display">
-            <img id="bau-elemento" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-img.png" class="bau-img" alt="Baú Hextech">
+            <img id="bau-png" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-img.png" class="bau-img">
+            
+            <img id="bau-gif" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif" class="bau-img">
         </div>
 
-        <p class="status-msg" id="mensagem">Aguardando comando...</p>
+        <p class="status-msg" id="mensagem">Conectando...</p>
         
         <button id="btn-acao" class="btn-abrir" onclick="abrirCofre()" disabled>Abrir Baú</button>
         <br>
@@ -136,33 +142,31 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const IMG_ESTATICA = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-img.png";
-        const GIF_ANIMADO = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif";
-        
+        const GIF_PATH = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif";
         let usuarioAtual = null;
         const somMoedas = new Audio('https://www.soundjay.com/misc/sounds/coins-spilled-1.mp3');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 usuarioAtual = user;
-                checarDisponibilidade();
+                verificarData();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        async function checarDisponibilidade() {
+        async function verificarData() {
             const userRef = doc(db, "usuarios", usuarioAtual.uid);
             const userDoc = await getDoc(userRef);
             const dados = userDoc.data() || {};
             const hoje = new Date().toISOString().split('T')[0];
             
-            const bau = document.getElementById('bau-elemento');
+            const png = document.getElementById('bau-png');
             const btn = document.getElementById('btn-acao');
 
             if (dados.ultimoBau === hoje) {
                 document.getElementById('mensagem').innerText = "BAÚ JÁ RECOLHIDO HOJE!";
-                bau.classList.add('bau-bloqueado');
+                png.classList.add('bau-bloqueado');
                 btn.disabled = true;
             } else {
                 document.getElementById('mensagem').innerText = "O COFRE ESTÁ PRONTO!";
@@ -173,18 +177,21 @@
         window.abrirCofre = async function() {
             const btn = document.getElementById('btn-acao');
             const msg = document.getElementById('mensagem');
-            const bau = document.getElementById('bau-elemento');
+            const png = document.getElementById('bau-png');
+            const gif = document.getElementById('bau-gif');
 
             btn.disabled = true;
-            msg.innerText = "DESBLOQUEANDO...";
+            msg.innerText = "ABRINDO...";
 
-            // 1. Troca o PNG pelo GIF (O GIF começa a rodar na hora)
-            bau.src = GIF_ANIMADO + "?t=" + Date.now();
+            // O SEGREDO: Esconde o PNG e mostra o GIF resetado
+            png.style.display = "none";
+            gif.style.display = "block";
+            gif.src = ""; // Limpa
+            gif.src = GIF_PATH + "?t=" + Date.now(); // Força reinício
 
             const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
             const hoje = new Date().toISOString().split('T')[0];
 
-            // 2. Aguarda os 4 segundos da sua animação
             setTimeout(async () => {
                 try {
                     const userRef = doc(db, "usuarios", usuarioAtual.uid);
@@ -196,32 +203,33 @@
                         ultimoBau: hoje
                     }, { merge: true });
 
-                    // 3. Volta para a imagem estática para "matar" o loop do GIF
-                    bau.src = IMG_ESTATICA;
-                    bau.classList.add('bau-finalizado');
+                    // Finaliza a animação: volta para o PNG (estático) mas com brilho
+                    gif.style.display = "none";
+                    png.style.display = "block";
+                    png.classList.add('bau-finalizado');
                     
                     dispararFogos();
                     somMoedas.play();
 
                     msg.innerHTML = `<span style="color: #ff0; font-size: 1.6rem;">+ ${recompensa.toLocaleString()} MOEDAS!</span>`;
                     
-                    btn.innerText = "RECOLHER MOEDAS";
+                    btn.innerText = "RECOLHER RECOMPENSA";
                     btn.disabled = false;
                     btn.classList.add('btn-resgatar');
                     btn.onclick = () => window.location.reload();
 
                 } catch (e) {
                     console.error(e);
-                    msg.innerText = "ERRO AO ACESSAR COFRE.";
+                    msg.innerText = "ERRO HEXTECH.";
                 }
-            }, 4000); // 4 Segundos exatos de sincronia
+            }, 4000); // 4 Segundos sincronizados
         };
 
         function dispararFogos() {
             const fim = Date.now() + 3000;
             (function frame() {
-                confetti({ particleCount: 12, angle: 60, spread: 70, origin: { x: 0, y: 0.6 }, colors: ['#c89b3c', '#0ac8b9'] });
-                confetti({ particleCount: 12, angle: 120, spread: 70, origin: { x: 1, y: 0.6 }, colors: ['#c89b3c', '#0ac8b9'] });
+                confetti({ particleCount: 15, angle: 60, spread: 70, origin: { x: 0, y: 0.6 }, colors: ['#c89b3c', '#0ac8b9'] });
+                confetti({ particleCount: 15, angle: 120, spread: 70, origin: { x: 1, y: 0.6 }, colors: ['#c89b3c', '#0ac8b9'] });
                 if (Date.now() < fim) requestAnimationFrame(frame);
             }());
         }
