@@ -41,8 +41,8 @@
         }
 
         .bau-display {
-            width: 250px;
-            height: 250px;
+            width: 280px;
+            height: 280px;
             margin: 0 auto;
             position: relative;
             display: flex;
@@ -50,34 +50,26 @@
             justify-content: center;
         }
 
-        /* Imagem do Baú */
         .bau-img {
             width: 100%;
             height: 100%;
             object-fit: contain;
             filter: drop-shadow(0 0 15px var(--blue));
-            transition: filter 0.5s;
+            transition: filter 0.5s ease;
         }
 
-        /* Estado quando já foi aberto (Preto e Branco) */
-        .bau-aberto-hoje {
+        /* Quando o baú termina de abrir, damos um destaque dourado */
+        .bau-finalizado {
+            filter: drop-shadow(0 0 30px var(--gold)) !important;
+        }
+
+        /* Quando já foi aberto no dia */
+        .bau-bloqueado {
             filter: grayscale(1) brightness(0.3) !important;
         }
 
-        .animar-tremer {
-            animation: tremer 0.4s infinite;
-        }
-
-        @keyframes tremer {
-            0% { transform: translate(0,0) rotate(0deg); }
-            25% { transform: translate(2px, 2px) rotate(1deg); }
-            50% { transform: translate(-2px, -2px) rotate(-1deg); }
-            75% { transform: translate(2px, -2px) rotate(1deg); }
-            100% { transform: translate(0,0) rotate(0deg); }
-        }
-
         h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-size: 1.5rem; margin-top: 0; }
-        .status-msg { margin: 20px 0; min-height: 30px; font-size: 1.1rem; color: var(--blue); font-weight: bold; text-transform: uppercase; }
+        .status-msg { margin: 20px 0; min-height: 35px; font-size: 1.1rem; color: var(--blue); font-weight: bold; }
 
         .btn-abrir {
             background: linear-gradient(to bottom, #c89b3c, #785a28);
@@ -115,13 +107,13 @@
     <div class="container-bau">
         <h1>Cofre Hextech</h1>
         
-        <div class="bau-display" id="bau-display">
-            <img id="bau-media" src="" class="bau-img">
+        <div class="bau-display">
+            <img id="bau-elemento" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-img.png" class="bau-img" alt="Baú Hextech">
         </div>
 
-        <p class="status-msg" id="mensagem">Conectando ao cofre...</p>
+        <p class="status-msg" id="mensagem">Aguardando comando...</p>
         
-        <button id="btn-acao" class="btn-abrir" onclick="iniciarAbertura()" disabled>Abrir Baú</button>
+        <button id="btn-acao" class="btn-abrir" onclick="abrirCofre()" disabled>Abrir Baú</button>
         <br>
         <a href="resgate.html" class="btn-voltar">Voltar para Resgate</a>
     </div>
@@ -144,61 +136,55 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const GIF_PATH = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif";
+        const IMG_ESTATICA = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-img.png";
+        const GIF_ANIMADO = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif";
+        
         let usuarioAtual = null;
         const somMoedas = new Audio('https://www.soundjay.com/misc/sounds/coins-spilled-1.mp3');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 usuarioAtual = user;
-                verificarStatus();
+                checarDisponibilidade();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        async function verificarStatus() {
+        async function checarDisponibilidade() {
             const userRef = doc(db, "usuarios", usuarioAtual.uid);
             const userDoc = await getDoc(userRef);
             const dados = userDoc.data() || {};
             const hoje = new Date().toISOString().split('T')[0];
             
-            const media = document.getElementById('bau-media');
+            const bau = document.getElementById('bau-elemento');
             const btn = document.getElementById('btn-acao');
 
             if (dados.ultimoBau === hoje) {
-                document.getElementById('mensagem').innerText = "BAÚ JÁ ABERTO HOJE!";
-                media.src = GIF_PATH;
-                media.classList.add('bau-aberto-hoje');
+                document.getElementById('mensagem').innerText = "BAÚ JÁ RECOLHIDO HOJE!";
+                bau.classList.add('bau-bloqueado');
                 btn.disabled = true;
             } else {
-                document.getElementById('mensagem').innerText = "COFRE PRONTO PARA ABRIR";
-                // Inicialmente, definimos o GIF mas vamos "pausar" visualmente se possível 
-                // ou apenas carregar quando clicar para garantir o tempo zero.
-                media.src = GIF_PATH;
+                document.getElementById('mensagem').innerText = "O COFRE ESTÁ PRONTO!";
                 btn.disabled = false;
             }
         }
 
-        window.iniciarAbertura = async function() {
+        window.abrirCofre = async function() {
             const btn = document.getElementById('btn-acao');
             const msg = document.getElementById('mensagem');
-            const media = document.getElementById('bau-media');
+            const bau = document.getElementById('bau-elemento');
 
             btn.disabled = true;
-            msg.innerText = "ABRINDO COFRE...";
+            msg.innerText = "DESBLOQUEANDO...";
 
-            // RESET DO GIF: Forçamos o navegador a recarregar o arquivo do zero
-            media.src = ""; 
-            media.src = GIF_PATH + "?t=" + Date.now();
-            
-            // Efeito de tremor inicial
-            media.classList.add('animar-tremer');
+            // 1. Troca o PNG pelo GIF (O GIF começa a rodar na hora)
+            bau.src = GIF_ANIMADO + "?t=" + Date.now();
 
             const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
             const hoje = new Date().toISOString().split('T')[0];
 
-            // SINCRONIA DE 4 SEGUNDOS (4000ms)
+            // 2. Aguarda os 4 segundos da sua animação
             setTimeout(async () => {
                 try {
                     const userRef = doc(db, "usuarios", usuarioAtual.uid);
@@ -210,51 +196,33 @@
                         ultimoBau: hoje
                     }, { merge: true });
 
-                    // Finaliza animações
-                    media.classList.remove('animar-tremer');
-                    media.style.filter = "drop-shadow(0 0 30px #c89b3c)"; // Brilho de Ouro
-
-                    // EFEITOS NO TEMPO CERTO
+                    // 3. Volta para a imagem estática para "matar" o loop do GIF
+                    bau.src = IMG_ESTATICA;
+                    bau.classList.add('bau-finalizado');
+                    
                     dispararFogos();
                     somMoedas.play();
 
-                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.5rem;">+ ${recompensa.toLocaleString()} MOEDAS!</span>`;
+                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.6rem;">+ ${recompensa.toLocaleString()} MOEDAS!</span>`;
                     
-                    btn.innerText = "RESGATAR E VOLTAR";
+                    btn.innerText = "RECOLHER MOEDAS";
                     btn.disabled = false;
                     btn.classList.add('btn-resgatar');
                     btn.onclick = () => window.location.reload();
 
                 } catch (e) {
                     console.error(e);
-                    msg.innerText = "ERRO AO PROCESSAR RECOMPENSA";
+                    msg.innerText = "ERRO AO ACESSAR COFRE.";
                 }
-            }, 4000); // Sincronizado com os 4 segundos do seu GIF
+            }, 4000); // 4 Segundos exatos de sincronia
         };
 
         function dispararFogos() {
-            const duracao = 4 * 1000;
-            const fim = Date.now() + duracao;
-
+            const fim = Date.now() + 3000;
             (function frame() {
-                confetti({
-                    particleCount: 15,
-                    angle: 60,
-                    spread: 80,
-                    origin: { x: 0, y: 0.7 },
-                    colors: ['#c89b3c', '#0ac8b9', '#ffffff']
-                });
-                confetti({
-                    particleCount: 15,
-                    angle: 120,
-                    spread: 80,
-                    origin: { x: 1, y: 0.7 },
-                    colors: ['#c89b3c', '#0ac8b9', '#ffffff']
-                });
-
-                if (Date.now() < fim) {
-                    requestAnimationFrame(frame);
-                }
+                confetti({ particleCount: 12, angle: 60, spread: 70, origin: { x: 0, y: 0.6 }, colors: ['#c89b3c', '#0ac8b9'] });
+                confetti({ particleCount: 12, angle: 120, spread: 70, origin: { x: 1, y: 0.6 }, colors: ['#c89b3c', '#0ac8b9'] });
+                if (Date.now() < fim) requestAnimationFrame(frame);
             }());
         }
     </script>
