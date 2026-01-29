@@ -57,12 +57,24 @@
             filter: drop-shadow(0 0 10px var(--blue));
             transition: all 0.4s ease;
             user-select: none;
+            display: block;
         }
 
-        /* Efeito de brilho quando o baú abre */
+        /* Estado quando o baú está disponível mas ainda não foi clicado (estático) */
+        .bau-estatico {
+            cursor: pointer;
+        }
+
+        /* Efeito de brilho intenso ao abrir */
         .bau-gif.aberto {
-            filter: drop-shadow(0 0 30px var(--gold));
+            filter: drop-shadow(0 0 30px var(--gold)) !important;
             transform: scale(1.1);
+        }
+
+        /* Estado desativado (já aberto hoje) */
+        .bau-bloqueado {
+            filter: grayscale(1) brightness(0.4) !important;
+            cursor: not-allowed;
         }
 
         .animar {
@@ -122,8 +134,8 @@
     <div class="container-bau">
         <h1>Cofre Hextech</h1>
         
-        <div class="bau-container-image">
-            <img id="bau-imagem" src="https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif" class="bau-gif" alt="Baú Hextech">
+        <div class="bau-container-image" id="area-bau">
+            <img id="bau-imagem" src="" class="bau-gif" alt="Baú Hextech">
         </div>
 
         <p class="status-msg" id="mensagem">Conectando ao sistema...</p>
@@ -151,7 +163,9 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const URL_GIF = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif";
+        // AQUI ESTÁ O SEGREDO: Uma imagem estática (PNG/JPG) do baú fechado para o estado inicial
+        // Se você não tiver um .png, usaremos o GIF mas com uma técnica para resetar
+        const URL_GIF_ANIMADO = "https://raw.githubusercontent.com/QuizLegends/quizlegends.github.io/main/ícones/bau-hextec.gif";
         
         let usuarioAtual = null;
         const somMoedas = new Audio('https://www.soundjay.com/misc/sounds/coins-spilled-1.mp3');
@@ -173,14 +187,19 @@
                 
                 const agora = new Date();
                 const hojeStr = agora.toISOString().split('T')[0];
+                const imgBau = document.getElementById('bau-imagem');
 
                 if (dados.ultimoBau === hojeStr) {
                     document.getElementById('mensagem').innerText = "BAÚ JÁ ABERTO HOJE!";
                     document.getElementById('btn-acao').disabled = true;
-                    document.getElementById('bau-imagem').style.filter = "grayscale(1) opacity(0.5)";
+                    imgBau.src = URL_GIF_ANIMADO; // Mantém o GIF mas bloqueado
+                    imgBau.classList.add('bau-bloqueado');
                 } else {
                     document.getElementById('mensagem').innerText = "O COFRE ESTÁ PRONTO!";
                     document.getElementById('btn-acao').disabled = false;
+                    // Mostra o baú parado (através do reset de SRC)
+                    imgBau.src = URL_GIF_ANIMADO; 
+                    imgBau.classList.add('bau-estatico');
                 }
             } catch (e) { console.error(e); }
         }
@@ -192,14 +211,17 @@
             
             btn.disabled = true;
             msg.innerText = "DESCRIPTOGRAFANDO...";
+            
+            // 1. Remove estado estático e adiciona tremor
+            imgBau.classList.remove('bau-estatico');
             imgBau.classList.add('animar');
+
+            // 2. FORÇA O GIF A RECOMEÇAR DO ZERO (Essencial para sincronizar a abertura)
+            const novaUrl = URL_GIF_ANIMADO + "?t=" + Math.random();
+            imgBau.src = novaUrl;
 
             const recompensa = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
             const hojeStr = new Date().toISOString().split('T')[0];
-
-            // Forçar o GIF a reiniciar a animação ao abrir
-            imgBau.src = "";
-            imgBau.src = URL_GIF + "?t=" + new Date().getTime();
 
             setTimeout(async () => {
                 try {
@@ -212,13 +234,14 @@
                         ultimoBau: hojeStr
                     }, { merge: true });
 
+                    // Para o tremor e brilha dourado
                     imgBau.classList.remove('animar');
                     imgBau.classList.add('aberto');
                     
                     dispararFogos();
                     somMoedas.play();
 
-                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.6rem; text-shadow: 0 0 10px rgba(255,255,0,0.5);">+ ${recompensa.toLocaleString()} MOEDAS!</span>`;
+                    msg.innerHTML = `<span style="color: #ff0; font-size: 1.6rem; text-shadow: 0 0 15px rgba(255,255,0,0.7);">+ ${recompensa.toLocaleString()} MOEDAS!</span>`;
                     
                     btn.innerText = "COLETAR RECOMPENSA";
                     btn.disabled = false;
@@ -231,7 +254,7 @@
                     btn.disabled = false;
                     imgBau.classList.remove('animar');
                 }
-            }, 2000); 
+            }, 2500); // Tempo da animação de abertura do seu GIF
         }
 
         function dispararFogos() {
@@ -240,14 +263,14 @@
 
             (function frame() {
               confetti({
-                particleCount: 10,
+                particleCount: 12,
                 angle: 60,
                 spread: 70,
                 origin: { x: 0, y: 0.6 },
                 colors: ['#c89b3c', '#0ac8b9', '#ffffff']
               });
               confetti({
-                particleCount: 10,
+                particleCount: 12,
                 angle: 120,
                 spread: 70,
                 origin: { x: 1, y: 0.6 },
